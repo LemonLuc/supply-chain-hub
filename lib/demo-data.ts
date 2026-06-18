@@ -1,4 +1,29 @@
-const suppliers = [
+export type RiskLevel = "High" | "Medium" | "Low";
+
+export type Supplier = {
+  name: string;
+  category: string;
+  region: string;
+  risk: RiskLevel;
+  signals: string;
+  impact: string;
+};
+
+export type WorkflowKey = "risks" | "delay" | "consolidate";
+
+export type Workflow = {
+  question: string;
+  confidence: string;
+  headline: string;
+  summary: string;
+  impacts: Array<[string, string]>;
+  actions: string[];
+  highlights: string[];
+  talk: Array<[string, string]>;
+  architecture: Array<[string, string]>;
+};
+
+export const suppliers: Supplier[] = [
   {
     name: "Supplier A",
     category: "Semiconductors",
@@ -65,7 +90,7 @@ const suppliers = [
   },
 ];
 
-const workflows = {
+export const workflows: Record<WorkflowKey, Workflow> = {
   risks: {
     question: "What are the current top supply chain risks across all suppliers this week?",
     confidence: "High confidence",
@@ -161,86 +186,4 @@ const workflows = {
   },
 };
 
-const workflowButtons = document.querySelectorAll(".workflow-button");
-const questionTitle = document.querySelector("#questionTitle");
-const answerHeadline = document.querySelector("#answerHeadline");
-const answerSummary = document.querySelector("#answerSummary");
-const confidenceBadge = document.querySelector("#confidenceBadge");
-const impactStrip = document.querySelector("#impactStrip");
-const actionsList = document.querySelector("#actionsList");
-const supplierRows = document.querySelector("#supplierRows");
-const talkTrack = document.querySelector("#talkTrack");
-const architectureTrace = document.querySelector("#architectureTrace");
-const rerunButton = document.querySelector("#rerunButton");
-
-function riskClass(risk) {
-  return `risk-${risk.toLowerCase()}`;
-}
-
-function renderSupplierRows(highlights) {
-  supplierRows.innerHTML = suppliers
-    .map((supplier) => {
-      const highlighted = highlights.includes(supplier.name) ? "highlight-row" : "";
-      return `
-        <tr class="${highlighted}">
-          <td><strong>${supplier.name}</strong></td>
-          <td>${supplier.category}</td>
-          <td>${supplier.region}</td>
-          <td><span class="risk-chip ${riskClass(supplier.risk)}">${supplier.risk}</span></td>
-          <td>${supplier.signals}</td>
-          <td>${supplier.impact}</td>
-        </tr>
-      `;
-    })
-    .join("");
-}
-
-function renderWorkflow(key) {
-  const workflow = workflows[key];
-
-  workflowButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.workflow === key);
-  });
-
-  questionTitle.textContent = workflow.question;
-  confidenceBadge.textContent = workflow.confidence;
-  answerHeadline.textContent = workflow.headline;
-  answerSummary.textContent = workflow.summary;
-
-  impactStrip.innerHTML = workflow.impacts
-    .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
-    .join("");
-
-  actionsList.innerHTML = workflow.actions.map((action) => `<li>${action}</li>`).join("");
-
-  talkTrack.innerHTML = workflow.talk
-    .map(([title, text]) => `<div><strong>${title}</strong><p>${text}</p></div>`)
-    .join("");
-
-  architectureTrace.innerHTML = workflow.architecture
-    .map(
-      ([layer, description]) =>
-        `<div class="architecture-node"><span>${layer}</span><strong>${layer}</strong><p>${description}</p></div>`,
-    )
-    .join("");
-
-  renderSupplierRows(workflow.highlights);
-}
-
-workflowButtons.forEach((button) => {
-  button.addEventListener("click", () => renderWorkflow(button.dataset.workflow));
-});
-
-rerunButton.addEventListener("click", () => {
-  rerunButton.textContent = "Thinking...";
-  rerunButton.disabled = true;
-
-  window.setTimeout(() => {
-    rerunButton.textContent = "Run copilot";
-    rerunButton.disabled = false;
-  }, 700);
-});
-
-document.querySelector("#supplierCount").textContent = suppliers.length;
-document.querySelector("#alertCount").textContent = suppliers.filter((s) => s.risk !== "Low").length * 2;
-renderWorkflow("risks");
+export const workflowKeys = Object.keys(workflows) as WorkflowKey[];

@@ -1,6 +1,16 @@
-# Supply Chain Copilot Demo
+# Supply Chain Hub
 
-Supply chain copilot to support inventory, cost, delivery, and risk decisions.
+Context-aware supply chain copilot for inventory, cost, delivery, and risk decisions. The application combines an operational dashboard with a streaming chat interface grounded in the currently selected workflow and supplier data.
+
+## What Is Included
+
+- Next.js App Router application with React and TypeScript.
+- Vercel AI SDK chat client and streaming server route.
+- OpenAI model selector for GPT-5.5, GPT-5.4, GPT-5.4 mini, and GPT-5.4 nano.
+- Reasoning selector from none through extra high.
+- Server-built application context for every request.
+- Deterministic demo mode when no live API key is configured.
+- Extension points in `lib/chat-extensions.ts` for MCP tools and RAG context.
 
 This repository supports an executive-level OpenAI presentation:
 
@@ -70,40 +80,51 @@ Each workflow demonstrates the same decision loop:
 ## Run Locally
 
 ```bash
-python3 -m http.server 8000
+npm install
+cp .env.example .env.local
+npm run dev
 ```
 
-Then open:
+Open [http://localhost:3000](http://localhost:3000).
 
-```text
-http://localhost:8000
-```
-
-## GitHub Push
-
-If the remote already contains a README or initial commit:
+The sample key keeps the app in demo mode, so chat works immediately with deterministic responses grounded in the selected dashboard workflow. To use OpenAI, replace the value in `.env.local`:
 
 ```bash
-git pull --rebase origin main
-git add .
-git rebase --continue
-git push -u origin main
+OPENAI_API_KEY=sk-your-real-key
 ```
 
-If the remote only has disposable starter files and you want this local version to win:
+The key is read only by `app/api/chat/route.ts` and is never sent to the browser. Restart the dev server after changing environment variables.
+
+## Commands
 
 ```bash
-git push -u origin main --force-with-lease
+npm test
+npm run typecheck
+npm run build
 ```
+
+## Chat Architecture
+
+```mermaid
+flowchart LR
+  UI["React chat + workflow state"] --> API["POST /api/chat"]
+  API --> CTX["Server-built app context"]
+  API --> EXT["MCP / RAG extension hooks"]
+  API --> OAI["OpenAI Responses API"]
+  API --> MOCK["Deterministic demo stream"]
+```
+
+Each request sends only the selected workflow key plus model and reasoning preferences. The server rebuilds the trusted supplier snapshot, preventing browser-provided data from becoming the source of truth.
+
+To add retrieval, return grounded passages from `loadExternalContext()`. To add MCP or application actions, register AI SDK tools in `getChatTools()`.
 
 ## Production Upgrade Path
 
-For a customer pilot, replace the static demo data with:
+For a customer pilot, replace the synthetic data with:
 
 - ERP and planning data for orders, parts, inventory, and demand.
 - Supplier scorecards, contracts, and policy documents.
 - Logistics, quality, weather, geopolitical, and financial risk signals.
-- A backend `/api/copilot` endpoint using the OpenAI Responses API.
 - Tool calls for risk scoring, scenario simulation, policy checks, and audit logging.
 
 Start with a narrow pilot: one product family, one supplier category, three decision workflows, and a clear measurement baseline.

@@ -5,12 +5,17 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "sanitize:cloudflare-env": "node scripts/sanitize-opennext-env.mjs",
+    "deploy": "opennextjs-cloudflare build && npm run sanitize:cloudflare-env && opennextjs-cloudflare deploy -- --keep-vars",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",
     "@ai-sdk/react": "latest",
+    "@opennextjs/cloudflare": "^1.19.11",
     "ai": "latest",
     "lucide-react": "latest",
     "next": "latest",
@@ -28,6 +33,7 @@
     "@vitejs/plugin-react": "latest",
     "jsdom": "latest",
     "typescript": "latest",
-    "vitest": "latest"
+    "vitest": "latest",
+    "wrangler": "^4.103.0"
   }
 }

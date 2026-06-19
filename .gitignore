@@ -2,7 +2,12 @@
 node_modules/
 dist/
 .next/
+.open-next/
+.wrangler/
 coverage/
 *.tsbuildinfo
 .env
 .env.local
+.env*.local
+.dev.vars
+.dev.vars*

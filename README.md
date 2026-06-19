@@ -82,6 +82,28 @@ npm run typecheck
 npm run build
 ```
 
+## Deploy To Cloudflare Workers
+
+This project is configured for Cloudflare Workers with the OpenNext Cloudflare adapter. Static assets are uploaded through Workers Assets and the Next.js application is served by a Worker.
+
+```bash
+npm run preview
+```
+
+Use `preview` to build the app and run it locally in the Workers runtime.
+
+```bash
+npm run deploy
+```
+
+Use `deploy` to build and publish to the `supply-chain-hub` Worker. The deploy script strips secret-looking local `.env*` fallback values from the generated Worker bundle and preserves dashboard-managed variables with `--keep-vars`.
+
+Set production secrets with Wrangler or the Cloudflare dashboard, not in source control:
+
+```bash
+npx wrangler secret put OPENAI_API_KEY
+```
+
 ## Production Upgrade Path
 
 Replace the synthetic data with bounded, audited connectors for:

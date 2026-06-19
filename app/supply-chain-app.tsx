@@ -2,25 +2,34 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { RotateCcw, Send, Square, WandSparkles } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  CircleUserRound,
+  History,
+  LockKeyhole,
+  RotateCcw,
+  ScanSearch,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  Square,
+  Truck,
+  type LucideIcon,
+} from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 
+import type { CurrentUser } from "@/lib/auth";
 import { supportedModels, thinkingLevels, type SupportedModel, type ThinkingLevel } from "@/lib/chat";
 import { buildAppContext } from "@/lib/context";
 import { suppliers, workflows, type WorkflowKey } from "@/lib/demo-data";
-import { getPersonaPolicy, personas, type PersonaId } from "@/lib/permissions";
+import { getPersonaPolicy } from "@/lib/permissions";
 
-const workflowLabels: Record<WorkflowKey, string> = {
-  risks: "Weekly risk scan",
-  delay: "Supplier A delay",
-  consolidate: "Consolidation plan",
+const workflowNavigation: Record<WorkflowKey, { label: string; icon: LucideIcon }> = {
+  risks: { label: "Weekly risk scan", icon: ScanSearch },
+  delay: { label: "14-day supplier delay", icon: Truck },
+  consolidate: { label: "Procurement optimization", icon: ShieldCheck },
 };
-
-const suggestedPrompts = [
-  "What should I do first?",
-  "Summarize the evidence for an executive.",
-  "What assumptions should I validate?",
-];
 
 function messageText(message: UIMessage): string {
   return message.parts
@@ -29,17 +38,16 @@ function messageText(message: UIMessage): string {
     .join("\n");
 }
 
-export function SupplyChainApp() {
+export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   const [workflowKey, setWorkflowKey] = useState<WorkflowKey>("risks");
-  const [persona, setPersona] = useState<PersonaId>("logistics");
   const [model, setModel] = useState<SupportedModel>("gpt-5.4-mini");
   const [thinking, setThinking] = useState<ThinkingLevel>("medium");
   const [input, setInput] = useState("");
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
   const { messages, sendMessage, status, error, stop, setMessages, clearError } = useChat({ transport });
   const workflow = workflows[workflowKey];
-  const appContext = buildAppContext(workflowKey, persona);
-  const personaPolicy = getPersonaPolicy(persona);
+  const appContext = buildAppContext(workflowKey, currentUser.persona);
+  const personaPolicy = getPersonaPolicy(currentUser.persona);
   const isBusy = status === "submitted" || status === "streaming";
 
   async function submitPrompt(prompt: string) {
@@ -50,7 +58,7 @@ export function SupplyChainApp() {
     setInput("");
     await sendMessage(
       { text: nextPrompt },
-      { body: { workflowKey, persona, model, thinking } },
+      { body: { workflowKey, model, thinking } },
     );
   }
 
@@ -59,56 +67,63 @@ export function SupplyChainApp() {
     void submitPrompt(input);
   }
 
-  function handlePersonaChange(nextPersona: PersonaId) {
-    void stop();
-    setMessages([]);
-    clearError();
-    setPersona(nextPersona);
-  }
-
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <div>
-          <p className="eyebrow">Decision console</p>
-          <h1>Supply Chain Hub</h1>
-          <p className="lede">Supplier risk triage, scenario planning, and sourcing decisions.</p>
+        <div className="sidebar-main">
+          <div className="brand-lockup">
+            <div className="brand-mark" aria-hidden="true">SH</div>
+            <div>
+              <p className="eyebrow">Intranet operations</p>
+              <h1>Supply Chain Hub</h1>
+            </div>
+          </div>
+          <p className="lede">Grounded supplier decisions across planning, procurement and operations.</p>
+
+          <nav className="workflow-nav" aria-label="Supply chain workflows">
+            {(Object.keys(workflowNavigation) as WorkflowKey[]).map((key) => {
+              const item = workflowNavigation[key];
+              const Icon = item.icon;
+              return (
+                <button
+                  className={`workflow-button ${workflowKey === key ? "active" : ""}`}
+                  key={key}
+                  type="button"
+                  onClick={() => setWorkflowKey(key)}
+                >
+                  <Icon aria-hidden="true" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        <label className="persona-selector">
-          <span>Persona</span>
-          <select value={persona} onChange={(event) => handlePersonaChange(event.target.value as PersonaId)}>
-            {personas.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-          </select>
-        </label>
+        <div className="sidebar-footer">
+          <section className="status-panel" aria-label="Dataset status">
+            <div><span className="metric-label">Suppliers</span><strong>{appContext.metrics.supplierCount}</strong></div>
+            <div><span className="metric-label">Open alerts</span><strong>{appContext.metrics.openAlerts}</strong></div>
+            <div><span className="metric-label">Revenue at risk</span><strong>{appContext.metrics.revenueAtRisk}</strong></div>
+          </section>
 
-        <nav className="workflow-nav" aria-label="Demo workflows">
-          {(Object.keys(workflows) as WorkflowKey[]).map((key, index) => (
-            <button
-              className={`workflow-button ${workflowKey === key ? "active" : ""}`}
-              key={key}
-              type="button"
-              onClick={() => setWorkflowKey(key)}
-            >
-              <span>{index + 1}</span>
-              {workflowLabels[key]}
-            </button>
-          ))}
-        </nav>
-
-        <section className="status-panel" aria-label="Dataset status">
-          <div><span className="metric-label">Suppliers</span><strong>{appContext.metrics.supplierCount}</strong></div>
-          <div><span className="metric-label">Open alerts</span><strong>{appContext.metrics.openAlerts}</strong></div>
-          <div><span className="metric-label">Revenue at risk</span><strong>{appContext.metrics.revenueAtRisk}</strong></div>
-        </section>
+          <section className="user-panel" aria-label="Signed-in user">
+            <div className="user-avatar" aria-hidden="true">{currentUser.initials}</div>
+            <div className="user-details">
+              <strong>{currentUser.name}</strong>
+              <span>{currentUser.role}</span>
+              <small>{currentUser.businessUnit}</small>
+            </div>
+            <LockKeyhole aria-label="Authenticated intranet session" />
+          </section>
+        </div>
       </aside>
 
       <section className="workspace">
         <section className="chat-panel" aria-labelledby="chat-title">
           <div className="chat-toolbar">
             <div>
-              <p className="eyebrow">Copilot</p>
-              <h2 id="chat-title"><WandSparkles aria-hidden="true" /> Chat with this workspace</h2>
+              <p className="eyebrow">Supply Chain Hub</p>
+              <h2 id="chat-title"><Sparkles aria-hidden="true" /> Ask Supply Chain Hub</h2>
             </div>
             <div className="chat-selectors">
               <label>
@@ -133,24 +148,24 @@ export function SupplyChainApp() {
 
           <div className="context-line">
             <span className="live-dot" aria-hidden="true" />
-            Context: {workflowLabels[workflowKey]}
+            {workflow.sourceStatus}
           </div>
 
           {messages.length > 0 && (
             <div className="message-list" aria-live="polite">
               {messages.map((message) => (
                 <div className={`message ${message.role}`} key={message.id}>
-                  <span>{message.role === "user" ? "You" : "Copilot"}</span>
+                  <span>{message.role === "user" ? "You" : "Supply Chain Hub"}</span>
                   <p>{messageText(message)}</p>
                 </div>
               ))}
-              {status === "submitted" && <div className="thinking-state">Reviewing workspace context...</div>}
+              {status === "submitted" && <div className="thinking-state">Reviewing authorized enterprise sources...</div>}
             </div>
           )}
 
           {messages.length === 0 && (
-            <div className="prompt-row" aria-label="Suggested prompts">
-              {suggestedPrompts.map((prompt) => (
+            <div className="prompt-row" aria-label="Suggested questions">
+              {workflow.suggestedPrompts.map((prompt) => (
                 <button key={prompt} type="button" onClick={() => void submitPrompt(prompt)}>{prompt}</button>
               ))}
             </div>
@@ -184,12 +199,42 @@ export function SupplyChainApp() {
           </form>
         </section>
 
-        <header className="topbar">
-          <div><p className="eyebrow">Active question</p><h2>{workflow.question}</h2></div>
-          <span className="badge">{workflow.confidence}</span>
-        </header>
+        <section className="workflow-section" aria-labelledby="workflow-question">
+          <div className="workflow-heading">
+            <div>
+              <p className="eyebrow">{workflow.title}</p>
+              <h2 id="workflow-question">{workflow.question}</h2>
+            </div>
+            <span className="badge">{workflow.confidence}</span>
+          </div>
 
-        <section className="answer-grid" aria-label="Copilot answer">
+          <div className="before-now-grid">
+            <article className="process-panel before-panel">
+              <div className="process-title"><History aria-hidden="true" /><h3>Before</h3></div>
+              <p>{workflow.before}</p>
+              <div className="system-list">
+                {workflow.beforeSystems.map((system) => <span key={system}>{system}</span>)}
+              </div>
+            </article>
+
+            <div className="journey-arrow" aria-hidden="true"><ArrowRight /></div>
+
+            <article className="process-panel hub-panel">
+              <div className="process-title"><Sparkles aria-hidden="true" /><h3>With Supply Chain Hub</h3></div>
+              <p>{workflow.withHub}</p>
+              <ol className="hub-steps">
+                {workflow.hubSteps.map(([label, detail]) => (
+                  <li key={label}>
+                    <CheckCircle2 aria-hidden="true" />
+                    <span><strong>{label}</strong>{detail}</span>
+                  </li>
+                ))}
+              </ol>
+            </article>
+          </div>
+        </section>
+
+        <section className="answer-grid" aria-label="Supply Chain Hub analysis">
           <article className="answer-card main-answer">
             <p className="eyebrow">Decision brief</p>
             <h3>{workflow.headline}</h3>
@@ -205,7 +250,10 @@ export function SupplyChainApp() {
         </section>
 
         <section className="content-section">
-          <div className="section-title"><div><p className="eyebrow">Evidence</p><h3>Supplier risk table</h3></div></div>
+          <div className="section-title">
+            <div><p className="eyebrow">Grounded evidence</p><h3>Supplier risk table</h3></div>
+            <span className="source-note"><CircleUserRound aria-hidden="true" /> Access filtered for {currentUser.role}</span>
+          </div>
           <div className="table-wrap">
             <table>
               <thead><tr><th>Supplier</th><th>Category</th><th>Region</th><th>Risk</th><th>Signals</th>{personaPolicy.canViewSupplierImpact && <th>Impact</th>}</tr></thead>
@@ -219,13 +267,6 @@ export function SupplyChainApp() {
                 ))}
               </tbody>
             </table>
-          </div>
-        </section>
-
-        <section className="content-section">
-          <div className="section-title"><div><p className="eyebrow">Demo prompts</p><h3>Talk track</h3></div></div>
-          <div className="talk-track">
-            {workflow.talk.map(([title, text]) => <div key={title}><strong>{title}</strong><p>{text}</p></div>)}
           </div>
         </section>
       </section>

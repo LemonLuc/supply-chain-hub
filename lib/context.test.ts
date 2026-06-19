@@ -8,10 +8,10 @@ describe("buildAppContext", () => {
 
     expect(context.workflow).toEqual({
       key: "risks",
-      question: "What are the current top supply chain risks across all suppliers this week?",
-      confidence: "High confidence",
+      question: "What are the current top supply risks across all critical suppliers this week?",
+      confidence: "Grounded · 6 sources",
     });
-    expect(context.answer.headline).toBe("Three suppliers need attention this week.");
+    expect(context.answer.headline).toBe("Three suppliers require action before the next planning cycle.");
     expect(context.suppliers).toHaveLength(8);
     expect(context.persona).toEqual({
       id: "logistics",
@@ -22,7 +22,7 @@ describe("buildAppContext", () => {
     expect(context.metrics).toEqual({
       supplierCount: 8,
       openAlerts: 12,
-      revenueAtRisk: "$4.8M",
+      revenueAtRisk: "€4.8M",
     });
   });
 
@@ -33,7 +33,7 @@ describe("buildAppContext", () => {
       id: "procurement",
       canViewSupplierImpact: true,
     });
-    expect(context.suppliers[0]).toHaveProperty("impact", "$1.6M revenue at risk");
+    expect(context.suppliers[0]).toHaveProperty("impact", "€1.6M revenue at risk");
   });
 });
 

@@ -37,15 +37,15 @@ describe("chat grounding", () => {
   it("includes the application snapshot in the system prompt", () => {
     const prompt = buildSystemPrompt(buildAppContext("delay"));
 
-    expect(prompt).toContain("A 2-week Supplier A delay creates a week-3 production gap.");
-    expect(prompt).toContain("$310K");
+    expect(prompt).toContain("The 14-day slip creates a five-day production gap in week three.");
+    expect(prompt).toContain("€310K");
   });
 
   it("returns a useful context-aware reply when no API key is configured", () => {
     const reply = generateMockReply("What should I do first?", buildAppContext("risks"));
 
     expect(reply).toContain("Supplier A");
-    expect(reply).toContain("Escalate Supplier A");
+    expect(reply).toContain("Open a joint recovery call with Supplier A");
     expect(reply).toContain("demo mode");
   });
 
@@ -59,8 +59,8 @@ describe("chat grounding", () => {
       buildAppContext("risks", "logistics"),
     );
 
-    expect(procurementReply).toContain("$1.6M revenue at risk");
-    expect(logisticsReply).not.toContain("$1.6M revenue at risk");
-    expect(logisticsReply).toContain("not available to your current persona");
+    expect(procurementReply).toContain("€1.6M revenue at risk");
+    expect(logisticsReply).not.toContain("€1.6M revenue at risk");
+    expect(logisticsReply).toContain("not available to your signed-in role");
   });
 });

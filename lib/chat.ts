@@ -32,7 +32,7 @@ export function normalizeChatOptions(model: unknown, thinking: unknown): {
 }
 
 export function buildSystemPrompt(context: AppContext): string {
-  return `You are the Supply Chain Hub copilot. Answer using the live application snapshot below.
+  return `You are Supply Chain Hub. Answer using the live application snapshot below.
 
 Priorities:
 - Be concise, operational, and explicit about evidence from the snapshot.
@@ -55,7 +55,7 @@ export function generateMockReply(question: string, context: AppContext): string
   const impactAnswer = normalizedQuestion.includes("impact")
     ? requestedSupplier && "impact" in requestedSupplier
       ? `${requestedSupplier.name}'s recorded impact is ${requestedSupplier.impact}.`
-      : "Supplier-level impact data is not available to your current persona."
+      : "Supplier-level impact data is not available to your signed-in role."
     : "";
 
   return `Based on the current ${context.workflow.key} view, ${context.answer.headline}

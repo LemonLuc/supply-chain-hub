@@ -3,9 +3,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { POST } from "./route";
 
 const previousApiKey = process.env.OPENAI_API_KEY;
+const previousDemoRole = process.env.DEMO_USER_ROLE;
 
 afterEach(() => {
   process.env.OPENAI_API_KEY = previousApiKey;
+  process.env.DEMO_USER_ROLE = previousDemoRole;
 });
 
 describe("POST /api/chat", () => {
@@ -50,8 +52,34 @@ describe("POST /api/chat", () => {
     expect(response.status).toBe(400);
   });
 
-  it("applies the procurement persona to server-built chat context", async () => {
+  it("uses the server-derived procurement identity", async () => {
     process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+    process.env.DEMO_USER_ROLE = "procurement";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "What is Supplier A's impact?" }],
+          },
+        ],
+        workflowKey: "risks",
+        persona: "logistics",
+      }),
+    });
+
+    const response = await POST(request);
+    const stream = await response.text();
+
+    expect(stream).toContain("€1.6M revenue at risk");
+  });
+
+  it("does not trust a browser persona to elevate access", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+    process.env.DEMO_USER_ROLE = "logistics";
     const request = new Request("http://localhost/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -71,31 +99,7 @@ describe("POST /api/chat", () => {
     const response = await POST(request);
     const stream = await response.text();
 
-    expect(stream).toContain("$1.6M revenue at risk");
-  });
-
-  it("uses least privilege for an invalid persona", async () => {
-    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
-    const request = new Request("http://localhost/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          {
-            id: "message-1",
-            role: "user",
-            parts: [{ type: "text", text: "What is Supplier A's impact?" }],
-          },
-        ],
-        workflowKey: "risks",
-        persona: "administrator",
-      }),
-    });
-
-    const response = await POST(request);
-    const stream = await response.text();
-
     expect(stream).not.toContain("$1.6M revenue at risk");
-    expect(stream).toContain("not available to your current persona");
+    expect(stream).toContain("not available to your signed-in role");
   });
 });

@@ -35,8 +35,8 @@ describe("persona permissions", () => {
 
   it("exposes the two demo identities with procurement represented by a woman", () => {
     expect(personas).toEqual([
-      { id: "logistics", label: "Logistics planner" },
-      { id: "procurement", label: "Procurement team lead" },
+      { id: "logistics", label: "Logistics Planner" },
+      { id: "procurement", label: "Procurement Team Lead" },
       { id: "executive", label: "Chief Logistics Officer" },
     ]);
   });

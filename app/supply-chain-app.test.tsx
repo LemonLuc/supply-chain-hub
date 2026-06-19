@@ -77,13 +77,19 @@ describe("SupplyChainApp", () => {
 
     expect(screen.getByLabelText("Demo identity")).toHaveValue("logistics");
     expect(screen.getByText("Lukas Weber")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Lukas Weber avatar" })).toHaveAttribute("src", "/avatars/lukas-weber.png");
+    expect(screen.queryByText("LW")).not.toBeInTheDocument();
     expect(screen.getAllByLabelText("Supply Chain Hub AI mark")).toHaveLength(2);
     expect(document.querySelectorAll(".ai-mark svg")).toHaveLength(2);
     expect(screen.queryByText("SH")).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
-    expect(screen.getByText("Anna Keller")).toBeInTheDocument();
-    expect(screen.getByText("Procurement Team Lead")).toBeInTheDocument();
+    expect(screen.getByText("Dana Narid")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Dana Narid avatar" })).toHaveAttribute("src", "/avatars/dana-narid.png");
+    expect(screen.queryByText("DN")).not.toBeInTheDocument();
+    expect(within(screen.getByLabelText("Signed-in user")).getByText("Procurement Team Lead")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Logistics Planner" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Procurement Team Lead" })).toBeInTheDocument();
   });
 
   it("keeps the weekly risk radar operational and hides results until a prompt runs", async () => {
@@ -152,19 +158,20 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByRole("button", { name: /Terminate contract now/i })).not.toBeInTheDocument();
   });
 
-  it("shows a safe simulated analysis trace only after prompting", async () => {
+  it("does not show the simulated process summary after prompting", async () => {
     mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
     expect(screen.queryByText("Analysis trace")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Is there any delivery risk this week/i }));
 
-    await waitFor(() => expect(screen.getByText("Analysis trace")).toBeInTheDocument());
-    expect(screen.getByText("Understand request")).toBeInTheDocument();
-    expect(screen.getByText("Check access")).toBeInTheDocument();
-    expect(screen.getByText("Validate evidence")).toBeInTheDocument();
-    expect(screen.getByText(/Simulated process summary/i)).toBeInTheDocument();
-    expect(screen.getByText(/does not expose private model chain-of-thought/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Delivery exception found")).toBeInTheDocument());
+    expect(screen.queryByText("Analysis trace")).not.toBeInTheDocument();
+    expect(screen.queryByText("Understand request")).not.toBeInTheDocument();
+    expect(screen.queryByText("Check access")).not.toBeInTheDocument();
+    expect(screen.queryByText("Validate evidence")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Simulated process summary/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/does not expose private model chain-of-thought/i)).not.toBeInTheDocument();
   });
 
   it("auto-collapses finished API reasoning and allows reopening it", async () => {

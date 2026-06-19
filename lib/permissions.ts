@@ -1,8 +1,8 @@
 import type { WorkflowKey } from "./demo-data";
 
 export const personas = [
-  { id: "logistics", label: "Logistics planner" },
-  { id: "procurement", label: "Procurement team lead" },
+  { id: "logistics", label: "Logistics Planner" },
+  { id: "procurement", label: "Procurement Team Lead" },
   { id: "executive", label: "Chief Logistics Officer" },
 ] as const;
 

@@ -2,7 +2,7 @@ import type { PersonaId } from "./permissions";
 
 export type CurrentUser = {
   name: string;
-  initials: string;
+  avatarSrc: string;
   role: string;
   businessUnit: string;
   persona: PersonaId;
@@ -11,21 +11,21 @@ export type CurrentUser = {
 export const mockUsers: Record<PersonaId, CurrentUser> = {
   logistics: {
     name: "Lukas Weber",
-    initials: "LW",
+    avatarSrc: "/avatars/lukas-weber.png",
     role: "Logistics Planner",
     businessUnit: "Industrial Quality & Research",
     persona: "logistics",
   },
   procurement: {
-    name: "Anna Keller",
-    initials: "AK",
+    name: "Dana Narid",
+    avatarSrc: "/avatars/dana-narid.png",
     role: "Procurement Team Lead",
     businessUnit: "Semiconductor Manufacturing Technology",
     persona: "procurement",
   },
   executive: {
-    name: "Dr. Elena Fischer",
-    initials: "EF",
+    name: "Dr. Lucía López",
+    avatarSrc: "/avatars/lucia-lopez.png",
     role: "Chief Logistics Officer",
     businessUnit: "Corporate Supply Chain",
     persona: "executive",

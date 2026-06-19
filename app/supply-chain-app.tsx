@@ -250,7 +250,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
           </section>
 
           <section className="user-panel" aria-label="Signed-in user">
-            <div className="user-avatar" aria-hidden="true">{activeUser.initials}</div>
+            <img className="user-avatar" src={activeUser.avatarSrc} alt={`${activeUser.name} avatar`} />
             <div className="user-details">
               <strong>{activeUser.name}</strong>
               <span>{activeUser.role}</span>
@@ -393,25 +393,6 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
           </section>
         ) : (
           <section className="results" aria-label="Supply Chain Hub results">
-            <section className="analysis-trace" aria-labelledby="analysis-trace-title">
-              <div className="trace-heading">
-                <Sparkles aria-hidden="true" />
-                <div>
-                  <p className="eyebrow">Simulated process summary</p>
-                  <h3 id="analysis-trace-title">Analysis trace</h3>
-                  <span>This explains the workflow and evidence checks. It does not expose private model chain-of-thought.</span>
-                </div>
-              </div>
-              <ol>
-                {appContext.analysisTrace.map((step, index) => (
-                  <li key={step.label}>
-                    <span className="trace-number">{index + 1}</span>
-                    <div><strong>{step.label}</strong><p>{step.detail}</p><small>{step.outcome}</small></div>
-                  </li>
-                ))}
-              </ol>
-            </section>
-
             <div className="result-grid">
               <article className="result-summary">
                 <p className="eyebrow">Operational answer</p>

@@ -6,7 +6,7 @@ describe("getCurrentUser", () => {
   it("defaults to a least-privileged logistics planner", () => {
     expect(getCurrentUser({})).toEqual({
       name: "Lukas Weber",
-      initials: "LW",
+      avatarSrc: "/avatars/lukas-weber.png",
       role: "Logistics Planner",
       businessUnit: "Industrial Quality & Research",
       persona: "logistics",
@@ -15,8 +15,8 @@ describe("getCurrentUser", () => {
 
   it("resolves the procurement mock identity from server configuration", () => {
     expect(getCurrentUser({ DEMO_USER_ROLE: "procurement" })).toEqual({
-      name: "Anna Keller",
-      initials: "AK",
+      name: "Dana Narid",
+      avatarSrc: "/avatars/dana-narid.png",
       role: "Procurement Team Lead",
       businessUnit: "Semiconductor Manufacturing Technology",
       persona: "procurement",
@@ -25,8 +25,8 @@ describe("getCurrentUser", () => {
 
   it("resolves the executive mock identity from server configuration", () => {
     expect(getCurrentUser({ DEMO_USER_ROLE: "executive" })).toEqual({
-      name: "Dr. Elena Fischer",
-      initials: "EF",
+      name: "Dr. Lucía López",
+      avatarSrc: "/avatars/lucia-lopez.png",
       role: "Chief Logistics Officer",
       businessUnit: "Corporate Supply Chain",
       persona: "executive",

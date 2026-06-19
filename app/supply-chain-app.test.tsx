@@ -27,11 +27,12 @@ describe("SupplyChainApp", () => {
     expect(screen.getByLabelText("Demo identity")).toHaveValue("logistics");
     expect(screen.getByText("Lukas Weber")).toBeInTheDocument();
     expect(screen.getAllByLabelText("Supply Chain Hub AI mark")).toHaveLength(2);
+    expect(document.querySelectorAll(".ai-mark svg")).toHaveLength(2);
     expect(screen.queryByText("SH")).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
     expect(screen.getByText("Anna Keller")).toBeInTheDocument();
-    expect(screen.getByText("Procurement Lead")).toBeInTheDocument();
+    expect(screen.getByText("Procurement Team Lead")).toBeInTheDocument();
   });
 
   it("keeps the weekly risk radar operational and hides results until a prompt runs", async () => {
@@ -82,13 +83,12 @@ describe("SupplyChainApp", () => {
     expect(screen.getByLabelText("SAP S/4HANA")).toBeChecked();
     expect(screen.getByLabelText("Supplier qualification database")).toBeChecked();
 
-    fireEvent.click(screen.getByRole("button", { name: /Executive supplier portfolio/i }));
-    expect(screen.getByText(/cost-versus-resilience heat map/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Executive supplier portfolio/i })).toBeDisabled();
   });
 
   it("reveals the executive heat map and human approval gate only after a prompt", async () => {
     mockChatStream();
-    render(<SupplyChainApp currentUser={mockUsers.procurement} />);
+    render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Executive supplier portfolio/i }));
     expect(screen.queryByText("Supplier portfolio heat map")).not.toBeInTheDocument();
@@ -99,6 +99,21 @@ describe("SupplyChainApp", () => {
     expect(screen.getByText("C-level approval required")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Request executive review/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Terminate contract now/i })).not.toBeInTheDocument();
+  });
+
+  it("shows a safe simulated analysis trace only after prompting", async () => {
+    mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    expect(screen.queryByText("Analysis trace")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Is there any delivery risk this week/i }));
+
+    await waitFor(() => expect(screen.getByText("Analysis trace")).toBeInTheDocument());
+    expect(screen.getByText("Understand request")).toBeInTheDocument();
+    expect(screen.getByText("Check access")).toBeInTheDocument();
+    expect(screen.getByText("Validate evidence")).toBeInTheDocument();
+    expect(screen.getByText(/Simulated process summary/i)).toBeInTheDocument();
+    expect(screen.getByText(/does not expose private model chain-of-thought/i)).toBeInTheDocument();
   });
 
   it("sends only the selected source ids with the chat request", async () => {

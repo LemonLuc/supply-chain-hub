@@ -15,8 +15,8 @@ An intranet-ready supply chain decision workspace that turns fragmented ERP, sup
 ## Workflows
 
 1. **Risk radar** checks SAP, warehouse stock, DHL Freight, FedEx, and other selected carrier tools for part-specific delivery exceptions.
-2. **Supplier alternatives** traces affected orders, checks qualified substitutes, and prepares operational updates and supplier follow-ups.
-3. **Executive supplier portfolio** produces a prompt-triggered cost-versus-resilience heat map with policy guardrails and C-level approval gates.
+2. **Supplier alternatives** is available to the Procurement Team Lead and Chief Logistics Officer. It traces affected orders, checks qualified substitutes, and prepares operational updates and supplier follow-ups.
+3. **Executive supplier portfolio** is reserved for the Chief Logistics Officer and produces a prompt-triggered cost-versus-resilience heat map with policy guardrails and C-level approval gates.
 
 ## Run Locally
 
@@ -46,9 +46,13 @@ Use one of these values in `.env.local`, then restart the server:
 DEMO_USER_ROLE=logistics
 # or
 DEMO_USER_ROLE=procurement
+# or
+DEMO_USER_ROLE=executive
 ```
 
-`logistics` is the least-privilege default. It sees only the operational delivery radar and never receives money values or quantified business-risk fields. `procurement` represents Anna Keller, Procurement Lead, and unlocks supplier alternatives, financial context, the executive portfolio workflow, and approval routing.
+`logistics` is the least-privilege default. It sees only the operational delivery radar and never receives money values or quantified business-risk fields. `procurement` represents Anna Keller, Procurement Team Lead, and unlocks supplier alternatives and financial context. `executive` represents Dr. Elena Fischer, Chief Logistics Officer, and additionally unlocks the executive portfolio workflow and approval routing.
+
+After a prompt, the app shows a simulated analysis trace covering intent recognition, access checks, source retrieval, evidence validation, and response preparation. This is an auditable process summary for the demo, not private model chain-of-thought.
 
 In production, replace `getCurrentUser()` in `lib/auth.ts` with claims from the company identity provider, such as Microsoft Entra ID or Okta. Map immutable group or application-role claims to internal policies on the server; never trust a role sent by the browser.
 

@@ -54,8 +54,6 @@ function AiMark() {
   return (
     <div className="ai-mark" aria-label="Supply Chain Hub AI mark">
       <Sparkles aria-hidden="true" />
-      <Sparkles aria-hidden="true" />
-      <Sparkles aria-hidden="true" />
     </div>
   );
 }
@@ -324,6 +322,25 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
           </section>
         ) : (
           <section className="results" aria-label="Supply Chain Hub results">
+            <section className="analysis-trace" aria-labelledby="analysis-trace-title">
+              <div className="trace-heading">
+                <Sparkles aria-hidden="true" />
+                <div>
+                  <p className="eyebrow">Simulated process summary</p>
+                  <h3 id="analysis-trace-title">Analysis trace</h3>
+                  <span>This explains the workflow and evidence checks. It does not expose private model chain-of-thought.</span>
+                </div>
+              </div>
+              <ol>
+                {workflow.analysisTrace.map((step, index) => (
+                  <li key={step.label}>
+                    <span className="trace-number">{index + 1}</span>
+                    <div><strong>{step.label}</strong><p>{step.detail}</p><small>{step.outcome}</small></div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
             <div className="result-grid">
               <article className="result-summary">
                 <p className="eyebrow">Operational answer</p>

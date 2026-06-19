@@ -19,14 +19,22 @@ export const mockUsers: Record<PersonaId, CurrentUser> = {
   procurement: {
     name: "Anna Keller",
     initials: "AK",
-    role: "Procurement Lead",
+    role: "Procurement Team Lead",
     businessUnit: "Semiconductor Manufacturing Technology",
     persona: "procurement",
+  },
+  executive: {
+    name: "Dr. Elena Fischer",
+    initials: "EF",
+    role: "Chief Logistics Officer",
+    businessUnit: "Corporate Supply Chain",
+    persona: "executive",
   },
 };
 
 export function getCurrentUser(
   env: Record<string, string | undefined> = process.env,
 ): CurrentUser {
+  if (env.DEMO_USER_ROLE === "executive") return mockUsers.executive;
   return env.DEMO_USER_ROLE === "procurement" ? mockUsers.procurement : mockUsers.logistics;
 }

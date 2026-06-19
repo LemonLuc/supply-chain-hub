@@ -16,7 +16,7 @@ describe("operational workflow data", () => {
   it("models role-restricted alternatives and an executive approval workflow", () => {
     expect(workflows.delay.minimumPersona).toBe("procurement");
     expect(workflows.delay.question).toContain("objective turret");
-    expect(workflows.consolidate.minimumPersona).toBe("procurement");
+    expect(workflows.consolidate.minimumPersona).toBe("executive");
     expect(workflows.consolidate.approval?.label).toBe("C-level approval required");
   });
 
@@ -25,6 +25,13 @@ describe("operational workflow data", () => {
       expect.arrayContaining([
         expect.objectContaining({ tool: "SAP S/4HANA MCP" }),
         expect.objectContaining({ tool: "DHL Freight MCP" }),
+      ]),
+    );
+    expect(workflows.risks.analysisTrace).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Understand request" }),
+        expect.objectContaining({ label: "Check access" }),
+        expect.objectContaining({ label: "Validate evidence" }),
       ]),
     );
   });

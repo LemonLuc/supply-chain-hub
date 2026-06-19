@@ -20,14 +20,24 @@ describe("persona permissions", () => {
   it("grants procurement access while preserving executive approval gates", () => {
     expect(getPersonaPolicy("procurement")).toEqual({
       canViewFinancials: true,
+      allowedWorkflows: ["risks", "delay"],
+    });
+  });
+
+  it("reserves the executive supplier portfolio for the Chief Logistics Officer", () => {
+    expect(getPersonaPolicy("executive")).toEqual({
+      canViewFinancials: true,
       allowedWorkflows: ["risks", "delay", "consolidate"],
     });
+    expect(canAccessWorkflow("procurement", "consolidate")).toBe(false);
+    expect(canAccessWorkflow("executive", "consolidate")).toBe(true);
   });
 
   it("exposes the two demo identities with procurement represented by a woman", () => {
     expect(personas).toEqual([
       { id: "logistics", label: "Logistics planner" },
-      { id: "procurement", label: "Procurement lead" },
+      { id: "procurement", label: "Procurement team lead" },
+      { id: "executive", label: "Chief Logistics Officer" },
     ]);
   });
 });

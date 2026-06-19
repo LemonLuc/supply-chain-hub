@@ -17,9 +17,19 @@ describe("getCurrentUser", () => {
     expect(getCurrentUser({ DEMO_USER_ROLE: "procurement" })).toEqual({
       name: "Anna Keller",
       initials: "AK",
-      role: "Procurement Lead",
+      role: "Procurement Team Lead",
       businessUnit: "Semiconductor Manufacturing Technology",
       persona: "procurement",
+    });
+  });
+
+  it("resolves the executive mock identity from server configuration", () => {
+    expect(getCurrentUser({ DEMO_USER_ROLE: "executive" })).toEqual({
+      name: "Dr. Elena Fischer",
+      initials: "EF",
+      role: "Chief Logistics Officer",
+      businessUnit: "Corporate Supply Chain",
+      persona: "executive",
     });
   });
 

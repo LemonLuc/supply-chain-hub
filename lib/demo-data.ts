@@ -16,6 +16,12 @@ export type ActivityStep = {
   result: string;
 };
 
+export type AnalysisTraceStep = {
+  label: string;
+  detail: string;
+  outcome: string;
+};
+
 export type WorkflowAction = {
   label: string;
   detail: string;
@@ -48,6 +54,7 @@ export type Workflow = {
   suggestedPrompts: string[];
   sources: WorkflowSource[];
   activity: ActivityStep[];
+  analysisTrace: AnalysisTraceStep[];
   headline: string;
   summary: string;
   metrics: Array<[string, string]>;
@@ -69,7 +76,7 @@ export const workflows: Record<WorkflowKey, Workflow> = {
     description:
       "Checks open purchase orders and live carrier milestones, then reports only operational exceptions relevant to your role.",
     minimumPersona: "logistics",
-    accessLabel: "Available to logistics and procurement",
+    accessLabel: "Available to all supply chain roles",
     sourceStatus: "6 available tools · live demo data",
     suggestedPrompts: [
       "Is there any delivery risk this week for N-FK5 optical glass blanks used in the Axioscan 7 objective module?",
@@ -89,6 +96,13 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       { tool: "DHL Freight MCP", detail: "Checked shipment 00340434161094000012", result: "Hub departure missed by 19 hours" },
       { tool: "FedEx MCP", detail: "Checked backup parcel 771924603189", result: "On schedule for 23 June" },
       { tool: "SAP EWM MCP", detail: "Read Jena receiving stock and reservations", result: "2.5 production days available" },
+    ],
+    analysisTrace: [
+      { label: "Understand request", detail: "Identify material, product context and requested delivery window.", outcome: "N-FK5-110-32 · current week" },
+      { label: "Check access", detail: "Apply the signed-in role and selected source permissions.", outcome: "Operational fields allowed; financial fields filtered" },
+      { label: "Retrieve evidence", detail: "Query the authorized ERP, warehouse and carrier records.", outcome: "Four current records returned" },
+      { label: "Validate evidence", detail: "Compare promised dates, carrier milestones and available production stock.", outcome: "One confirmed exception; one shipment on schedule" },
+      { label: "Prepare response", detail: "Summarize the exception and offer reversible operational actions.", outcome: "Draft and staged actions only" },
     ],
     headline: "Delivery exception found",
     summary:
@@ -131,7 +145,7 @@ export const workflows: Record<WorkflowKey, Workflow> = {
     description:
       "Traces the affected orders, checks qualified substitutes and prepares the operational handoffs needed to keep production moving.",
     minimumPersona: "procurement",
-    accessLabel: "Team lead or procurement access required",
+    accessLabel: "Procurement Team Lead or higher",
     sourceStatus: "6 available tools · restricted workflow",
     suggestedPrompts: [
       "What are our approved alternatives if the objective turret supplier for Axioscan 7 is delayed by 12 days?",
@@ -151,6 +165,13 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       { tool: "Quality MCP", detail: "Checked approved manufacturer list and deviations", result: "One alternate approved with a torque-test condition" },
       { tool: "Supplier capacity MCP", detail: "Requested current capacity from Mechatronik Süd", result: "Eight units available within six days" },
       { tool: "SharePoint MCP", detail: "Opened supplier overview.xlsx", result: "Row and comment targets identified" },
+    ],
+    analysisTrace: [
+      { label: "Understand request", detail: "Identify the delayed assembly, duration and affected product.", outcome: "Objective turret 000113-8821 · 12 days" },
+      { label: "Check access", detail: "Verify team-lead sourcing and supplier qualification access.", outcome: "Operational and commercial fields allowed" },
+      { label: "Retrieve evidence", detail: "Trace BOM usage, approved alternates, capacity and supplier tracker records.", outcome: "14 builds and two candidate alternates found" },
+      { label: "Validate evidence", detail: "Exclude unapproved substitutes and apply incoming inspection conditions.", outcome: "One conditional alternate remains" },
+      { label: "Prepare response", detail: "Build a coverage plan and reversible follow-up actions.", outcome: "Eight builds protected; six require resequencing" },
     ],
     headline: "One approved alternate can protect the first eight builds",
     summary:
@@ -192,8 +213,8 @@ export const workflows: Record<WorkflowKey, Workflow> = {
     question: "Give me a cost-versus-resilience heat map and recommend where we can consolidate suppliers without weakening continuity.",
     description:
       "Combines commercial and operational evidence, applies resilience guardrails, and routes consequential actions to accountable human reviewers.",
-    minimumPersona: "procurement",
-    accessLabel: "Procurement lead view · executive approval enforced",
+    minimumPersona: "executive",
+    accessLabel: "Chief Logistics Officer only · executive approval enforced",
     sourceStatus: "7 available tools · governance policy active",
     suggestedPrompts: [
       "Give me a heat map of suppliers showing cost versus resilience and recommend where we can consolidate.",
@@ -213,6 +234,13 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       { tool: "Contract RAG", detail: "Retrieved notice periods and volume commitments", result: "Three contracts eligible for review this quarter" },
       { tool: "Resilience MCP", detail: "Scored capacity, location and qualification redundancy", result: "Two consolidation options pass dual-source policy" },
       { tool: "Policy RAG", detail: "Applied procurement policy SC-17 and approval matrix", result: "Contract termination requires C-level approval" },
+    ],
+    analysisTrace: [
+      { label: "Understand request", detail: "Identify the portfolio scope, decision criteria and requested action.", outcome: "Cost versus resilience · consolidation" },
+      { label: "Check access", detail: "Verify Chief Logistics Officer access to portfolio and financial data.", outcome: "Executive view authorized" },
+      { label: "Retrieve evidence", detail: "Combine spend, contracts, quality, capacity and resilience records.", outcome: "42 suppliers across nine categories" },
+      { label: "Validate evidence", detail: "Apply dual-source, quality, notice-period and continuity guardrails.", outcome: "Two candidates pass all checks" },
+      { label: "Prepare response", detail: "Create recommendations while blocking irreversible supplier actions.", outcome: "Executive review required before termination" },
     ],
     headline: "Two consolidation candidates pass the resilience guardrails",
     summary:

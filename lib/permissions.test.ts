@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getPersonaPolicy, normalizePersona, personas } from "./permissions";
+import { canAccessWorkflow, getPersonaPolicy, normalizePersona, personas } from "./permissions";
 
 describe("persona permissions", () => {
   it("defaults unknown personas to the least-privileged logistics role", () => {
@@ -8,14 +8,25 @@ describe("persona permissions", () => {
     expect(normalizePersona(undefined)).toBe("logistics");
   });
 
-  it("grants supplier impact access only to procurement leads", () => {
-    expect(getPersonaPolicy("logistics").canViewSupplierImpact).toBe(false);
-    expect(getPersonaPolicy("procurement").canViewSupplierImpact).toBe(true);
+  it("removes financial access and advanced workflows from logistics", () => {
+    expect(getPersonaPolicy("logistics")).toEqual({
+      canViewFinancials: false,
+      allowedWorkflows: ["risks"],
+    });
+    expect(canAccessWorkflow("logistics", "delay")).toBe(false);
+    expect(canAccessWorkflow("logistics", "consolidate")).toBe(false);
   });
 
-  it("exposes the two demo personas with logistics first", () => {
+  it("grants procurement access while preserving executive approval gates", () => {
+    expect(getPersonaPolicy("procurement")).toEqual({
+      canViewFinancials: true,
+      allowedWorkflows: ["risks", "delay", "consolidate"],
+    });
+  });
+
+  it("exposes the two demo identities with procurement represented by a woman", () => {
     expect(personas).toEqual([
-      { id: "logistics", label: "Standard logistics employee" },
+      { id: "logistics", label: "Logistics planner" },
       { id: "procurement", label: "Procurement lead" },
     ]);
   });

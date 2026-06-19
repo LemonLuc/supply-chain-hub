@@ -34,33 +34,35 @@ describe("normalizeChatOptions", () => {
 });
 
 describe("chat grounding", () => {
-  it("includes the application snapshot in the system prompt", () => {
-    const prompt = buildSystemPrompt(buildAppContext("delay"));
+  it("includes restricted workflow evidence only for an authorized role", () => {
+    const prompt = buildSystemPrompt(buildAppContext("delay", "procurement"));
 
-    expect(prompt).toContain("The 14-day slip creates a five-day production gap in week three.");
-    expect(prompt).toContain("€310K");
+    expect(prompt).toContain("One approved alternate can protect the first eight builds");
+    expect(prompt).toContain("€21,600");
+    expect(prompt).toContain("Never reveal private chain-of-thought");
   });
 
-  it("returns a useful context-aware reply when no API key is configured", () => {
+  it("returns an operational, tool-grounded demo reply", () => {
     const reply = generateMockReply("What should I do first?", buildAppContext("risks"));
 
-    expect(reply).toContain("Supplier A");
-    expect(reply).toContain("Open a joint recovery call with Supplier A");
+    expect(reply).toContain("DHL Freight shipment 00340434161094000012");
+    expect(reply).toContain("Draft email to DHL Freight");
+    expect(reply).toContain("SAP S/4HANA MCP");
     expect(reply).toContain("demo mode");
   });
 
-  it("answers supplier impact questions only when the context permits it", () => {
+  it("answers financial questions only when the context permits it", () => {
     const procurementReply = generateMockReply(
-      "What is Supplier A's impact?",
+      "What is the cost impact?",
       buildAppContext("risks", "procurement"),
     );
     const logisticsReply = generateMockReply(
-      "What is Supplier A's impact?",
+      "What is the cost impact?",
       buildAppContext("risks", "logistics"),
     );
 
-    expect(procurementReply).toContain("€1.6M revenue at risk");
-    expect(logisticsReply).not.toContain("€1.6M revenue at risk");
+    expect(procurementReply).toContain("€185,000");
+    expect(logisticsReply).not.toContain("€185,000");
     expect(logisticsReply).toContain("not available to your signed-in role");
   });
 });

@@ -3,11 +3,17 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import {
-  ArrowRight,
-  CheckCircle2,
+  Activity,
+  Bot,
+  Boxes,
+  Check,
+  ChevronRight,
   CircleUserRound,
-  History,
+  Database,
+  ExternalLink,
+  FileCheck2,
   LockKeyhole,
+  Mail,
   RotateCcw,
   ScanSearch,
   Send,
@@ -19,16 +25,15 @@ import {
 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 
-import type { CurrentUser } from "@/lib/auth";
+import { mockUsers, type CurrentUser } from "@/lib/auth";
 import { supportedModels, thinkingLevels, type SupportedModel, type ThinkingLevel } from "@/lib/chat";
-import { buildAppContext } from "@/lib/context";
-import { suppliers, workflows, type WorkflowKey } from "@/lib/demo-data";
-import { getPersonaPolicy } from "@/lib/permissions";
+import { workflows, type WorkflowAction, type WorkflowKey } from "@/lib/demo-data";
+import { canAccessWorkflow, getPersonaPolicy, personas, type PersonaId } from "@/lib/permissions";
 
-const workflowNavigation: Record<WorkflowKey, { label: string; icon: LucideIcon }> = {
-  risks: { label: "Weekly risk scan", icon: ScanSearch },
-  delay: { label: "14-day supplier delay", icon: Truck },
-  consolidate: { label: "Procurement optimization", icon: ShieldCheck },
+const workflowNavigation: Record<WorkflowKey, { icon: LucideIcon }> = {
+  risks: { icon: ScanSearch },
+  delay: { icon: Boxes },
+  consolidate: { icon: ShieldCheck },
 };
 
 function messageText(message: UIMessage): string {
@@ -38,27 +43,76 @@ function messageText(message: UIMessage): string {
     .join("\n");
 }
 
+function actionIcon(action: WorkflowAction) {
+  if (action.kind === "draft") return Mail;
+  if (action.kind === "approval") return ShieldCheck;
+  if (action.kind === "share") return ExternalLink;
+  return FileCheck2;
+}
+
+function AiMark() {
+  return (
+    <div className="ai-mark" aria-label="Supply Chain Hub AI mark">
+      <Sparkles aria-hidden="true" />
+      <Sparkles aria-hidden="true" />
+      <Sparkles aria-hidden="true" />
+    </div>
+  );
+}
+
 export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
+  const [persona, setPersona] = useState<PersonaId>(currentUser.persona);
   const [workflowKey, setWorkflowKey] = useState<WorkflowKey>("risks");
   const [model, setModel] = useState<SupportedModel>("gpt-5.4-mini");
   const [thinking, setThinking] = useState<ThinkingLevel>("medium");
   const [input, setInput] = useState("");
+  const [hasRun, setHasRun] = useState(false);
+  const [actionNotice, setActionNotice] = useState("");
+  const [sourceSelection, setSourceSelection] = useState<Record<string, boolean>>({});
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
   const { messages, sendMessage, status, error, stop, setMessages, clearError } = useChat({ transport });
   const workflow = workflows[workflowKey];
-  const appContext = buildAppContext(workflowKey, currentUser.persona);
-  const personaPolicy = getPersonaPolicy(currentUser.persona);
+  const activeUser = mockUsers[persona];
+  const personaPolicy = getPersonaPolicy(persona);
   const isBusy = status === "submitted" || status === "streaming";
+
+  function sourceIsSelected(id: string, fallback: boolean) {
+    return sourceSelection[`${workflowKey}:${id}`] ?? fallback;
+  }
+
+  function resetRunState() {
+    setHasRun(false);
+    setActionNotice("");
+    setMessages([]);
+    clearError();
+  }
+
+  function changePersona(nextPersona: PersonaId) {
+    setPersona(nextPersona);
+    if (!canAccessWorkflow(nextPersona, workflowKey)) setWorkflowKey("risks");
+    resetRunState();
+  }
+
+  function changeWorkflow(nextWorkflow: WorkflowKey) {
+    if (!canAccessWorkflow(persona, nextWorkflow)) return;
+    setWorkflowKey(nextWorkflow);
+    resetRunState();
+  }
 
   async function submitPrompt(prompt: string) {
     const nextPrompt = prompt.trim();
-    if (!nextPrompt || isBusy) return;
+    if (!nextPrompt || isBusy || !canAccessWorkflow(persona, workflowKey)) return;
 
     clearError();
     setInput("");
+    setHasRun(true);
+    setActionNotice("");
+    const selectedSourceIds = workflow.sources
+      .filter((source) => sourceIsSelected(source.id, source.selected))
+      .map((source) => source.id);
     await sendMessage(
       { text: nextPrompt },
-      { body: { workflowKey, model, thinking } },
+      { body: { workflowKey, model, thinking, demoPersona: persona, selectedSourceIds } },
     );
   }
 
@@ -67,32 +121,47 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     void submitPrompt(input);
   }
 
+  function runAction(action: WorkflowAction) {
+    const messagesByKind = {
+      draft: `${action.label} prepared as a draft. Review is required before sending.`,
+      update: `${action.label} staged. Confirmation is required before the SAP record changes.`,
+      share: `${action.label} prepared. The recipient list is ready for review.`,
+      approval: `${action.label} submitted to the executive review queue. No supplier change has been made.`,
+    };
+    setActionNotice(messagesByKind[action.kind]);
+  }
+
   return (
     <main className="app-shell">
       <aside className="sidebar">
         <div className="sidebar-main">
           <div className="brand-lockup">
-            <div className="brand-mark" aria-hidden="true">SH</div>
+            <AiMark />
             <div>
               <p className="eyebrow">Intranet operations</p>
               <h1>Supply Chain Hub</h1>
             </div>
           </div>
-          <p className="lede">Grounded supplier decisions across planning, procurement and operations.</p>
+          <p className="lede">Operational answers and governed actions across the supply chain.</p>
 
           <nav className="workflow-nav" aria-label="Supply chain workflows">
             {(Object.keys(workflowNavigation) as WorkflowKey[]).map((key) => {
-              const item = workflowNavigation[key];
-              const Icon = item.icon;
+              const Icon = workflowNavigation[key].icon;
+              const locked = !canAccessWorkflow(persona, key);
               return (
                 <button
                   className={`workflow-button ${workflowKey === key ? "active" : ""}`}
+                  disabled={locked}
                   key={key}
                   type="button"
-                  onClick={() => setWorkflowKey(key)}
+                  onClick={() => changeWorkflow(key)}
                 >
                   <Icon aria-hidden="true" />
-                  <span>{item.label}</span>
+                  <span>
+                    {workflows[key].navLabel}
+                    <small>{locked ? "Restricted" : workflows[key].accessLabel}</small>
+                  </span>
+                  {locked ? <LockKeyhole aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
                 </button>
               );
             })}
@@ -100,18 +169,29 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
         </div>
 
         <div className="sidebar-footer">
-          <section className="status-panel" aria-label="Dataset status">
-            <div><span className="metric-label">Suppliers</span><strong>{appContext.metrics.supplierCount}</strong></div>
-            <div><span className="metric-label">Open alerts</span><strong>{appContext.metrics.openAlerts}</strong></div>
-            <div><span className="metric-label">Revenue at risk</span><strong>{appContext.metrics.revenueAtRisk}</strong></div>
+          <section className="access-demo" aria-label="Demo access">
+            <div className="access-heading">
+              <CircleUserRound aria-hidden="true" />
+              <div><strong>Access simulation</strong><span>Mock intranet identity</span></div>
+            </div>
+            <label>
+              <span>Demo identity</span>
+              <select
+                aria-label="Demo identity"
+                value={persona}
+                onChange={(event) => changePersona(event.target.value as PersonaId)}
+              >
+                {personas.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+              </select>
+            </label>
           </section>
 
           <section className="user-panel" aria-label="Signed-in user">
-            <div className="user-avatar" aria-hidden="true">{currentUser.initials}</div>
+            <div className="user-avatar" aria-hidden="true">{activeUser.initials}</div>
             <div className="user-details">
-              <strong>{currentUser.name}</strong>
-              <span>{currentUser.role}</span>
-              <small>{currentUser.businessUnit}</small>
+              <strong>{activeUser.name}</strong>
+              <span>{activeUser.role}</span>
+              <small>{activeUser.businessUnit}</small>
             </div>
             <LockKeyhole aria-label="Authenticated intranet session" />
           </section>
@@ -119,36 +199,40 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
       </aside>
 
       <section className="workspace">
+        <header className="workspace-header">
+          <div>
+            <p className="eyebrow">{workflow.title}</p>
+            <h2>{workflow.question}</h2>
+            <p>{workflow.description}</p>
+          </div>
+          <span className="access-badge"><LockKeyhole aria-hidden="true" />{workflow.accessLabel}</span>
+        </header>
+
         <section className="chat-panel" aria-labelledby="chat-title">
           <div className="chat-toolbar">
             <div>
-              <p className="eyebrow">Supply Chain Hub</p>
-              <h2 id="chat-title"><Sparkles aria-hidden="true" /> Ask Supply Chain Hub</h2>
+              <h2 id="chat-title"><AiMark /> Ask Supply Chain Hub</h2>
+              <span className="context-line"><span className="live-dot" aria-hidden="true" />{workflow.sourceStatus}</span>
             </div>
             <div className="chat-selectors">
               <label>
                 <span>Model</span>
-                <select value={model} onChange={(event) => setModel(event.target.value as SupportedModel)}>
+                <select aria-label="Model" value={model} onChange={(event) => setModel(event.target.value as SupportedModel)}>
                   {supportedModels.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
                 </select>
               </label>
               <label>
                 <span>Thinking level</span>
-                <select value={thinking} onChange={(event) => setThinking(event.target.value as ThinkingLevel)}>
+                <select aria-label="Thinking level" value={thinking} onChange={(event) => setThinking(event.target.value as ThinkingLevel)}>
                   {thinkingLevels.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
                 </select>
               </label>
-              {messages.length > 0 && (
-                <button className="icon-button" type="button" aria-label="Clear conversation" title="Clear conversation" onClick={() => setMessages([])}>
+              {(messages.length > 0 || hasRun) && (
+                <button className="icon-button" type="button" aria-label="Clear conversation" title="Clear conversation" onClick={resetRunState}>
                   <RotateCcw aria-hidden="true" />
                 </button>
               )}
             </div>
-          </div>
-
-          <div className="context-line">
-            <span className="live-dot" aria-hidden="true" />
-            {workflow.sourceStatus}
           </div>
 
           {messages.length > 0 && (
@@ -159,11 +243,11 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                   <p>{messageText(message)}</p>
                 </div>
               ))}
-              {status === "submitted" && <div className="thinking-state">Reviewing authorized enterprise sources...</div>}
+              {status === "submitted" && <div className="thinking-state">Connecting to authorized tools and retrieving records...</div>}
             </div>
           )}
 
-          {messages.length === 0 && (
+          {!hasRun && (
             <div className="prompt-row" aria-label="Suggested questions">
               {workflow.suggestedPrompts.map((prompt) => (
                 <button key={prompt} type="button" onClick={() => void submitPrompt(prompt)}>{prompt}</button>
@@ -176,7 +260,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
           <form className="chat-composer" onSubmit={handleSubmit}>
             <textarea
               aria-label="Message"
-              placeholder="Ask about suppliers, risks, scenarios, or recommendations"
+              placeholder="Ask about a part, delivery, supplier, order, or operational task"
               rows={2}
               value={input}
               onChange={(event) => setInput(event.target.value)}
@@ -199,76 +283,143 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
           </form>
         </section>
 
-        <section className="workflow-section" aria-labelledby="workflow-question">
-          <div className="workflow-heading">
-            <div>
-              <p className="eyebrow">{workflow.title}</p>
-              <h2 id="workflow-question">{workflow.question}</h2>
-            </div>
-            <span className="badge">{workflow.confidence}</span>
-          </div>
-
-          <div className="before-now-grid">
-            <article className="process-panel before-panel">
-              <div className="process-title"><History aria-hidden="true" /><h3>Before</h3></div>
-              <p>{workflow.before}</p>
-              <div className="system-list">
-                {workflow.beforeSystems.map((system) => <span key={system}>{system}</span>)}
-              </div>
-            </article>
-
-            <div className="journey-arrow" aria-hidden="true"><ArrowRight /></div>
-
-            <article className="process-panel hub-panel">
-              <div className="process-title"><Sparkles aria-hidden="true" /><h3>With Supply Chain Hub</h3></div>
-              <p>{workflow.withHub}</p>
-              <ol className="hub-steps">
-                {workflow.hubSteps.map(([label, detail]) => (
-                  <li key={label}>
-                    <CheckCircle2 aria-hidden="true" />
-                    <span><strong>{label}</strong>{detail}</span>
-                  </li>
-                ))}
-              </ol>
-            </article>
-          </div>
-        </section>
-
-        <section className="answer-grid" aria-label="Supply Chain Hub analysis">
-          <article className="answer-card main-answer">
-            <p className="eyebrow">Decision brief</p>
-            <h3>{workflow.headline}</h3>
-            <p className="answer-summary">{workflow.summary}</p>
-            <div className="impact-strip">
-              {workflow.impacts.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}
-            </div>
-          </article>
-          <article className="answer-card actions-card">
-            <p className="eyebrow">Recommended actions</p>
-            <ol className="actions-list">{workflow.actions.map((action) => <li key={action}>{action}</li>)}</ol>
-          </article>
-        </section>
-
-        <section className="content-section">
+        <section className="source-section" aria-labelledby="source-title">
           <div className="section-title">
-            <div><p className="eyebrow">Grounded evidence</p><h3>Supplier risk table</h3></div>
-            <span className="source-note"><CircleUserRound aria-hidden="true" /> Access filtered for {currentUser.role}</span>
+            <div>
+              <p className="eyebrow">Tool access</p>
+              <h3 id="source-title">Choose authorized sources</h3>
+            </div>
+            <span className="source-note"><ShieldCheck aria-hidden="true" />Filtered for {activeUser.role}</span>
           </div>
-          <div className="table-wrap">
-            <table>
-              <thead><tr><th>Supplier</th><th>Category</th><th>Region</th><th>Risk</th><th>Signals</th>{personaPolicy.canViewSupplierImpact && <th>Impact</th>}</tr></thead>
-              <tbody>
-                {suppliers.map((supplier) => (
-                  <tr className={workflow.highlights.includes(supplier.name) ? "highlight-row" : ""} key={supplier.name}>
-                    <td><strong>{supplier.name}</strong></td><td>{supplier.category}</td><td>{supplier.region}</td>
-                    <td><span className={`risk-chip risk-${supplier.risk.toLowerCase()}`}>{supplier.risk}</span></td>
-                    <td>{supplier.signals}</td>{personaPolicy.canViewSupplierImpact && <td>{supplier.impact}</td>}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="source-grid">
+            {workflow.sources.map((source) => {
+              const checked = sourceIsSelected(source.id, source.selected);
+              return (
+                <label className={`source-item ${checked ? "selected" : ""}`} key={source.id}>
+                  <input
+                    aria-label={source.name}
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(event) => setSourceSelection((current) => ({
+                      ...current,
+                      [`${workflowKey}:${source.id}`]: event.target.checked,
+                    }))}
+                  />
+                  <Database aria-hidden="true" />
+                  <span><strong>{source.name}</strong><small>{source.category} · {source.detail}</small></span>
+                  <span className="source-state">{checked ? "Authorized" : "Not used"}</span>
+                </label>
+              );
+            })}
           </div>
         </section>
+
+        {!hasRun ? (
+          <section className="empty-state" aria-label="No analysis yet">
+            <Bot aria-hidden="true" />
+            <div>
+              <h3>Ask a question to retrieve authorized live data</h3>
+              <p>Results, records, recommendations and actions appear only after the request is evaluated against your identity and selected tools.</p>
+            </div>
+          </section>
+        ) : (
+          <section className="results" aria-label="Supply Chain Hub results">
+            <div className="result-grid">
+              <article className="result-summary">
+                <p className="eyebrow">Operational answer</p>
+                <h3>{workflow.headline}</h3>
+                <p>{workflow.summary}</p>
+                <div className="metric-strip">
+                  {workflow.metrics.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}
+                  {personaPolicy.canViewFinancials && workflow.financialMetrics?.map(([label, value]) => (
+                    <div className="financial-metric" key={label}><span>{label}</span><strong>{value}</strong></div>
+                  ))}
+                </div>
+              </article>
+
+              <article className="activity-panel">
+                <div className="panel-heading">
+                  <Activity aria-hidden="true" />
+                  <div><h3>Agent activity</h3><span>Auditable tool trace, not private model reasoning</span></div>
+                </div>
+                <ol>
+                  {workflow.activity
+                    .filter((step) => workflow.sources.some((source) =>
+                      sourceIsSelected(source.id, source.selected) &&
+                      step.tool.toLowerCase().includes(source.name.split(" ")[0].toLowerCase()),
+                    ) || step.tool.includes("Policy") || step.tool.includes("Quality"))
+                    .map((step) => (
+                      <li key={step.tool}>
+                        <span className="activity-check"><Check aria-hidden="true" /></span>
+                        <div><strong>{step.tool}</strong><p>{step.detail}</p><small>{step.result}</small></div>
+                      </li>
+                    ))}
+                </ol>
+              </article>
+            </div>
+
+            {workflow.heatMap && (
+              <section className="heatmap-section">
+                <div className="section-title">
+                  <div><p className="eyebrow">Decision support</p><h3>Supplier portfolio heat map</h3></div>
+                  <span className="source-note">Cost versus resilience</span>
+                </div>
+                <div className="heatmap">
+                  {workflow.heatMap.map((item) => (
+                    <article className={`heat-cell resilience-${item.resilience.toLowerCase()}`} key={item.supplier}>
+                      <span>{item.supplier}</span>
+                      <strong>{item.recommendation}</strong>
+                      <small>Cost: {item.cost} · Resilience: {item.resilience}</small>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="records-section">
+              <div className="section-title">
+                <div><p className="eyebrow">Grounded records</p><h3>Evidence returned by authorized tools</h3></div>
+                <span className="source-note"><Database aria-hidden="true" />Synthetic demo records</span>
+              </div>
+              <div className="record-list">
+                {workflow.rows.map((row) => (
+                  <article className="record-row" key={row.subject}>
+                    <div><strong>{row.subject}</strong><span>{row.detail}</span></div>
+                    <span className={`status-chip status-${row.status.toLowerCase().replaceAll(" ", "-")}`}>{row.status}</span>
+                    <p>{row.evidence}</p>
+                    {personaPolicy.canViewFinancials && row.financial && <strong className="financial-value">{row.financial}</strong>}
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="actions-section">
+              <div className="section-title">
+                <div><p className="eyebrow">Agentic follow-up</p><h3>Available actions</h3></div>
+                <span className="source-note"><ShieldCheck aria-hidden="true" />Human confirmation before external changes</span>
+              </div>
+              {workflow.approval && (
+                <div className="approval-banner">
+                  <ShieldCheck aria-hidden="true" />
+                  <div><strong>{workflow.approval.label}</strong><span>{workflow.approval.detail}</span></div>
+                </div>
+              )}
+              <div className="action-grid">
+                {workflow.actions.map((action) => {
+                  const Icon = actionIcon(action);
+                  return (
+                    <button key={action.label} type="button" onClick={() => runAction(action)}>
+                      <Icon aria-hidden="true" />
+                      <span><strong>{action.label}</strong><small>{action.detail}</small></span>
+                      <ChevronRight aria-hidden="true" />
+                    </button>
+                  );
+                })}
+              </div>
+              {actionNotice && <p className="action-notice" role="status"><Check aria-hidden="true" />{actionNotice}</p>}
+            </section>
+          </section>
+        )}
       </section>
     </main>
   );

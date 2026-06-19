@@ -1,27 +1,31 @@
 import { describe, expect, it } from "vitest";
 
-import { suppliers, workflows } from "./demo-data";
+import { workflows } from "./demo-data";
 
-describe("workflow transformation data", () => {
-  it("captures the manual weekly risk process and integrated replacement", () => {
-    expect(workflows.risks.before).toContain("SAP");
-    expect(workflows.risks.beforeSystems).toEqual(
-      expect.arrayContaining(["SAP S/4HANA", "Supplier portals", "Excel scorecards"]),
+describe("operational workflow data", () => {
+  it("models a Monday delivery radar with carrier evidence and actions", () => {
+    expect(workflows.risks.question).toContain("N-FK5");
+    expect(workflows.risks.sources.map((source) => source.name)).toEqual(
+      expect.arrayContaining(["SAP S/4HANA", "DHL Freight", "FedEx"]),
     );
-    expect(workflows.risks.withHub).toContain("authorized");
-    expect(workflows.risks.hubSteps).toHaveLength(3);
-    expect(workflows.risks.suggestedPrompts).toHaveLength(3);
+    expect(workflows.risks.actions.map((action) => action.label)).toEqual(
+      expect.arrayContaining(["Draft email to DHL Freight", "Update SAP promised date"]),
+    );
   });
 
-  it("models the 14-day delay and procurement guardrails", () => {
-    expect(workflows.delay.question).toContain("14 days");
-    expect(workflows.delay.withHub).toContain("BOM");
-    expect(workflows.consolidate.withHub.toLowerCase()).toContain("guardrails");
+  it("models role-restricted alternatives and an executive approval workflow", () => {
+    expect(workflows.delay.minimumPersona).toBe("procurement");
+    expect(workflows.delay.question).toContain("objective turret");
+    expect(workflows.consolidate.minimumPersona).toBe("procurement");
+    expect(workflows.consolidate.approval?.label).toBe("C-level approval required");
   });
 
-  it("removes presentation talk tracks and uses optics-relevant EUR data", () => {
-    expect(workflows.risks).not.toHaveProperty("talk");
-    expect(suppliers.map((supplier) => supplier.category)).toContain("Optical glass blanks");
-    expect(suppliers[0].impact).toContain("€");
+  it("stores auditable activity rather than hidden model reasoning", () => {
+    expect(workflows.risks.activity).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ tool: "SAP S/4HANA MCP" }),
+        expect.objectContaining({ tool: "DHL Freight MCP" }),
+      ]),
+    );
   });
 });

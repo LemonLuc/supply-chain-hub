@@ -35,7 +35,7 @@ describe("POST /api/chat", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-vercel-ai-ui-message-stream")).toBe("v1");
-    expect(stream).toContain("Supplier A");
+    expect(stream).toContain("DHL Freight shipment 00340434161094000012");
     expect(stream).toContain("demo mode");
   });
 
@@ -63,7 +63,7 @@ describe("POST /api/chat", () => {
           {
             id: "message-1",
             role: "user",
-            parts: [{ type: "text", text: "What is Supplier A's impact?" }],
+            parts: [{ type: "text", text: "What is the cost impact?" }],
           },
         ],
         workflowKey: "risks",
@@ -74,7 +74,7 @@ describe("POST /api/chat", () => {
     const response = await POST(request);
     const stream = await response.text();
 
-    expect(stream).toContain("€1.6M revenue at risk");
+    expect(stream).toContain("€185,000");
   });
 
   it("does not trust a browser persona to elevate access", async () => {
@@ -88,7 +88,7 @@ describe("POST /api/chat", () => {
           {
             id: "message-1",
             role: "user",
-            parts: [{ type: "text", text: "What is Supplier A's impact?" }],
+            parts: [{ type: "text", text: "What is the cost impact?" }],
           },
         ],
         workflowKey: "risks",
@@ -99,7 +99,7 @@ describe("POST /api/chat", () => {
     const response = await POST(request);
     const stream = await response.text();
 
-    expect(stream).not.toContain("$1.6M revenue at risk");
+    expect(stream).not.toContain("€185,000");
     expect(stream).toContain("not available to your signed-in role");
   });
 });

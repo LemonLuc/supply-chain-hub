@@ -3,37 +3,41 @@ import { describe, expect, it } from "vitest";
 import { buildAppContext, normalizeWorkflowKey } from "./context";
 
 describe("buildAppContext", () => {
-  it("builds a complete context snapshot for the selected workflow", () => {
+  it("builds a least-privilege operational context for logistics", () => {
     const context = buildAppContext("risks");
 
     expect(context.workflow).toEqual({
       key: "risks",
-      question: "What are the current top supply risks across all critical suppliers this week?",
-      confidence: "Grounded · 6 sources",
+      question: "Is there any delivery risk this week for N-FK5 optical glass blanks used in the Axioscan 7 objective module?",
+      accessAllowed: true,
     });
-    expect(context.answer.headline).toBe("Three suppliers require action before the next planning cycle.");
-    expect(context.suppliers).toHaveLength(8);
+    expect(context.answer.headline).toBe("Delivery exception found");
+    expect(context.answer).not.toHaveProperty("financialMetrics");
+    expect(context.rows[0]).not.toHaveProperty("financial");
     expect(context.persona).toEqual({
       id: "logistics",
-      canViewSupplierImpact: false,
-    });
-    expect(context.suppliers[0]).not.toHaveProperty("impact");
-    expect(context.highlightedSuppliers).toEqual(["Supplier A", "Supplier G", "Supplier C"]);
-    expect(context.metrics).toEqual({
-      supplierCount: 8,
-      openAlerts: 12,
-      revenueAtRisk: "€4.8M",
+      canViewFinancials: false,
+      allowedWorkflows: ["risks"],
     });
   });
 
-  it("includes supplier impact data for procurement leads", () => {
+  it("includes financial fields for procurement leads", () => {
     const context = buildAppContext("risks", "procurement");
 
-    expect(context.persona).toEqual({
-      id: "procurement",
-      canViewSupplierImpact: true,
-    });
-    expect(context.suppliers[0]).toHaveProperty("impact", "€1.6M revenue at risk");
+    expect(context.persona.canViewFinancials).toBe(true);
+    expect(context.answer.financialMetrics).toEqual([
+      ["Expedite option", "€8,400"],
+      ["Avoided downtime", "€185,000"],
+    ]);
+    expect(context.rows[0]).toHaveProperty("financial", "€185K downtime exposure");
+  });
+
+  it("falls back to the risk radar when logistics requests a restricted workflow", () => {
+    const context = buildAppContext("delay", "logistics");
+
+    expect(context.workflow.key).toBe("risks");
+    expect(context.workflow.accessAllowed).toBe(false);
+    expect(context.answer.headline).toBe("Delivery exception found");
   });
 });
 

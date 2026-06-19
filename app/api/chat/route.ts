@@ -11,6 +11,7 @@ import { buildSystemPrompt, generateMockReply, hasLiveApiKey, normalizeChatOptio
 import { getChatTools, loadExternalContext } from "@/lib/chat-extensions";
 import { buildAppContext } from "@/lib/context";
 import { getCurrentUser } from "@/lib/auth";
+import { normalizePersona } from "@/lib/permissions";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,8 @@ type ChatRequest = {
   workflowKey?: unknown;
   model?: unknown;
   thinking?: unknown;
+  demoPersona?: unknown;
+  selectedSourceIds?: unknown;
 };
 
 function getMessageText(message: UIMessage): string {
@@ -59,7 +62,9 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "A user message is required." }, { status: 400 });
   }
 
-  const context = buildAppContext(body.workflowKey, getCurrentUser().persona);
+  const serverPersona = getCurrentUser().persona;
+  const demoPersona = hasLiveApiKey() ? serverPersona : normalizePersona(body.demoPersona ?? serverPersona);
+  const context = buildAppContext(body.workflowKey, demoPersona, body.selectedSourceIds);
   const options = normalizeChatOptions(body.model, body.thinking);
 
   if (!hasLiveApiKey()) {

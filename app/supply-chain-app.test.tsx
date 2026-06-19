@@ -9,74 +9,107 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+function mockChatStream() {
+  return vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response("data: [DONE]\n\n", {
+      headers: {
+        "content-type": "text/event-stream",
+        "x-vercel-ai-ui-message-stream": "v1",
+      },
+    }),
+  );
+}
+
 describe("SupplyChainApp", () => {
-  it("renders the signed-in identity and Supply Chain Hub controls", () => {
+  it("shows the demo access switch and uses the AI mark in the sidebar", () => {
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
+    expect(screen.getByLabelText("Demo identity")).toHaveValue("logistics");
     expect(screen.getByText("Lukas Weber")).toBeInTheDocument();
-    expect(screen.getByText("Logistics Planner")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Persona")).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Ask Supply Chain Hub" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Model")).toHaveValue("gpt-5.4-mini");
-    expect(screen.getByLabelText("Thinking level")).toHaveValue("medium");
-    expect(screen.getByPlaceholderText("Ask about suppliers, risks, scenarios, or recommendations")).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Supply Chain Hub AI mark")).toHaveLength(2);
+    expect(screen.queryByText("SH")).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
+    expect(screen.getByText("Anna Keller")).toBeInTheDocument();
+    expect(screen.getByText("Procurement Lead")).toBeInTheDocument();
   });
 
-  it("shows the before and integrated weekly risk workflow", () => {
+  it("keeps the weekly risk radar operational and hides results until a prompt runs", async () => {
+    mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    expect(screen.getByRole("heading", { name: "Before" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "With Supply Chain Hub" })).toBeInTheDocument();
-    expect(screen.getByText(/Planner checks SAP open purchase orders/i)).toBeInTheDocument();
-    expect(screen.getByText("SAP S/4HANA")).toBeInTheDocument();
-    expect(screen.getByText(/6 connected sources/i)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Before" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "With Supply Chain Hub" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Ask a question to retrieve authorized live data/i)).toBeInTheDocument();
+    expect(screen.queryByText("Delivery exception found")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Is there any delivery risk this week/i }));
+
+    await waitFor(() => expect(screen.getByText("Delivery exception found")).toBeInTheDocument());
+    expect(screen.getByText(/DHL Freight shipment 00340434161094000012/i)).toBeInTheDocument();
+    expect(screen.getByText("Agent activity")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Draft email to DHL Freight/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Update SAP promised date/i })).toBeInTheDocument();
   });
 
-  it("switches between the 14-day delay and procurement guardrail workflows", () => {
+  it("never shows financial values or quantified business risk to logistics planners", async () => {
+    mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /14-day supplier delay/i }));
-    expect(screen.getByRole("heading", { name: /Supplier A slips by 14 days/i })).toBeInTheDocument();
-    expect(screen.getByText(/retrieves BOM where-used/i)).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: /Procurement optimization/i }));
-    expect(screen.getByRole("heading", { name: /Where can we consolidate spend/i })).toBeInTheDocument();
-    expect(screen.getByText(/Guardrails preserve critical redundancy/i)).toBeInTheDocument();
-  });
-
-  it("derives supplier impact visibility from the signed-in user", () => {
-    const { unmount } = render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+    expect(screen.queryByText(/€/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Revenue at risk/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "Impact" })).not.toBeInTheDocument();
-    unmount();
 
-    render(<SupplyChainApp currentUser={mockUsers.procurement} />);
-    expect(screen.getByRole("columnheader", { name: "Impact" })).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "€1.6M revenue at risk" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Is there any delivery risk this week/i }));
+    await waitFor(() => expect(screen.getByText("Delivery exception found")).toBeInTheDocument());
+
+    expect(screen.queryByText(/€/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/financial exposure/i)).not.toBeInTheDocument();
   });
 
-  it("removes presentation-only sections and old product language", () => {
+  it("locks supplier alternatives and executive optimization for logistics planners", () => {
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    expect(screen.queryByText("Talk track")).not.toBeInTheDocument();
-    expect(screen.queryByText("Demo prompts")).not.toBeInTheDocument();
-    expect(screen.queryByText("Copilot")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Supplier alternatives/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Executive supplier portfolio/i })).toBeDisabled();
   });
 
-  it("does not send persona data from the browser", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response("data: [DONE]\n\n", {
-        headers: {
-          "content-type": "text/event-stream",
-          "x-vercel-ai-ui-message-stream": "v1",
-        },
-      }),
-    );
+  it("unlocks procurement workflows and shows source authorization controls", () => {
     render(<SupplyChainApp currentUser={mockUsers.procurement} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Which supplier needs action today?" }));
+    fireEvent.click(screen.getByRole("button", { name: /Supplier alternatives/i }));
+    expect(screen.getByRole("heading", { name: /What are our approved alternatives/i })).toBeInTheDocument();
+    expect(screen.getByLabelText("SAP S/4HANA")).toBeChecked();
+    expect(screen.getByLabelText("Supplier qualification database")).toBeChecked();
+
+    fireEvent.click(screen.getByRole("button", { name: /Executive supplier portfolio/i }));
+    expect(screen.getByText(/cost-versus-resilience heat map/i)).toBeInTheDocument();
+  });
+
+  it("reveals the executive heat map and human approval gate only after a prompt", async () => {
+    mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.procurement} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Executive supplier portfolio/i }));
+    expect(screen.queryByText("Supplier portfolio heat map")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Give me a heat map/i }));
+
+    await waitFor(() => expect(screen.getByText("Supplier portfolio heat map")).toBeInTheDocument());
+    expect(screen.getByText("C-level approval required")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Request executive review/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Terminate contract now/i })).not.toBeInTheDocument();
+  });
+
+  it("sends only the selected source ids with the chat request", async () => {
+    const fetchMock = mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Is there any delivery risk this week/i }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
-    expect(requestBody).not.toHaveProperty("persona");
+    expect(requestBody.selectedSourceIds).toEqual(["sap", "dhl", "fedex", "warehouse"]);
+    expect(requestBody.selectedSourceIds).not.toContain("ups");
   });
 });

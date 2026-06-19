@@ -37,9 +37,10 @@ export function buildSystemPrompt(context: AppContext): string {
 Priorities:
 - Be concise, operational, and explicit about evidence from the snapshot.
 - Distinguish observed facts from recommendations.
+- Describe tool activity as an audit trace. Never reveal private chain-of-thought.
 - Never invent suppliers, metrics, policies, or external data.
 - When evidence is missing, say what additional source or tool is needed.
-- Treat recommended actions as proposals that require human approval.
+- Respect workflow access, financial visibility, and approval gates in the snapshot.
 
 Application snapshot:
 ${JSON.stringify(context, null, 2)}`;
@@ -47,24 +48,26 @@ ${JSON.stringify(context, null, 2)}`;
 
 export function generateMockReply(question: string, context: AppContext): string {
   const [firstAction, secondAction] = context.recommendedActions;
-  const focus = context.highlightedSuppliers.join(", ");
   const normalizedQuestion = question.toLowerCase();
-  const requestedSupplier = context.suppliers.find((supplier) =>
-    normalizedQuestion.includes(supplier.name.toLowerCase()),
+  const asksForMoney = ["impact", "cost", "€", "revenue", "savings"].some((term) =>
+    normalizedQuestion.includes(term),
   );
-  const impactAnswer = normalizedQuestion.includes("impact")
-    ? requestedSupplier && "impact" in requestedSupplier
-      ? `${requestedSupplier.name}'s recorded impact is ${requestedSupplier.impact}.`
-      : "Supplier-level impact data is not available to your signed-in role."
-    : "";
+  const financialNote =
+    asksForMoney && !context.persona.canViewFinancials
+      ? "\nFinancial and quantified business-risk data is not available to your signed-in role."
+      : asksForMoney && context.answer.financialMetrics?.length
+        ? `\nAuthorized financial view: ${context.answer.financialMetrics
+            .map(([label, value]) => `${label}: ${value}`)
+            .join("; ")}.`
+      : "";
 
-  return `Based on the current ${context.workflow.key} view, ${context.answer.headline}
+  return `${context.answer.headline}
 
-${impactAnswer ? `${impactAnswer}\n` : ""}
+${context.answer.summary}${financialNote}
 
-Start here: ${firstAction}${secondAction ? ` Then ${secondAction.charAt(0).toLowerCase()}${secondAction.slice(1)}` : ""}
+I checked ${context.activity.map((step) => step.tool).join(", ")}. The detailed tool activity and source records are available in the audit panel.
 
-The supporting signals center on ${focus}. Your question was: "${question.trim()}"
+Suggested next action: ${firstAction.label}.${secondAction ? ` I can also ${secondAction.label.toLowerCase()}.` : ""}
 
 This response is running in demo mode with sample application data. Add a real OPENAI_API_KEY to enable model-generated analysis.`;
 }

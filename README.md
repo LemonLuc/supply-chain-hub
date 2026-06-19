@@ -8,15 +8,15 @@ An intranet-ready supply chain decision workspace that turns fragmented ERP, sup
 - Vercel AI SDK chat client and streaming server route.
 - OpenAI model and reasoning-level selectors.
 - Server-built context for every request.
-- Server-derived mock identity with least-privilege dataset access.
+- Least-privilege mock identity plus an explicit in-app access simulation for demos.
 - Deterministic sample responses when no live API key is configured.
 - Extension points in `lib/chat-extensions.ts` for MCP tools and RAG context.
 
 ## Workflows
 
-1. **Weekly risk scan** replaces manual reconciliation across SAP, supplier portals, Excel, and email with an authorized, source-grounded risk brief.
-2. **14-day supplier delay** traces the affected BOM and orders, simulates inventory exposure, and proposes mitigations with clear tradeoffs.
-3. **Procurement optimization** combines cost, operational risk, resilience, quality, and policy guardrails before recommending sourcing changes.
+1. **Risk radar** checks SAP, warehouse stock, DHL Freight, FedEx, and other selected carrier tools for part-specific delivery exceptions.
+2. **Supplier alternatives** traces affected orders, checks qualified substitutes, and prepares operational updates and supplier follow-ups.
+3. **Executive supplier portfolio** produces a prompt-triggered cost-versus-resilience heat map with policy guardrails and C-level approval gates.
 
 ## Run Locally
 
@@ -38,7 +38,7 @@ The key is read only by `app/api/chat/route.ts` and is never sent to the browser
 
 ## Mock Intranet Identity
 
-The browser does not choose or submit a role. `getCurrentUser()` resolves identity on the server, and the API rebuilds its permission-filtered context from that trusted identity.
+`getCurrentUser()` resolves the initial mock identity on the server. The left-rail **Access simulation** selector lets a presenter demonstrate the logistics and procurement views. This browser-selected identity is honored only while the app is using the sample API key; a live OpenAI configuration continues to use the server-derived identity.
 
 Use one of these values in `.env.local`, then restart the server:
 
@@ -48,7 +48,7 @@ DEMO_USER_ROLE=logistics
 DEMO_USER_ROLE=procurement
 ```
 
-`logistics` is the least-privilege default and cannot access supplier impact data. `procurement` represents a Procurement Lead and can access the Impact column and impact-grounded chat answers.
+`logistics` is the least-privilege default. It sees only the operational delivery radar and never receives money values or quantified business-risk fields. `procurement` represents Anna Keller, Procurement Lead, and unlocks supplier alternatives, financial context, the executive portfolio workflow, and approval routing.
 
 In production, replace `getCurrentUser()` in `lib/auth.ts` with claims from the company identity provider, such as Microsoft Entra ID or Okta. Map immutable group or application-role claims to internal policies on the server; never trust a role sent by the browser.
 

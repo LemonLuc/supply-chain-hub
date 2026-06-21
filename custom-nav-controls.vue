@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { currentMic } from '@slidev/client/state/index.ts'
 
 const formats = [
   { value: 'video/webm;codecs=h264', label: 'MP4' },
@@ -24,6 +25,10 @@ function initialFormat() {
 }
 
 const selectedFormat = ref(initialFormat())
+const micEnabled = computed({
+  get: () => currentMic.value !== 'none',
+  set: enabled => currentMic.value = enabled ? 'default' : 'none',
+})
 
 function updateFormat() {
   const key = 'slidev-record-mimetype'
@@ -37,11 +42,23 @@ function updateFormat() {
   }))
 }
 
-if (typeof window !== 'undefined')
+if (typeof window !== 'undefined') {
+  if (currentMic.value === 'none')
+    currentMic.value = 'default'
   updateFormat()
+}
 </script>
 
 <template>
+  <button
+    type="button"
+    :aria-pressed="micEnabled"
+    :title="micEnabled ? 'Microphone is on for recording' : 'Microphone is muted for recording'"
+    class="recording-mic-toggle"
+    @click="micEnabled = !micEnabled"
+  >
+    {{ micEnabled ? 'Mic on' : 'Mic off' }}
+  </button>
   <select
     v-if="availableFormats.length > 1"
     v-model="selectedFormat"
@@ -57,7 +74,8 @@ if (typeof window !== 'undefined')
 </template>
 
 <style scoped>
-.recording-format-select {
+.recording-format-select,
+.recording-mic-toggle {
   background: transparent;
   border: 1px solid currentColor;
   border-radius: 4px;
@@ -67,5 +85,9 @@ if (typeof window !== 'undefined')
   line-height: 1;
   margin: auto 2px;
   padding: 0 4px;
+}
+
+.recording-mic-toggle[aria-pressed='false'] {
+  opacity: 0.58;
 }
 </style>

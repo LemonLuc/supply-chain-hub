@@ -13,7 +13,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "slides:deploy": "npm run slides:build && wrangler deploy --config wrangler.deck.jsonc"
+    "slides:deploy": "npm run slides:build && node -e \"require(\\\"fs\\\").rmSync(\\\"dist-slidev/_redirects\\\",{force:true})\" && wrangler deploy --config wrangler.deck.jsonc"
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",

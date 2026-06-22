@@ -14,12 +14,14 @@ record: true
   <p class="eyebrow">OpenAI Solutions Engineering</p>
   <h1 class="cover-title">From fragmented supply-chain signals to governed decisions</h1>
   <p class="subtitle">A proposed OpenAI platform approach for ZEISS Supply Chain, Procurement and IT leadership</p>
+  <div class="talk-track"><span>9 min executive setup</span><span>18 min live demo</span><span>3 min proof-of-value close</span></div>
 </section>
 
 ---
 
 <section class="slide-section tldr">
-  <p class="eyebrow">Executive takeaway</p>
+  <span class="slide-number">02</span>
+  <p class="eyebrow">In a nutshell</p>
   <h1>TL;DR</h1>
   <div class="tldr-layout">
     <div class="tldr-main">
@@ -40,24 +42,25 @@ record: true
 ---
 
 <section class="slide-section customer-slide">
+  <span class="slide-number">03</span>
   <p class="eyebrow">Setting the stage</p>
-  <h1>What we know so far, and what we need to validate</h1>
+  <h1>Discovery baseline: what is known, what must be proven</h1>
   <div class="split-60">
     <div class="statement-panel">
       <div class="zeiss-logo" aria-label="ZEISS logo"></div>
-      <h2>Known customer context</h2>
+      <h2>Known operating context</h2>
       <ul>
-        <li>Global optics and optoelectronics leader founded in 1846</li>
-        <li>Semiconductor, industrial quality, microscopy, medical technology and consumer optics</li>
-        <li>Large, regulated, globally distributed manufacturing and supply-chain environment</li>
+        <li>ZEISS operates across advanced manufacturing, medical technology, quality and optics domains</li>
+        <li>Supply-chain decisions depend on SAP, supplier, logistics and document context</li>
+        <li>Executive value depends on trustworthy answers, not another disconnected dashboard</li>
       </ul>
     </div>
     <div class="assumption-list">
-      <h2>Discovery assumptions to validate</h2>
+      <h2>Discovery hypotheses to validate</h2>
       <ul>
         <li>Which disruptions consume the most planner, procurement and leadership time?</li>
-        <li>Where do SAP, supplier, carrier and file handoffs weaken accuracy or predictability?</li>
-        <li>Which decisions need human approval, auditability and source-level evidence?</li>
+        <li>Where do handoffs weaken accuracy, precision or predictability?</li>
+        <li>Which recommendations need approval, auditability and source-level evidence?</li>
       </ul>
     </div>
   </div>
@@ -66,6 +69,7 @@ record: true
 ---
 
 <section class="slide-section problem-slide">
+  <span class="slide-number">04</span>
   <p class="eyebrow">Business problem</p>
   <h1>Providing a decision framework for existing data</h1>
   <div class="signal-flow">
@@ -76,16 +80,17 @@ record: true
     <div><b>Files</b><ul><li>Scorecards</li><li>Excel trackers</li><li>Contracts</li></ul></div>
   </div>
   <div class="problem-strip problem-strip-two">
-    <div><strong>Pain</strong><ul><li>High manual effort to reconstruct one trusted view from partial signals</li><li>Variable answer accuracy when teams work from different source snapshots</li><li>Low precision and predictability for lead-time, supplier and carrier risk</li><li>Reliability depends on expert availability instead of a repeatable decision process</li></ul></div>
-    <div><strong>Cost</strong><ul><li>Expedite spend and buffer inventory used to compensate for uncertainty</li><li>Leadership time spent in escalation meetings instead of trade-off decisions</li><li>Schedule churn when mitigation options arrive too late</li><li>Quality and compliance exposure when evidence is scattered across tools</li></ul></div>
+    <div><strong>Pain</strong><ul><li>Manual effort to reconstruct one trusted view</li><li>Answer accuracy varies by source snapshot</li><li>Low precision for lead-time and supplier risk</li><li>Reliability depends on scarce experts</li></ul></div>
+    <div><strong>Cost</strong><ul><li>Expedite spend and buffers absorb uncertainty</li><li>Leadership time shifts into escalation meetings</li><li>Late mitigation creates schedule churn</li><li>Scattered evidence increases quality exposure</li></ul></div>
   </div>
 </section>
 
 ---
 
 <section class="slide-section solution-slide solution-proposal">
+  <span class="slide-number">05</span>
   <p class="eyebrow">Solution Proposal</p>
-  <h1>Supply Chain Hub as an enterprise decision operating model</h1>
+  <h1>Supply Chain Hub as the Enterprise decision model</h1>
   <div class="solution-grid">
     <div><h2>Communication interface</h2><p>A ChatGPT-style app where executives and operators ask business questions, inspect evidence and align on next steps.</p></div>
     <div><h2>Enterprise operating model</h2><p>Role scope, source ownership, approval paths and auditability turn the app into a governed way of working.</p></div>
@@ -93,21 +98,22 @@ record: true
   </div>
   <div class="consequence-band">
     <span>Business outcome</span>
-    <p>Supply Chain Hub reduces manual effort, improves decision precision and gives leaders a reliable path from signal to approved action.</p>
+    <p>Reduction of manual effort, improved decision precision, provision of a reliable decision path from signal to action for leaders.</p>
   </div>
 </section>
 
 ---
 
 <section class="slide-section architecture">
+  <span class="slide-number">06</span>
   <p class="eyebrow">Reference architecture</p>
-  <h1>App front end, OpenAI platform backend, ZEISS systems of record</h1>
+  <h1>Solution overview</h1>
   <div class="arch-canvas">
     <div class="arch-zone"><span>01</span><h2>Supply Chain Hub app</h2><p>Ask, review evidence, approve.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone ai-zone"><span>02</span><h2>OpenAI integration</h2><p>API / SDK, <code>/api/chat</code>, evals, MCP tools.</p></div>
+    <div class="arch-zone ai-zone"><span>02</span><h2>OpenAI integration</h2><p>API / SDK, <code>/api/chat</code>, MCP tools.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone governance-zone"><span>03</span><h2>Governance</h2><p>Role scope, source filters, masking, evals.</p></div>
+    <div class="arch-zone governance-zone"><span>03</span><h2>Governance</h2><p>Role scope, source filters, masking, approvals.</p></div>
     <div class="arch-connector">→</div>
     <div class="arch-zone"><span>04</span><h2>ZEISS systems</h2><p>SAP, carriers, suppliers, files, workflows.</p></div>
     <div class="arch-rail"><div><b>Ground</b><p>Assemble approved context.</p></div><div><b>Reason</b><p>Synthesize risk and options.</p></div><div><b>Act</b><p>Route high-impact changes to approval.</p></div></div>
@@ -118,42 +124,45 @@ record: true
 ---
 
 <section class="slide-section workflow-slide">
-  <p class="eyebrow">Target workflow</p>
-  <h1>From operational question to governed action</h1>
-  <div class="process-line process-flow">
-    <div><h2><b>1</b> Ask</h2><p>Business question</p></div>
+  <span class="slide-number">07</span>
+  <p class="eyebrow">Decision model</p>
+  <h1>The mental model: ask, ground, decide, govern</h1>
+  <div class="process-line process-flow conceptual-flow">
+    <div><h2><b>1</b> Ask</h2><p>Executive question framed in business language</p></div>
     <div class="process-arrow">→</div>
-    <div><h2><b>2</b> Scope</h2><p>Role, source and workflow policy</p></div>
+    <div><h2><b>2</b> Scope</h2><p>Role, source and policy boundaries</p></div>
     <div class="process-arrow">→</div>
-    <div><h2><b>3</b> Ground</h2><p>Approved evidence</p></div>
+    <div><h2><b>3</b> Ground</h2><p>Approved enterprise evidence and assumptions</p></div>
     <div class="process-arrow">→</div>
-    <div><h2><b>4</b> Recommend</h2><p>Risk, options and trade-offs</p></div>
+    <div><h2><b>4</b> Decide</h2><p>Options, trade-offs and confidence</p></div>
     <div class="process-arrow">→</div>
-    <div><h2><b>5</b> Approve</h2><p>Human-controlled action path</p></div>
+    <div><h2><b>5</b> Govern</h2><p>Human review and auditable action path</p></div>
   </div>
-  <div class="workflow-example">
-    <span>Example executive workflow</span>
-    <p>The COO asks which customer commitments are exposed by a supplier delay; the Hub scopes the role, pulls approved ZEISS evidence, recommends mitigation options and routes the selected action for human approval.</p>
+  <div class="model-band">
+    <div><h2>Thought leadership angle</h2><p>The app is not another dashboard. It is a reusable decision model that turns fragmented enterprise signals into governed action.</p></div>
+    <div><h2>Why OpenAI</h2><p>Natural-language reasoning plus MCP-enabled tool access lets leaders move from question to evidence to next action without learning every system.</p></div>
+    <div><h2>Deployment note</h2><p>The demo app is deployed on Cloudflare Developer Platform for fast iteration and edge-ready delivery.</p></div>
   </div>
 </section>
 
 ---
 
 <section class="slide-section ops-slide">
-  <p class="eyebrow">Operating model</p>
-  <h1>One executive workflow across existing systems</h1>
-  <div class="flow-map">
-    <div><span>Plan</span><p>Demand, material priority and production impact</p></div>
+  <span class="slide-number">08</span>
+  <p class="eyebrow">Workflow example</p>
+  <h1>Executive workflow before switching to the live demo</h1>
+  <div class="flow-map workflow-map">
+    <div><span>Trigger</span><p>Critical supplier delay threatens customer commitments</p></div>
     <div class="flow-arrow">→</div>
-    <div><span>Source</span><p>Supplier commit, alternatives and commercial constraints</p></div>
+    <div><span>Question</span><p>Which orders are exposed and what can we do today?</p></div>
     <div class="flow-arrow">→</div>
-    <div><span>Move</span><p>Carrier milestone, customs risk and warehouse receipt</p></div>
+    <div><span>Evidence</span><p>SAP demand, supplier status, carrier milestones, inventory</p></div>
     <div class="flow-arrow">→</div>
-    <div><span>Decide</span><p>Mitigation option, approval owner and audit trail</p></div>
+    <div><span>Action</span><p>Recommended mitigation with owner, risk and approval path</p></div>
   </div>
-  <div class="workflow-example ops-example">
-    <span>In action</span>
-    <p>An executive accesses the app, asks for the highest-risk shipments affecting customer commitments this week and gets a source-backed recommendation with owner, confidence, cost exposure and next approval step.</p>
+  <div class="before-after">
+    <div><h2>Before</h2><p>Teams reconcile trackers, SAP extracts and supplier emails before leadership can discuss trade-offs.</p></div>
+    <div><h2>After</h2><p>The executive sees a grounded recommendation, confidence level, cost exposure and required approval step in one interface.</p></div>
   </div>
 </section>
 
@@ -161,13 +170,16 @@ record: true
 
 <section class="demo-title">
   <h1>Demo</h1>
+  <p>18 minutes live walkthrough</p>
 </section>
 
 ---
 
 <section class="slide-section">
-  <p class="eyebrow">Business case and ROI</p>
+  <span class="slide-number">10</span>
+  <p class="eyebrow">Proof of concept scorecard</p>
   <h1>Impact validation and success criteria</h1>
+  <p class="poc-note">Use the live demo workflow as the first POC candidate: prove measurable value, source trust and governance within four weeks.</p>
   <div class="roi-grid impact-grid">
     <div><h2>Baseline</h2><ul><li>Risk review cycle time</li><li>Escalation frequency</li><li>Manual triage hours</li></ul></div>
     <div><h2>Decision speed</h2><b>25%</b><p>Faster weekly risk-review cycle versus baseline.</p></div>
@@ -181,6 +193,7 @@ record: true
 ---
 
 <section class="slide-section scale-slide">
+  <span class="slide-number">11</span>
   <p class="eyebrow">Future potential</p>
   <h1>Supply Chain Hub as the business blueprint</h1>
   <div class="expansion-grid">
@@ -195,13 +208,16 @@ record: true
 ---
 
 <section class="slide-section rollout-slide">
+  <span class="slide-number">12</span>
   <p class="eyebrow">Looking ahead</p>
-  <h1>Fast proof of value with enterprise controls</h1>
-  <div class="rollout-grid rollout-grid-four">
-    <div><h2>Week 0</h2><ul><li>Executive sponsor</li><li>Workflow owner</li><li>Success criteria</li></ul></div>
-    <div><h2>Weeks 1-2</h2><ul><li>Confirm source access</li><li>Define policy boundaries</li><li>Capture baseline metrics</li></ul></div>
-    <div><h2>Weeks 3-5</h2><ul><li>Build proof of concept</li><li>Validate grounding quality</li><li>Run user feedback loops</li></ul></div>
-    <div><h2>Weeks 6-8</h2><ul><li>Operate controlled pilot</li><li>Measure impact</li><li>Decide scale path</li></ul></div>
+  <h1>Proof of value including guardrails</h1>
+  <p class="timeline-kicker">Four-week proof of concept maximum, followed by a business decision on pilot scale.</p>
+  <div class="timeline">
+    <div><span>Week 0</span><h2>Align</h2><p>Sponsor, workflow owner, success metrics, data boundaries.</p></div>
+    <div><span>Week 1</span><h2>Connect</h2><p>Representative sources, role scopes, approval policy.</p></div>
+    <div><span>Week 2</span><h2>Build</h2><p>App workflow, MCP tools, grounding and audit trail.</p></div>
+    <div><span>Week 3</span><h2>Validate</h2><p>User feedback, answer quality checks, security review.</p></div>
+    <div><span>Week 4</span><h2>Decide</h2><p>Impact readout, guardrail review, pilot recommendation.</p></div>
   </div>
   <p class="callout">What is needed to get started: executive sponsorship, access to representative systems and documents, a named business process owner and agreement on governance boundaries for the first controlled pilot.</p>
 </section>
@@ -215,6 +231,7 @@ record: true
 ---
 
 <section class="slide-section">
+  <span class="slide-number">14</span>
   <p class="eyebrow">Annex</p>
   <h1>Behind the scenes - how Supply Chain Hub was built</h1>
   <div class="build-grid">

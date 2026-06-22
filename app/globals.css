@@ -10,6 +10,7 @@
   --indigo-dark: #091b72;
   --azure: #0072ef;
   --lime: #d9e906;
+  --magenta: #d946ef;
   --danger: #b42318;
   --warning: #9a6700;
   --success: #157347;
@@ -272,4 +273,296 @@ h1, h2, h3, p { margin-top: 0; }
   .metric-strip { grid-template-columns: 1fr; }
   .record-row { grid-template-columns: 1fr; gap: 8px; }
   .record-row .financial-value { grid-column: auto; }
+}
+
+/* Slide-inspired theme layer: keep the original layout and adapt the palette. */
+.app-shell {
+  --ink: #101010;
+  --muted: #5d625f;
+  --line: rgba(16, 16, 16, 0.13);
+  --line-strong: rgba(16, 16, 16, 0.2);
+  --panel: rgba(16, 16, 16, 0.045);
+  --panel-blue: rgba(11, 77, 255, 0.075);
+  --indigo: #0b4dff;
+  --indigo-dark: #0739bd;
+  --azure: #00a7c7;
+  --lime: #d9e906;
+  --magenta: #f472d0;
+  --white: rgba(255, 255, 255, 0.92);
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-strong: rgba(253, 253, 251, 0.96);
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    linear-gradient(118deg, rgba(11, 77, 255, 0.055), transparent 36%),
+    linear-gradient(24deg, rgba(0, 167, 199, 0.06), transparent 46%),
+    #f7f7f4;
+  font-family: "Proxima Nova", "Avenir Next", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app-shell[data-theme="dark"] {
+  --ink: #f4f7fb;
+  --muted: #aeb8c7;
+  --line: rgba(255, 255, 255, 0.13);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --panel: rgba(255, 255, 255, 0.07);
+  --panel-blue: rgba(93, 140, 255, 0.16);
+  --indigo: #78a0ff;
+  --indigo-dark: #adc2ff;
+  --azure: #35c8e5;
+  --lime: #d9e906;
+  --white: rgba(22, 26, 35, 0.96);
+  --surface: rgba(25, 30, 40, 0.9);
+  --surface-strong: rgba(18, 22, 31, 0.98);
+  color: var(--ink);
+  background:
+    linear-gradient(118deg, rgba(93, 140, 255, 0.14), transparent 36%),
+    linear-gradient(24deg, rgba(53, 200, 229, 0.11), transparent 46%),
+    #101318;
+}
+
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 26px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: transparent;
+}
+
+.theme-switch-track {
+  position: relative;
+  width: 42px;
+  height: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-strong);
+  transition: background .16s ease, border-color .16s ease;
+}
+
+.theme-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--indigo);
+  box-shadow: 0 1px 4px rgba(16, 16, 16, 0.24);
+  transition: transform .16s ease, background .16s ease;
+}
+
+.theme-switch[aria-checked="true"] .theme-switch-track {
+  border-color: color-mix(in srgb, var(--azure) 58%, var(--line-strong));
+  background: var(--panel-blue);
+}
+
+.theme-switch[aria-checked="true"] .theme-switch-thumb {
+  transform: translateX(18px);
+  background: var(--azure);
+}
+
+.theme-switch:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--azure) 35%, transparent);
+  outline-offset: 3px;
+}
+
+.app-shell .workspace-header {
+  position: relative;
+}
+
+.app-shell .app-title .ai-mark {
+  transform: translateY(-2px);
+}
+
+.app-shell .app-title h1 {
+  font-weight: 620;
+}
+
+.app-shell .identity-picker,
+.app-shell .chat-selectors label,
+.app-shell .access-demo label {
+  font-weight: 560;
+}
+
+.app-shell .identity-picker span,
+.app-shell .chat-selectors label span,
+.app-shell .access-demo label span {
+  font-weight: 560;
+}
+
+.app-shell .identity-picker select,
+.app-shell .chat-selectors select,
+.app-shell .access-demo select {
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.app-shell .context-line,
+.app-shell .prompt-row button,
+.app-shell .action-menu-toggle,
+.app-shell .approval-controls button {
+  font-weight: 560;
+}
+
+.app-shell .settings-heading h3,
+.app-shell .section-title h3,
+.app-shell .source-item strong,
+.app-shell .action-grid button strong,
+.app-shell .action-menu-list button strong,
+.app-shell .approval-card-heading strong,
+.app-shell .records-table td:first-child strong {
+  font-weight: 620;
+}
+
+.app-shell .records-table th,
+.app-shell .source-state,
+.app-shell .status-chip {
+  font-weight: 700;
+}
+
+.app-shell .top-user-controls .user-details strong {
+  font-weight: 620;
+}
+
+.app-shell .chat-panel,
+.app-shell .result-summary,
+.app-shell .approval-card,
+.app-shell .chat-settings-panel,
+.app-shell .action-menu-list,
+.app-shell .records-table-wrap,
+.app-shell .top-user-controls .user-panel {
+  background: var(--white);
+}
+
+.app-shell .identity-picker select,
+.app-shell .chat-selectors select,
+.app-shell .chat-composer,
+.app-shell .source-item,
+.app-shell .heat-cell,
+.app-shell .action-grid button,
+.app-shell .action-menu-list button,
+.app-shell .approval-controls button {
+  background: var(--surface-strong);
+}
+
+.app-shell .prompt-row button,
+.app-shell .metric-strip div,
+.app-shell .markdown-content,
+.app-shell .message.assistant > p,
+.app-shell .reasoning-summary {
+  background: var(--panel);
+}
+
+.app-shell .prompt-row button,
+.app-shell .icon-button {
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.app-shell .icon-button {
+  background: var(--surface-strong);
+}
+
+.app-shell .prompt-row button:first-child,
+.app-shell .source-item.selected,
+.app-shell .metric-strip .financial-metric,
+.app-shell .records-table th,
+.app-shell .markdown-content th {
+  background: var(--panel-blue);
+}
+
+.app-shell .chat-composer textarea,
+.app-shell .records-table td:first-child,
+.app-shell .source-item strong,
+.app-shell .action-grid button strong,
+.app-shell .action-menu-list button strong,
+.app-shell .heat-cell strong,
+.app-shell .result-summary h3 {
+  color: var(--ink);
+}
+
+.app-shell .user-details span,
+.app-shell .user-details small,
+.app-shell .context-line,
+.app-shell .settings-heading p,
+.app-shell .source-item small,
+.app-shell .action-grid button small,
+.app-shell .action-menu-list button small,
+.app-shell .records-table td,
+.app-shell .heat-cell span,
+.app-shell .heat-cell small,
+.app-shell .reasoning-summary small,
+.app-shell .message.assistant .reasoning-content p {
+  color: var(--muted);
+}
+
+.app-shell .chat-panel,
+.app-shell .result-summary,
+.app-shell .approval-card,
+.app-shell .chat-settings-panel,
+.app-shell .action-menu-list,
+.app-shell .records-table-wrap,
+.app-shell .source-item,
+.app-shell .heat-cell,
+.app-shell .action-grid button,
+.app-shell .action-menu-list button,
+.app-shell .chat-composer,
+.app-shell .identity-picker select,
+.app-shell .chat-selectors select,
+.app-shell .top-user-controls .user-panel {
+  border-color: var(--line);
+}
+
+.app-shell .message.user p,
+.app-shell .send-button {
+  background: var(--indigo);
+}
+
+.app-shell .send-button:not(:disabled):hover,
+.app-shell .message.user p {
+  color: #fff;
+}
+
+.app-shell .icon-button:hover:not(:disabled),
+.app-shell .prompt-row button:hover,
+.app-shell .action-grid button:hover,
+.app-shell .action-menu-list button:hover {
+  border-color: color-mix(in srgb, var(--indigo) 46%, var(--line));
+  background: var(--panel-blue);
+}
+
+.app-shell .live-dot {
+  background: var(--magenta);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--magenta) 22%, transparent);
+}
+
+@media (max-width: 860px) {
+  .app-shell .chat-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .app-shell .chat-controls {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    justify-self: end;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell .workspace-header {
+    padding-right: 66px;
+  }
+
+  .app-shell .top-user-controls .theme-switch {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+  }
 }

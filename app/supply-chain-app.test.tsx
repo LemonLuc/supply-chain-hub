@@ -72,6 +72,23 @@ function mockChatStreamWithMarkdownTable() {
 }
 
 describe("SupplyChainApp", () => {
+  it("defaults to light mode and lets users toggle dark mode", () => {
+    const { container } = render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+    const shell = container.querySelector(".app-shell");
+
+    expect(shell).toHaveAttribute("data-theme", "light");
+    expect(screen.getByRole("switch", { name: "Switch to dark mode" })).not.toHaveAttribute("title");
+
+    fireEvent.click(screen.getByRole("switch", { name: "Switch to dark mode" }));
+
+    expect(shell).toHaveAttribute("data-theme", "dark");
+    expect(screen.getByRole("switch", { name: "Switch to light mode" })).toHaveAttribute("aria-checked", "true");
+
+    fireEvent.click(screen.getByRole("switch", { name: "Switch to light mode" }));
+
+    expect(shell).toHaveAttribute("data-theme", "light");
+  });
+
   it("shows the demo access switch and signed-in user in the top-right header", () => {
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
@@ -163,7 +180,7 @@ describe("SupplyChainApp", () => {
 
     expect(screen.queryByRole("button", { name: /Supplier alternatives/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Executive supplier portfolio/i })).not.toBeInTheDocument();
-    expect(screen.getByText("Currently 4 out of 6 authorized tools selected")).toBeInTheDocument();
+    expect(screen.getByText("4 / 6 data sources selected")).toBeInTheDocument();
     expect(screen.queryByText(/Risk radar/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Tool access/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Choose authorized sources" })).not.toBeInTheDocument();
@@ -307,7 +324,7 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
     fireEvent.click(screen.getByLabelText("DHL Freight"));
 
-    expect(screen.getByText("Currently 3 out of 6 authorized tools selected")).toBeInTheDocument();
+    expect(screen.getByText("3 / 6 data sources selected")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 

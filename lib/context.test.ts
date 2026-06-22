@@ -88,6 +88,17 @@ describe("buildAppContext", () => {
     expect(JSON.stringify(context.documents)).toContain("version 24.06.21-rc3");
   });
 
+  it("includes SharePoint workbook review data for Dana when the Excel source is selected", () => {
+    const context = buildAppContext("delay", "procurement", ["sap", "quality", "excel", "capacity", "outlook"]);
+
+    expect(context.workflow.key).toBe("delay");
+    expect(context.workflow.accessAllowed).toBe(true);
+    expect(context.sources.map((source) => source.id)).toContain("excel");
+    expect(context.documents?.map((document) => document.name)).toEqual(["Supplier Risk & Capacity Register.xlsx"]);
+    expect(JSON.stringify(context.documents)).toContain("Dana Narid");
+    expect(JSON.stringify(context.documents)).toContain("Mechatronik Süd capacity increased from 6 to 8 units");
+  });
+
   it("omits SharePoint workbook review data when the workbook source is not selected", () => {
     const context = buildAppContext("delay", "executive", ["sap", "quality", "capacity", "outlook"]);
 

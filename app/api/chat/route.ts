@@ -8,7 +8,7 @@ import {
   type UIMessage,
 } from "ai";
 
-import { buildSystemPrompt, generateMockReply, hasLiveApiKey, normalizeChatOptions } from "@/lib/chat";
+import { asksForWorkbookReview, buildSystemPrompt, generateMockReply, hasLiveApiKey, normalizeChatOptions } from "@/lib/chat";
 import { getChatTools, loadExternalContext } from "@/lib/chat-extensions";
 import { buildAppContext } from "@/lib/context";
 import { getCurrentUser } from "@/lib/auth";
@@ -123,7 +123,7 @@ export async function POST(request: Request): Promise<Response> {
   const context = buildAppContext(body.workflowKey, demoPersona, body.selectedSourceIds);
   const options = normalizeChatOptions(body.model, body.thinking);
 
-  if (!hasLiveApiKey()) {
+  if (asksForWorkbookReview(question) || !hasLiveApiKey()) {
     return createMockResponse(generateMockReply(question, context));
   }
 

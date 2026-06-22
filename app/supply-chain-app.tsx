@@ -139,6 +139,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   const [actionNotice, setActionNotice] = useState("");
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [sourceSelection, setSourceSelection] = useState<Record<string, boolean>>({});
   const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>([]);
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
@@ -258,7 +259,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   );
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" data-theme={theme}>
       <section className="workspace">
         <header className="workspace-header">
           <div className="app-title">
@@ -284,6 +285,18 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                 <small>{activeUser.businessUnit}</small>
               </div>
             </div>
+            <button
+              className="theme-switch"
+              type="button"
+              role="switch"
+              aria-checked={theme === "dark"}
+              aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+              onClick={() => setTheme((current) => (current === "light" ? "dark" : "light"))}
+            >
+              <span className="theme-switch-track" aria-hidden="true">
+                <span className="theme-switch-thumb" />
+              </span>
+            </button>
           </section>
         </header>
 
@@ -292,7 +305,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
             <div>
               <span className="context-line">
                 <span className="live-dot" aria-hidden="true" />
-                Currently {selectedToolCount} out of {roleToolSources.length} authorized tools selected
+                {selectedToolCount} / {roleToolSources.length} data sources selected
               </span>
             </div>
             <div className="chat-controls">

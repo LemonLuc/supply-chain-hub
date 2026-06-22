@@ -137,12 +137,12 @@ describe("POST /api/chat", () => {
           {
             id: "message-1",
             role: "user",
-            parts: [{ type: "text", text: "Review Supplier Risk & Capacity Register.xlsx and show me recent changes." }],
+            parts: [{ type: "text", text: "Show supplier consolidation options with cost and resilience tradeoffs." }],
           },
         ],
-        workflowKey: "delay",
+        workflowKey: "consolidate",
         demoPersona: "executive",
-        selectedSourceIds: ["sap", "quality", "excel", "capacity", "outlook"],
+        selectedSourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
       }),
     });
 
@@ -151,8 +151,8 @@ describe("POST /api/chat", () => {
 
     expect(response.status).toBe(200);
     expect(systemPrompt).toContain('"id": "executive"');
-    expect(systemPrompt).toContain('"key": "delay"');
-    expect(systemPrompt).toContain("Supplier Risk & Capacity Register.xlsx");
+    expect(systemPrompt).toContain('"key": "consolidate"');
+    expect(systemPrompt).toContain("Two consolidation candidates pass the resilience guardrails");
   });
 
   it("enables OpenAI reasoning summaries for live responses", async () => {
@@ -221,9 +221,9 @@ describe("POST /api/chat", () => {
     expect(systemPrompt).not.toContain("PO 4500872481");
   });
 
-  it("passes selected SharePoint workbook mock data into the live model context", async () => {
+  it("returns selected SharePoint workbook data for Dana without asking the live model to infer access", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
-    process.env.DEMO_USER_ROLE = "executive";
+    process.env.DEMO_USER_ROLE = undefined;
     const request = new Request("http://localhost/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -236,17 +236,19 @@ describe("POST /api/chat", () => {
           },
         ],
         workflowKey: "delay",
+        demoPersona: "procurement",
         selectedSourceIds: ["sap", "quality", "excel", "capacity", "outlook"],
       }),
     });
 
     const response = await POST(request);
-    const systemPrompt = (streamTextMock.mock.calls[0][0] as { system: string }).system;
+    const stream = await response.text();
 
     expect(response.status).toBe(200);
-    expect(systemPrompt).toContain("Supplier Risk & Capacity Register.xlsx");
-    expect(systemPrompt).toContain("Mechatronik Süd capacity increased from 6 to 8 units");
-    expect(systemPrompt).toContain("version 24.06.21-rc3");
+    expect(streamTextMock).not.toHaveBeenCalled();
+    expect(stream).toContain("Supplier Risk & Capacity Register.xlsx");
+    expect(stream).toContain("Mechatronik Süd capacity increased from 6 to 8 units");
+    expect(stream).toContain("version 24.06.21-rc3");
   });
 
   it("surfaces safe OpenAI API error details in streamed responses", async () => {

@@ -77,6 +77,14 @@ describe("chat grounding", () => {
     expect(reply).toContain("Mechatronik Süd capacity increased from 6 to 8 units");
   });
 
+  it("treats selected sources in the live snapshot as accessible to the assistant", () => {
+    const prompt = buildSystemPrompt(buildAppContext("delay", "procurement", ["sap", "quality", "excel", "capacity", "outlook"]));
+
+    expect(prompt).toContain("Any source listed in `sources` or `selectedAuthorizedSources` is already authorized and available");
+    expect(prompt).toContain("Do not say you lack access to SAP, SharePoint, Excel, or any selected source");
+    expect(prompt).toContain("Supplier Risk & Capacity Register.xlsx");
+  });
+
   it("does not claim workbook access when the SharePoint source is deselected", () => {
     const context = buildAppContext("delay", "executive", ["sap", "quality", "capacity", "outlook"]);
     const prompt = buildSystemPrompt(context);

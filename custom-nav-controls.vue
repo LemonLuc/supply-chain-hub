@@ -1,30 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { currentMic } from '@slidev/client/state/index.ts'
+import { recordCamera } from '@slidev/client/logic/recording.ts'
+import { currentCamera, currentMic } from '@slidev/client/state/index.ts'
 
-const formats = [
-  { value: 'video/webm;codecs=h264', label: 'MP4' },
-  { value: 'video/webm', label: 'WebM' },
-]
-
-const availableFormats = computed(() => {
-  if (typeof MediaRecorder === 'undefined' || typeof MediaRecorder.isTypeSupported !== 'function')
-    return []
-  return formats.filter(format => MediaRecorder.isTypeSupported(format.value))
-})
-
-function initialFormat() {
-  if (typeof window === 'undefined')
-    return 'video/webm'
-
-  const stored = window.localStorage.getItem('slidev-record-mimetype')
-  if (stored && availableFormats.value.some(format => format.value === stored))
-    return stored
-
-  return availableFormats.value[0]?.value || 'video/webm'
-}
-
-const selectedFormat = ref(initialFormat())
 const displayAudioEnabled = ref(false)
 const micEnabled = computed({
   get: () => currentMic.value !== 'none',
@@ -35,24 +13,14 @@ function updateDisplayAudio() {
   window.localStorage.setItem('slidev-record-display-audio', displayAudioEnabled.value ? 'true' : 'false')
 }
 
-function updateFormat() {
-  const key = 'slidev-record-mimetype'
-  const oldValue = window.localStorage.getItem(key)
-  window.localStorage.setItem(key, selectedFormat.value)
-  window.dispatchEvent(new StorageEvent('storage', {
-    key,
-    oldValue,
-    newValue: selectedFormat.value,
-    storageArea: window.localStorage,
-  }))
-}
-
 if (typeof window !== 'undefined') {
   if (currentMic.value === 'none')
     currentMic.value = 'default'
+  if (currentCamera.value === 'none')
+    currentCamera.value = 'default'
+  recordCamera.value = true
   displayAudioEnabled.value = window.localStorage.getItem('slidev-record-display-audio') === 'true'
   updateDisplayAudio()
-  updateFormat()
 }
 </script>
 
@@ -75,22 +43,9 @@ if (typeof window !== 'undefined') {
   >
     {{ displayAudioEnabled ? 'Tab audio on' : 'Mic only' }}
   </button>
-  <select
-    v-if="availableFormats.length > 1"
-    v-model="selectedFormat"
-    aria-label="Recording format"
-    title="Recording format"
-    class="recording-format-select"
-    @change="updateFormat"
-  >
-    <option v-for="format in availableFormats" :key="format.value" :value="format.value">
-      {{ format.label }}
-    </option>
-  </select>
 </template>
 
 <style scoped>
-.recording-format-select,
 .recording-mic-toggle,
 .recording-audio-toggle {
   background: transparent;

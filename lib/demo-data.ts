@@ -148,10 +148,10 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       ["Avoided downtime", "€185,000"],
     ],
     actions: [
-      { label: "Draft email to DHL Freight", detail: "Ask for recovery routing and confirmed ETA.", kind: "draft", sourceIds: ["carriers", "outlook"] },
-      { label: "Create Outlook follow-up task", detail: "Track DHL recovery confirmation and pickup cutoff before 12:00.", kind: "update", sourceIds: ["outlook"] },
+      { label: "Request DHL recovery routing", detail: "Draft a carrier message asking DHL Freight for confirmed Leipzig recovery routing and ETA.", kind: "draft", sourceIds: ["carriers", "outlook"] },
+      { label: "Create Outlook recovery task", detail: "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff before 12:00.", kind: "update", sourceIds: ["outlook"] },
       { label: "Write Dana Narid for review", detail: "Send the delivery risk summary to the procurement team lead.", kind: "approval", sourceIds: ["outlook"] },
-      { label: "Update SAP promised date", detail: "Write 25 June to PO 4500872319 after confirmation.", kind: "update", sourceIds: ["sap", "carriers"] },
+      { label: "Log DHL exception on PO 4500872319", detail: "Attach the missed DHL milestone and hold promised-date changes until the recovery ETA is confirmed.", kind: "update", sourceIds: ["sap", "carriers"] },
     ],
     rows: [
       {
@@ -326,9 +326,9 @@ export const workflows: Record<WorkflowKey, Workflow> = {
     title: "Supplier portfolio governance",
     question: "Give me a cost-versus-resilience heat map and recommend where we can consolidate suppliers without weakening continuity.",
     description:
-      "Combines commercial and operational evidence, applies resilience guardrails, and routes consequential actions to accountable human reviewers.",
+      "Combines commercial and operational evidence, applies resilience guardrails, and prepares final decision material for the CLO.",
     minimumPersona: "executive",
-    accessLabel: "Chief Logistics Officer only · executive approval enforced",
+    accessLabel: "Chief Logistics Officer only · final decision authority",
     sourceStatus: "6 available tools · governance policy active",
     suggestedPrompts: [
       "Show supplier consolidation options with cost and resilience tradeoffs.",
@@ -370,14 +370,14 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       ["Transition budget", "€180K"],
     ],
     actions: [
-      { label: "Draft contract termination letter", detail: "Prepare a non-binding notice draft for Supplier H and Supplier M; no notice is sent.", kind: "draft" },
+      { label: "Draft contract termination letter", detail: "Prepare a non-binding notice draft for Steripack Hohenlohe and PräziForm Aalen; no notice is sent.", kind: "draft" },
       { label: "Prepare board decision record", detail: "Create the evidence summary, heat map and executive decision log.", kind: "draft" },
       { label: "Create supplier negotiation mandate", detail: "Set savings target, guardrails and fallback terms for the procurement team.", kind: "share" },
     ],
     rows: [
       {
         subject: "Sterile packaging",
-        detail: "Suppliers H, J and K",
+        detail: "Steripack Hohenlohe, MediSeal Jena and Kappel Pack",
         status: "Consolidation candidate",
         evidence: "Validated capacity at two suppliers; stable service and quality",
         sourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
@@ -388,7 +388,7 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       },
       {
         subject: "Standard machined brackets",
-        detail: "Suppliers M, N and P",
+        detail: "PräziForm Aalen, Nordspan Components and BracketPro Ulm",
         status: "Consolidation candidate",
         evidence: "Interchangeable drawings; three qualified sources in Germany",
         sourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
@@ -399,7 +399,7 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       },
       {
         subject: "Optical glass blanks",
-        detail: "Suppliers A and Q",
+        detail: "Glaswerke Mainz and OptiQuartz Suhl",
         status: "Protected",
         evidence: "Limited qualified furnace capacity; dual-source guardrail applies",
         sourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
@@ -410,11 +410,11 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       },
     ],
     heatMap: [
-      { supplier: "Supplier H", cost: "High", resilience: "High", recommendation: "Consolidate volume" },
-      { supplier: "Supplier J", cost: "Medium", resilience: "High", recommendation: "Retain as primary" },
-      { supplier: "Supplier M", cost: "High", resilience: "Medium", recommendation: "Renegotiate or consolidate" },
-      { supplier: "Supplier A", cost: "High", resilience: "Low", recommendation: "Protect and qualify backup" },
-      { supplier: "Supplier Q", cost: "Medium", resilience: "Low", recommendation: "Retain for redundancy" },
+      { supplier: "Steripack Hohenlohe", cost: "High", resilience: "High", recommendation: "Consolidate volume into MediSeal Jena" },
+      { supplier: "MediSeal Jena", cost: "Medium", resilience: "High", recommendation: "Retain as strategic packaging source" },
+      { supplier: "PräziForm Aalen", cost: "High", resilience: "Medium", recommendation: "Renegotiate or consolidate bracket volume" },
+      { supplier: "Glaswerke Mainz", cost: "High", resilience: "Low", recommendation: "Protect and qualify backup capacity" },
+      { supplier: "OptiQuartz Suhl", cost: "Medium", resilience: "Low", recommendation: "Retain for optical glass redundancy" },
     ],
   },
 };

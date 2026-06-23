@@ -26,6 +26,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { mockUsers, type CurrentUser } from "@/lib/auth";
+import { buildActionDraft, getActionReviewer, type ActionWorkflowResult } from "@/lib/action-workflows";
 import { supportedModels, thinkingLevels, type SupportedModel, type ThinkingLevel } from "@/lib/chat";
 import { buildAppContext, buildRoleToolSources, resolveWorkflowForPrompt } from "@/lib/context";
 import { workflows, type WorkflowAction, type WorkflowKey } from "@/lib/demo-data";
@@ -42,6 +43,8 @@ type ApprovalRequest = {
   draft: string;
   status: ApprovalStatus;
 };
+
+type ActionNoticeTone = "success" | "pending" | "error";
 
 function messageText(message: UIMessage): string {
   return message.parts
@@ -159,18 +162,19 @@ const personaPromptSets: Record<PersonaId, string[]> = {
   ],
 };
 
-function actionReviewer(persona: PersonaId, action: WorkflowAction): PersonaId | null {
-  if (action.kind !== "approval") return null;
-  if (persona === "logistics") return "procurement";
-  if (persona === "procurement") return "executive";
-  return null;
-}
-
 function approvalStatusText(request: ApprovalRequest) {
   const reviewer = mockUsers[request.reviewerPersona].name;
   if (request.status === "approved") return `Approved by ${reviewer}`;
   if (request.status === "denied") return `Denied by ${reviewer}`;
   return `Pending review by ${reviewer}`;
+}
+
+function heatMapDecision(item: { cost: string; resilience: string; recommendation: string }) {
+  const recommendation = item.recommendation.toLowerCase();
+  if (recommendation.includes("protect")) return "Protect";
+  if (recommendation.includes("retain")) return "Retain";
+  if (recommendation.includes("consolidate")) return "Consolidate";
+  return "Review";
 }
 
 export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
@@ -181,6 +185,8 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   const [input, setInput] = useState("");
   const [hasRun, setHasRun] = useState(false);
   const [actionNotice, setActionNotice] = useState("");
+  const [actionNoticeTone, setActionNoticeTone] = useState<ActionNoticeTone>("success");
+  const [actionInFlightLabel, setActionInFlightLabel] = useState("");
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -189,6 +195,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>([]);
   const [copiedMessageId, setCopiedMessageId] = useState("");
   const [recommendationNotice, setRecommendationNotice] = useState("");
+  const [openedRecommendationSource, setOpenedRecommendationSource] = useState("");
   const [localDateTime] = useState(() =>
     new Intl.DateTimeFormat("en-GB", {
       dateStyle: "medium",
@@ -237,9 +244,12 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   function resetRunState() {
     setHasRun(false);
     setActionNotice("");
+    setActionNoticeTone("success");
+    setActionInFlightLabel("");
     setActionMenuOpen(false);
     setActivePrompt("");
     setRecommendationNotice("");
+    setOpenedRecommendationSource("");
     setMessages([]);
     clearError();
   }
@@ -249,6 +259,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     const nextPolicy = getPersonaPolicy(nextPersona);
     if (!nextPolicy.allowedWorkflows.includes(workflowKey)) setWorkflowKey(nextPolicy.allowedWorkflows[0] ?? "risks");
     setSourceSelection({});
+    setSettingsOpen(false);
     resetRunState();
   }
 
@@ -281,7 +292,8 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   }
 
   function openRecommendedSource(source: string) {
-    setRecommendationNotice(`Opening ${source} from Oberkochen HQ...`);
+    setOpenedRecommendationSource(source);
+    setRecommendationNotice(`Opened ${source} in a new tab.`);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -289,45 +301,104 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     void submitPrompt(input);
   }
 
-  function runAction(action: WorkflowAction) {
+  function applyActionResult(action: WorkflowAction, result?: ActionWorkflowResult) {
     const requester = mockUsers[persona];
-    const reviewerPersona = actionReviewer(persona, action);
+    const reviewerPersona = result?.reviewerPersona ?? getActionReviewer(persona, action);
     if (!reviewerPersona) {
-      const actionLabel =
-        action.kind === "draft"
-          ? "Draft prepared"
-          : action.kind === "share"
-            ? "Mandate prepared"
-            : "Action staged";
       setActionMenuOpen(false);
-      setActionNotice(`${actionLabel} for ${requester.name}. ${action.detail}`);
+      setActionNotice(
+        result?.notice ??
+          `${action.kind === "draft" ? "Draft prepared" : action.kind === "share" ? "Mandate prepared" : "Action staged"} for ${requester.name}. ${action.detail}`,
+      );
+      setActionNoticeTone("success");
       return;
     }
 
     const reviewer = mockUsers[reviewerPersona];
-    const evidence = appContext.rows.length
-      ? appContext.rows.map((row) => `${row.subject}: ${row.evidence}`).join(" ")
-      : appContext.answer.summary;
-    const draft = [
-      `${action.label}`,
-      `From ${requester.name} to ${reviewer.name}.`,
-      `${appContext.answer.headline}: ${appContext.answer.summary}`,
-      `Evidence: ${evidence}`,
-      `Requested action: ${action.detail}`,
-    ].join("\n\n");
     const request: ApprovalRequest = {
-      id: `approval-${approvalRequests.length + 1}`,
+      id: `approval-${crypto.randomUUID()}`,
       actionLabel: action.label,
       workflowKey,
       requesterPersona: persona,
       reviewerPersona,
-      draft,
+      draft: result?.draft ?? buildActionDraft(appContext, workflowKey, persona, action, reviewerPersona),
       status: "pending",
     };
 
     setApprovalRequests((current) => [...current, request]);
     setActionMenuOpen(false);
-    setActionNotice(`Approval request sent to ${reviewer.name}.`);
+    setActionNotice(result?.notice ?? `Approval request sent to ${reviewer.name}.`);
+    setActionNoticeTone("pending");
+  }
+
+  async function runAction(action: WorkflowAction) {
+    if (actionInFlightLabel) return;
+
+    const reviewerPersona = getActionReviewer(persona, action);
+    const optimisticApprovalId = `approval-${crypto.randomUUID()}`;
+
+    if (reviewerPersona) {
+      setApprovalRequests((current) => [
+        ...current,
+        {
+          id: optimisticApprovalId,
+          actionLabel: action.label,
+          workflowKey,
+          requesterPersona: persona,
+          reviewerPersona,
+          draft: buildActionDraft(appContext, workflowKey, persona, action, reviewerPersona),
+          status: "pending",
+        },
+      ]);
+    }
+
+    setActionInFlightLabel(action.label);
+    setActionNotice("");
+    setActionNoticeTone("pending");
+
+    try {
+      const response = await fetch("/api/actions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          workflowKey,
+          demoPersona: persona,
+          selectedSourceIds,
+          actionLabel: action.label,
+          model,
+          thinking,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Action workflow rejected.");
+
+      const result = (await response.json()) as ActionWorkflowResult;
+
+      if (reviewerPersona) {
+        setApprovalRequests((current) =>
+          current.map((request) =>
+            request.id === optimisticApprovalId
+              ? { ...request, draft: result.draft, reviewerPersona: result.reviewerPersona ?? reviewerPersona }
+              : request,
+          ),
+        );
+        setActionMenuOpen(false);
+        setActionNotice(result.notice);
+        setActionNoticeTone("pending");
+      } else {
+        applyActionResult(action, result);
+      }
+    } catch {
+      if (reviewerPersona) {
+        setActionMenuOpen(false);
+        setActionNotice(`Approval request sent to ${mockUsers[reviewerPersona].name}.`);
+        setActionNoticeTone("pending");
+      } else {
+        applyActionResult(action);
+      }
+    } finally {
+      setActionInFlightLabel("");
+    }
   }
 
   function decideApproval(id: string, status: Extract<ApprovalStatus, "approved" | "denied">) {
@@ -405,7 +476,17 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
               </li>
             ))}
           </ul>
-          {recommendationNotice && <p className="recommendation-notice" role="status">{recommendationNotice}</p>}
+          {recommendationNotice && (
+            <p className="recommendation-notice" role="status">
+              {recommendationNotice}
+              {openedRecommendationSource && (
+                <button type="button" onClick={() => undefined}>
+                  Go to {openedRecommendationSource}
+                  <ExternalLink aria-hidden="true" />
+                </button>
+              )}
+            </p>
+          )}
         </section>
 
         <section className={`chat-panel ${hasRun ? "has-run" : ""}`} aria-label="Ask Supply Chain Hub">
@@ -539,8 +620,15 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                   )}
                   {appContext.recommendedActions.map((action) => {
                     const Icon = actionIcon(action);
+                    const isActionLoading = actionInFlightLabel === action.label;
                     return (
-                      <button key={action.label} type="button" onClick={() => runAction(action)}>
+                      <button
+                        key={action.label}
+                        type="button"
+                        disabled={Boolean(actionInFlightLabel)}
+                        aria-busy={isActionLoading}
+                        onClick={() => void runAction(action)}
+                      >
                         <Icon aria-hidden="true" />
                         <span><strong>{action.label}</strong><small>{action.detail}</small></span>
                         <ChevronRight aria-hidden="true" />
@@ -549,7 +637,18 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                   })}
                 </div>
               )}
-              {actionNotice && <p className="action-notice" role="status"><Check aria-hidden="true" />{actionNotice}</p>}
+              {actionInFlightLabel && (
+                <div className="action-loading" role="status" aria-live="polite">
+                  <span>Running action workflow for {actionInFlightLabel}</span>
+                  <div aria-hidden="true"><span /></div>
+                </div>
+              )}
+              {actionNotice && (
+                <p className={`action-notice tone-${actionNoticeTone}`} role="status">
+                  <Check aria-hidden="true" />
+                  {actionNotice}
+                </p>
+              )}
             </section>
           )}
 
@@ -652,10 +751,17 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                 </div>
                 <div className="heatmap">
                   {appContext.decisionSupport.heatMap.map((item) => (
-                    <article className={`heat-cell resilience-${item.resilience.toLowerCase()}`} key={item.supplier}>
+                    <article
+                      className={`heat-cell decision-${heatMapDecision(item).toLowerCase().replaceAll(" ", "-")} cost-${item.cost.toLowerCase()} resilience-${item.resilience.toLowerCase()}`}
+                      key={item.supplier}
+                    >
                       <span>{item.supplier}</span>
                       <strong>{item.recommendation}</strong>
-                      <small>Cost: {item.cost} · Resilience: {item.resilience}</small>
+                      <small>
+                        <mark>{heatMapDecision(item)}</mark>
+                        <mark>Cost: {item.cost}</mark>
+                        <mark>Resilience: {item.resilience}</mark>
+                      </small>
                     </article>
                   ))}
                 </div>

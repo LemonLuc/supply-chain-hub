@@ -42,18 +42,18 @@ describe("buildAppContext", () => {
     const context = buildAppContext("risks", "logistics", ["sap", "carriers", "warehouse"]);
 
     expect(context.recommendedActions.map((action) => action.label)).not.toContain("Write Dana Narid for review");
-    expect(context.recommendedActions.map((action) => action.label)).not.toContain("Draft email to DHL Freight");
-    expect(context.recommendedActions.map((action) => action.label)).toContain("Update SAP promised date");
+    expect(context.recommendedActions.map((action) => action.label)).not.toContain("Request DHL recovery routing");
+    expect(context.recommendedActions.map((action) => action.label)).toContain("Log DHL exception on PO 4500872319");
   });
 
   it("includes Outlook-gated actions when Outlook is selected", () => {
     const context = buildAppContext("risks", "logistics", ["sap", "carriers", "warehouse", "outlook"]);
 
     expect(context.recommendedActions.map((action) => action.label)).toEqual([
-      "Draft email to DHL Freight",
-      "Create Outlook follow-up task",
+      "Request DHL recovery routing",
+      "Create Outlook recovery task",
       "Write Dana Narid for review",
-      "Update SAP promised date",
+      "Log DHL exception on PO 4500872319",
     ]);
   });
 
@@ -72,11 +72,11 @@ describe("buildAppContext", () => {
     expect(context.workflow.key).toBe("consolidate");
     expect(context.workflow.accessAllowed).toBe(true);
     expect(context.decisionSupport?.heatMap).toEqual([
-      { supplier: "Supplier H", cost: "High", resilience: "High", recommendation: "Consolidate volume" },
-      { supplier: "Supplier J", cost: "Medium", resilience: "High", recommendation: "Retain as primary" },
-      { supplier: "Supplier M", cost: "High", resilience: "Medium", recommendation: "Renegotiate or consolidate" },
-      { supplier: "Supplier A", cost: "High", resilience: "Low", recommendation: "Protect and qualify backup" },
-      { supplier: "Supplier Q", cost: "Medium", resilience: "Low", recommendation: "Retain for redundancy" },
+      { supplier: "Steripack Hohenlohe", cost: "High", resilience: "High", recommendation: "Consolidate volume into MediSeal Jena" },
+      { supplier: "MediSeal Jena", cost: "Medium", resilience: "High", recommendation: "Retain as strategic packaging source" },
+      { supplier: "PräziForm Aalen", cost: "High", resilience: "Medium", recommendation: "Renegotiate or consolidate bracket volume" },
+      { supplier: "Glaswerke Mainz", cost: "High", resilience: "Low", recommendation: "Protect and qualify backup capacity" },
+      { supplier: "OptiQuartz Suhl", cost: "Medium", resilience: "Low", recommendation: "Retain for optical glass redundancy" },
     ]);
     expect(context.approval).toBeUndefined();
     expect(context.recommendedActions.map((action) => action.label)).toEqual([
@@ -141,7 +141,7 @@ describe("buildAppContext", () => {
     expect(context.workflow.key).toBe("risks");
     expect(context.workflow.accessAllowed).toBe(false);
     expect(context.answer.headline).toBe("Delivery exception found");
-    expect(JSON.stringify(context)).not.toContain("Supplier H");
+    expect(JSON.stringify(context)).not.toContain("Steripack Hohenlohe");
     expect(JSON.stringify(context)).not.toContain("C-level approval required");
   });
 });

@@ -21,6 +21,55 @@ function mockChatStream() {
   );
 }
 
+function mockChatAndActionStream(actionResponse?: Record<string, unknown>) {
+  return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
+
+    if (url.includes("/api/actions")) {
+      return Response.json(
+        actionResponse ?? {
+          actionLabel: "Write Dana Narid for review",
+          reviewerPersona: "procurement",
+          reviewerName: "Dana Narid",
+          draft:
+            "Write Dana Narid for review\n\nFrom Lukas Weber to Dana Narid.\n\nDHL Freight shipment 00340434161094000012 missed its Leipzig hub departure.",
+          notice: "Approval request sent to Dana Narid.",
+          orchestration: "agents-sdk",
+          toolCalls: ["read_supply_chain_context", "prepare_action_workflow"],
+        },
+      );
+    }
+
+    return new Response("data: [DONE]\n\n", {
+      headers: {
+        "content-type": "text/event-stream",
+        "x-vercel-ai-ui-message-stream": "v1",
+      },
+    });
+  });
+}
+
+function mockChatAndPendingActionStream() {
+  let resolveAction!: (response: Response) => void;
+  const actionPromise = new Promise<Response>((resolve) => {
+    resolveAction = resolve;
+  });
+  const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
+
+    if (url.includes("/api/actions")) return actionPromise;
+
+    return new Response("data: [DONE]\n\n", {
+      headers: {
+        "content-type": "text/event-stream",
+        "x-vercel-ai-ui-message-stream": "v1",
+      },
+    });
+  });
+
+  return { fetchMock, resolveAction };
+}
+
 function mockPendingChatStream() {
   let resolveResponse!: (response: Response) => void;
   const responsePromise = new Promise<Response>((resolve) => {
@@ -117,6 +166,9 @@ describe("SupplyChainApp", () => {
     expect(within(recommendations).queryByText("Based on Oberkochen HQ priorities")).not.toBeInTheDocument();
     expect(within(recommendations).getByRole("button", { name: /Open DHL tracking delay/i })).toBeInTheDocument();
     expect(within(recommendations).getAllByRole("button")).toHaveLength(3);
+    fireEvent.click(within(recommendations).getByRole("button", { name: /Open DHL tracking delay/i }));
+    expect(within(recommendations).getByText("Opened Shipping providers in a new tab.")).toBeInTheDocument();
+    expect(within(recommendations).getByRole("button", { name: "Go to Shipping providers" })).toBeInTheDocument();
     expect(screen.getByLabelText("Supply Chain Hub AI mark").closest(".app-title")).not.toBeNull();
     expect(screen.queryByText("SH")).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Supply chain workflows" })).not.toBeInTheDocument();
@@ -181,9 +233,9 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByText("Agent activity")).not.toBeInTheDocument();
     const chatPanel = screen.getByLabelText("Ask Supply Chain Hub");
     expect(within(chatPanel).getByRole("button", { name: /Close actions/i })).toBeInTheDocument();
-    expect(within(chatPanel).queryByRole("button", { name: /Draft email to DHL Freight/i })).not.toBeInTheDocument();
+    expect(within(chatPanel).queryByRole("button", { name: /Request DHL recovery routing/i })).not.toBeInTheDocument();
     expect(within(chatPanel).queryByRole("button", { name: /Write Dana Narid for review/i })).not.toBeInTheDocument();
-    expect(within(chatPanel).getByRole("button", { name: /Update SAP promised date/i })).toBeInTheDocument();
+    expect(within(chatPanel).getByRole("button", { name: /Log DHL exception on PO 4500872319/i })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /Show me potential delivery risks/i })).toHaveLength(1);
   });
 
@@ -254,6 +306,17 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByLabelText("Contract repository")).not.toBeInTheDocument();
   });
 
+  it("collapses chat settings when switching demo persona", () => {
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
+    expect(screen.getByRole("heading", { name: "Settings" })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
+
+    expect(screen.queryByRole("heading", { name: "Settings" })).not.toBeInTheDocument();
+  });
+
   it("shows procurement sources without workflow navigation and routes alternate prompts to the right data", async () => {
     const fetchMock = mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.procurement} />);
@@ -289,6 +352,9 @@ describe("SupplyChainApp", () => {
     expect(requestBody.workflowKey).toBe("consolidate");
     expect(requestBody.selectedSourceIds).toEqual(["sap", "contracts", "quality", "resilience", "policy"]);
     expect(screen.queryByText("C-level approval required")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Consolidate")[0].closest(".heat-cell")).toHaveClass("decision-consolidate");
+    expect(screen.getAllByText("Retain")[0].closest(".heat-cell")).toHaveClass("decision-retain");
+    expect(screen.getByText("Protect").closest(".heat-cell")).toHaveClass("decision-protect");
     expect(screen.getByRole("button", { name: /Draft contract termination letter/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Request executive review/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Terminate contract now/i })).not.toBeInTheDocument();
@@ -405,7 +471,7 @@ describe("SupplyChainApp", () => {
   });
 
   it("only lets Lukas write Dana when Outlook is selected and returns Dana's decision", async () => {
-    mockChatStream();
+    const fetchMock = mockChatAndActionStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
@@ -416,7 +482,14 @@ describe("SupplyChainApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Write Dana Narid for review/i }));
 
-    expect(screen.getByText(/Approval request sent to Dana Narid/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/Approval request sent to Dana Narid/i)).toBeInTheDocument());
+    const actionRequest = fetchMock.mock.calls.find((call) => String(call[0]).includes("/api/actions"));
+    expect(JSON.parse(String(actionRequest?.[1]?.body))).toMatchObject({
+      workflowKey: "risks",
+      demoPersona: "logistics",
+      selectedSourceIds: ["sap", "carriers", "warehouse", "outlook"],
+      actionLabel: "Write Dana Narid for review",
+    });
     expect(screen.getByText("Submitted requests")).toBeInTheDocument();
     expect(screen.getByText("Pending review by Dana Narid")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Approve Write Dana Narid for review/i })).not.toBeInTheDocument();
@@ -437,8 +510,51 @@ describe("SupplyChainApp", () => {
     expect(screen.getByText("Approved by Dana Narid")).toBeInTheDocument();
   });
 
+  it("keeps approval controls visible while the action workflow is loading", async () => {
+    const { resolveAction } = mockChatAndPendingActionStream();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
+    fireEvent.click(screen.getByLabelText("Outlook"));
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
+    await screen.findByRole("button", { name: /Write Dana Narid for review/i });
+
+    fireEvent.click(screen.getByRole("button", { name: /Write Dana Narid for review/i }));
+
+    expect(await screen.findByText(/Running action workflow for Write Dana Narid for review/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
+
+    expect(screen.getByText("Approval queue")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Approve Write Dana Narid for review/i })).toBeInTheDocument();
+
+    resolveAction(
+      Response.json({
+        actionLabel: "Write Dana Narid for review",
+        reviewerPersona: "procurement",
+        reviewerName: "Dana Narid",
+        draft:
+          "Write Dana Narid for review\n\nFrom Lukas Weber to Dana Narid.\n\nDHL Freight shipment 00340434161094000012 missed its Leipzig hub departure.",
+        notice: "Approval request sent to Dana Narid.",
+        orchestration: "agents-sdk",
+        toolCalls: ["read_supply_chain_context", "prepare_action_workflow"],
+      }),
+    );
+
+    await waitFor(() => expect(screen.queryByText(/Running action workflow/i)).not.toBeInTheDocument());
+  });
+
   it("lets Lucia execute strategic actions without sending approval to Dana", async () => {
-    mockChatStream();
+    mockChatAndActionStream({
+      actionLabel: "Draft contract termination letter",
+      reviewerPersona: null,
+      reviewerName: null,
+      draft: "Draft contract termination letter\n\nPrepared for Dr. Lucía López.",
+      notice: "Draft prepared for Dr. Lucía López. Prepare a non-binding notice draft for Steripack Hohenlohe and PräziForm Aalen; no notice is sent.",
+      orchestration: "agents-sdk",
+      toolCalls: ["read_supply_chain_context", "prepare_action_workflow"],
+    });
     render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
@@ -446,7 +562,7 @@ describe("SupplyChainApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Draft contract termination letter/i }));
 
-    expect(screen.getByText(/Draft prepared for Dr. Lucía López/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/Draft prepared for Dr. Lucía López/i)).toBeInTheDocument());
     expect(screen.queryByText("Approval queue")).not.toBeInTheDocument();
     expect(screen.queryByText(/Dana Narid/i)).not.toBeInTheDocument();
   });

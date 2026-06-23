@@ -9,7 +9,7 @@ describe("operational workflow data", () => {
       expect.arrayContaining(["SAP S/4HANA", "Shipping providers", "Outlook"]),
     );
     expect(workflows.risks.actions.map((action) => action.label)).toEqual(
-      expect.arrayContaining(["Draft email to DHL Freight", "Write Dana Narid for review", "Update SAP promised date"]),
+      expect.arrayContaining(["Request DHL recovery routing", "Write Dana Narid for review", "Log DHL exception on PO 4500872319"]),
     );
   });
 

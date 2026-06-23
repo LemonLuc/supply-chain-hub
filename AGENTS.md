@@ -15,7 +15,7 @@ This is a Next.js App Router project written in TypeScript. Routes and UI live i
 
 ## SDKs, APIs, and Packages
 
-Core packages are Next.js, React, TypeScript, and the Vercel AI SDK (`ai`, `@ai-sdk/react`, `@ai-sdk/openai`). `app/api/chat/route.ts` uses the OpenAI Responses API when `OPENAI_API_KEY` is set, with deterministic demo streams as fallback. Markdown uses `react-markdown` and `remark-gfm`; icons use `lucide-react`. Cloudflare deployment uses `@opennextjs/cloudflare`, `wrangler`, `open-next.config.ts`, and `wrangler.jsonc`.
+Core packages are Next.js, React, TypeScript, and the Vercel AI SDK (`ai`, `@ai-sdk/react`, `@ai-sdk/openai`). `app/api/chat/route.ts` uses the OpenAI Responses API when `OPENAI_API_KEY` is set, with deterministic demo streams as fallback. `app/api/actions/route.ts` uses the OpenAI Agents SDK (`@openai/agents`) for action orchestration, local tool execution, approval handoff setup, and trace flushing; deterministic action results remain the fallback when no live API key is configured. Markdown uses `react-markdown` and `remark-gfm`; icons use `lucide-react`. Cloudflare deployment uses `@opennextjs/cloudflare`, `wrangler`, `open-next.config.ts`, and `wrangler.jsonc`.
 
 ## Coding Style & Naming Conventions
 

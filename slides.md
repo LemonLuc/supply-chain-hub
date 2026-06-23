@@ -128,8 +128,8 @@ record: true
 
 <section class="slide-section ops-slide decision-workflow-slide">
   <span class="slide-number">07</span>
-  <p class="eyebrow">Workflow example</p>
-  <h1>Executive workflow: from risk to next step</h1>
+  <p class="eyebrow">Example</p>
+  <h1>Executive workflow</h1>
   <div class="flow-map workflow-map">
     <div><span>Trigger</span><p>Customer shipment at risk: supplier date, SAP availability and carrier ETA do not match</p></div>
     <div class="flow-arrow">→</div>
@@ -140,7 +140,7 @@ record: true
     <div><span>Action</span><p>Recommended option, customer impact, owner and approval step</p></div>
   </div>
   <div class="before-after">
-    <div><h2>Before</h2><p>Teams spend the first escalation meeting reconciling SAP exports, supplier emails and freight updates.</p></div>
+    <div><h2>Before</h2><p>A customer delivery is at risk, and the team spends the first 20 minutes <strong>checking which source is actually current</strong> instead of deciding what to do.</p></div>
     <div><h2>After</h2><p>Leaders see the exposed orders, root cause, options, cost trade-off and approval owner <strong>in one interface</strong>.</p></div>
   </div>
   <div class="workflow-takeaway">
@@ -204,7 +204,7 @@ record: true
   <span class="slide-number">11</span>
   <p class="eyebrow">Looking ahead</p>
   <h1>Proof of value including guardrails</h1>
-  <p class="timeline-kicker">Four-week proof of concept maximum, followed by a business decision on pilot scale.</p>
+  <p class="timeline-kicker">Four-week proof of concept, followed by a business decision on pilot scale.</p>
   <div class="timeline">
     <div><span>Week 0</span><h2>Align</h2><p>Sponsor, workflow owner, success metrics, data boundaries.</p></div>
     <div><span>Week 1</span><h2>Connect</h2><p>Representative sources, role scopes, approval policy.</p></div>
@@ -212,7 +212,10 @@ record: true
     <div><span>Week 3</span><h2>Validate</h2><p>User feedback, answer quality checks, security review.</p></div>
     <div><span>Week 4</span><h2>Decide</h2><p>Impact readout, guardrail review, pilot recommendation.</p></div>
   </div>
-  <p class="callout">What is needed to get started: executive sponsorship, access to representative systems and documents, a named business process owner and agreement on operating boundaries for the first controlled pilot.</p>
+  <div class="proof-closing">
+    <p class="callout"><strong>What we need to get started:</strong> align on an executive sponsor, one business owner, representative systems and documents, and clear pilot guardrails so the first workflow can move quickly from demo to measured proof.</p>
+    <p class="timeline-kicker collaboration-note">Looking forward to shaping this collaboration between ZEISS and OpenAI!</p>
+  </div>
 </section>
 
 ---

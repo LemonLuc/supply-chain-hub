@@ -10,7 +10,7 @@ Pacing note: this is written for a deliberate executive pace, with short pauses 
 
 Thank you for the time today. I want to frame this around one concrete question: how do we move from fragmented supply-chain signals to faster, better-governed decisions?
 
-The point is not to replace ZEISS systems of record. SAP, logistics, supplier systems and documents remain the source of operational truth. The opportunity is to create a decision layer above them, where leadership can ask the business question directly, inspect the evidence and move toward an accountable action.
+The point is not to replace ZEISS sources of truth. SAP, logistics, supplier systems and documents remain where the operational truth lives. The opportunity is to create a decision layer above them, where leadership can ask the business question directly, inspect the evidence and move toward an action.
 
 So the lens for the next few minutes is business impact first, technology second: where does the decision slow down today, and how could we shorten that path without asking the organization to change every underlying system?
 
@@ -50,7 +50,7 @@ That is why a static report will not fully solve it. The question changes as soo
 
 The proposal is Supply Chain Hub as the enterprise decision interface.
 
-The communication interface gives executives and operators a place to ask the question in business language and inspect the supporting evidence. The operating model defines who can see what, who owns which sources and where approval is required. The system integration layer connects into the existing ZEISS landscape without replacing the systems of record.
+The communication interface gives executives and operators a place to ask the question in business language, inspect the supporting evidence and align on next steps. The operating model defines who can see what, who owns which sources and where approval is required. The system integration layer connects into the existing ZEISS landscape while keeping those sources of truth up to date.
 
 The business outcome is a shorter path from signal to decision: less manual reconstruction, more precise recommendations and a clear action path.
 
@@ -60,11 +60,13 @@ This also gives IT a cleaner operating model. The hub does not need to become th
 
 At architecture level, I would explain this as four layers.
 
-The Supply Chain Hub app is the conversation layer. The intelligence layer turns operational questions into grounded reasoning and scenario options. Operating controls make sure roles, trusted sources, masking and review paths are respected. ZEISS systems remain the systems of record.
+Supply Chain Hub is the conversation layer. The intelligence layer turns operational questions into options and next steps. Operating controls keep roles, trusted sources, masking and review paths clear. ZEISS systems remain the sources of truth.
 
-Below that, the pattern is ground, reason and act. Ground the answer in selected enterprise context. Reason across risk, options and trade-offs. Then route high-impact recommendations to the right owner or approval path.
+The OpenAI surfaces I would explicitly position here are the Responses API and the Agents SDK. The Responses API is the answer surface: grounded answers, source context and model controls. The Agents SDK is the workflow surface: tool-backed orchestration and reviewer handoffs.
 
-For an executive audience, I would not spend too much time on implementation details here. The message is that this can be enterprise-grade: the answer is not just generated from a prompt; it is shaped by trusted context, operating controls and clearly defined next steps.
+Below that, the pattern is ground, reason and act. Pull the relevant context. Compare risk, options and trade-offs. Then send recommendations to the right owner or approval path.
+
+For an executive audience, I would not spend too much time on implementation details here. The message is that this can be enterprise-grade and ROI-backed: shorter escalation cycles, lower expedite exposure and a repeatable business case across adjacent workflows.
 
 ## 6:45-9:00 - Slide 7: Executive workflow
 
@@ -78,7 +80,7 @@ The hub pulls together the relevant evidence: open orders, inventory, supplier c
 
 Before, teams spend the escalation meeting reconciling SAP exports, supplier emails and freight updates. After, leaders see the exposed orders, root cause, options, cost trade-off and approval owner in one interface.
 
-The change in the room is that the conversation starts from a shared recommendation, not from debating which spreadsheet or email thread is current.
+The change in the room is that the meeting starts with a shared view and a recommended next step, not with a debate about which spreadsheet or email thread is current.
 
 That is the two-minute story before the demo: the user is not asking the system to be clever in the abstract. The user is asking it to compress a very familiar escalation cycle. The outcome is a meeting where leaders can challenge the assumptions and decide, rather than spending the first half of the meeting building the facts.
 

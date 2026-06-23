@@ -49,17 +49,17 @@ record: true
       <div class="zeiss-logo" aria-label="ZEISS logo"></div>
       <h2>Known operating context</h2>
       <ul>
-        <li>ZEISS operates across advanced manufacturing, medical technology, quality and optics domains</li>
-        <li>Supply-chain decisions depend on SAP, supplier, logistics and document context</li>
-        <li>Executive value depends on trustworthy answers, not another disconnected dashboard</li>
+        <li>Advanced manufacturing, medical technology, quality and optics domains</li>
+        <li>Decisions draw on SAP, supplier, logistics and document context</li>
+        <li>Value depends on trustworthy answers, not another dashboard</li>
       </ul>
     </div>
     <div class="assumption-list">
       <h2>Discovery hypotheses to validate</h2>
       <ul>
-        <li>Which disruptions consume the most planner, procurement and leadership time?</li>
-        <li>Where do handoffs weaken accuracy, precision or predictability?</li>
-        <li>Which recommendations need approval, auditability and source-level evidence?</li>
+        <li>Which disruptions consume the most time?</li>
+        <li>Where do handoffs reduce accuracy or predictability?</li>
+        <li>Which recommendations need evidence, review and traceability?</li>
       </ul>
     </div>
   </div>
@@ -91,9 +91,9 @@ record: true
   <p class="eyebrow">Solution Proposal</p>
   <h1>Supply Chain Hub as the enterprise decision interface</h1>
   <div class="solution-grid">
-    <div><h2>Communication interface</h2><p>An executive-grade conversation surface where teams ask business questions, inspect evidence and align on next steps.</p></div>
-    <div><h2>Enterprise operating model</h2><p>Role scope, source ownership, approval paths and auditability turn the app into a governed way of working.</p></div>
-    <div><h2>System integration layer</h2><p>Connects ZEISS systems, documents, business tools and workflow actions without replacing systems of record.</p></div>
+    <div><h2>Communication interface</h2><p>An executive-grade conversation surface where teams ask business questions, inspect evidence and <strong>align on next steps</strong>.</p></div>
+    <div><h2>Enterprise operating model</h2><p>Role scope, source ownership, approval paths and auditability turn the app into a <strong>governed way of working</strong>.</p></div>
+    <div><h2>System integration layer</h2><p>Connects ZEISS systems, documents, business tools and workflow actions, constantly <strong>keeping these sources of truth up to date</strong>.</p></div>
   </div>
   <div class="consequence-band outcome-list">
     <span>Business outcome</span>
@@ -112,15 +112,15 @@ record: true
   <p class="eyebrow">Reference architecture</p>
   <h1>Solution overview</h1>
   <div class="arch-canvas">
-    <div class="arch-zone"><h2>Supply Chain Hub app</h2><p>Executive conversation layer for asking, reviewing evidence and aligning next steps.</p></div>
+    <div class="arch-zone"><h2>Supply Chain Hub</h2><p>Conversation layer for asking, reviewing evidence and aligning next steps.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone ai-zone"><h2>Intelligence layer</h2><p>Turns supply-chain questions into grounded reasoning, scenario options and workflow-ready recommendations.</p></div>
+    <div class="arch-zone ai-zone"><h2>Intelligence layer</h2><p>Turns supply-chain questions into options and next steps.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone controls-zone"><h2>Operating controls</h2><p>Role scope, trusted sources, financial masking, named review and auditability.</p></div>
+    <div class="arch-zone controls-zone"><h2>Operating controls</h2><p>Keeps roles, sources, masking and review paths clear.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone"><h2>ZEISS systems</h2><p>SAP, logistics, supplier, warehouse and document context stay systems of record.</p></div>
-    <div class="arch-rail"><div><b>Ground</b><p>Assemble trusted supply-chain context from selected enterprise sources.</p></div><div><b>Reason</b><p>Synthesize risk, options, trade-offs and assumptions for leaders.</p></div><div><b>Act</b><p>Route high-impact recommendations to owners and approval paths.</p></div></div>
-    <div class="arch-subgrid"><div><h2>Controlled tools</h2><p>Risk, scenario, supplier and policy functions connect to controlled business actions.</p></div><div><h2>Retrieval</h2><p>Documents, trackers and operational records ground every answer.</p></div><div><h2>Scale path</h2><p>The same pattern can extend to procurement, quality, manufacturing and finance.</p></div></div>
+    <div class="arch-zone"><h2>ZEISS systems</h2><p>SAP, logistics, supplier, warehouse and documents stay sources of truth.</p></div>
+    <div class="arch-rail"><div><b>Ground</b><p>Pull the relevant supply-chain context.</p></div><div><b>Reason</b><p>Compare risk, options and trade-offs.</p></div><div><b>Act</b><p>Send recommendations to owners or approval paths.</p></div></div>
+    <div class="arch-subgrid"><div><h2>OpenAI Responses API</h2><p>Streams grounded answers with source context and model controls.</p></div><div><h2>OpenAI Agents SDK</h2><p>Runs tool-backed workflows and reviewer handoffs.</p></div><div><h2>Why OpenAI / ROI</h2><p>Faster escalation cycles, less expedite exposure and a reusable business case.</p></div></div>
   </div>
 </section>
 
@@ -129,23 +129,23 @@ record: true
 <section class="slide-section ops-slide decision-workflow-slide">
   <span class="slide-number">07</span>
   <p class="eyebrow">Workflow example</p>
-  <h1>Executive workflow: from question to action</h1>
+  <h1>Executive workflow: from risk to next step</h1>
   <div class="flow-map workflow-map">
-    <div><span>Trigger</span><p>Top customer shipment at risk: supplier date, SAP availability and carrier ETA do not match</p></div>
+    <div><span>Trigger</span><p>Customer shipment at risk: supplier date, SAP availability and carrier ETA do not match</p></div>
     <div class="flow-arrow">→</div>
-    <div><span>Question</span><p>Can we protect the promise date, and what trade-off needs approval today?</p></div>
+    <div><span>Question</span><p>Can we keep the promise date? What needs approval today?</p></div>
     <div class="flow-arrow">→</div>
-    <div><span>Evidence</span><p>Open orders, inventory, supplier commits, carrier ETA and expedite cost</p></div>
+    <div><span>Evidence</span><p>Orders, inventory, supplier commits, carrier ETA and expedite cost</p></div>
     <div class="flow-arrow">→</div>
-    <div><span>Action</span><p>Best mitigation, customer impact, owner and required approval step</p></div>
+    <div><span>Action</span><p>Recommended option, customer impact, owner and approval step</p></div>
   </div>
   <div class="before-after">
-    <div><h2>Before</h2><p>Teams spend the first escalation meeting reconciling SAP exports, supplier emails and freight updates before anyone can agree which customer orders are truly at risk.</p></div>
+    <div><h2>Before</h2><p>Teams spend the first escalation meeting reconciling SAP exports, supplier emails and freight updates.</p></div>
     <div><h2>After</h2><p>Leaders see the exposed orders, root cause, options, cost trade-off and approval owner <strong>in one interface</strong>.</p></div>
   </div>
   <div class="workflow-takeaway">
-    <div><h2>What changes in the room</h2><p>The discussion starts from a shared recommendation, not from debating which spreadsheet or email thread is current.</p></div>
-    <div><h2>Why this matters</h2><p>ZEISS keeps system ownership intact while giving executives a faster path from risk signal to accountable action.</p></div>
+    <div><h2>What changes in the room</h2><p>The meeting starts with a shared view and a recommended next step.</p></div>
+    <div><h2>Why this matters</h2><p>ZEISS keeps source ownership intact while leaders move faster.</p></div>
   </div>
 </section>
 
@@ -226,11 +226,11 @@ record: true
 <section class="slide-section">
   <span class="slide-number">13</span>
   <p class="eyebrow">Annex</p>
-  <h1>Behind the scenes - how Supply Chain Hub was built</h1>
+  <h1>Behind the scenes - actual Supply Chain Hub stack</h1>
   <div class="build-grid">
-    <div><h2>Experience</h2><ul><li>Next.js App Router and React UI</li><li>AI SDK <code>useChat</code> transport</li><li>Persona, model, thinking and source controls</li></ul></div>
-    <div><h2>Chat route</h2><ul><li><code>/api/chat</code> validates the request</li><li>Builds server-side context from selected sources</li><li>Streams OpenAI Responses or deterministic demo output</li></ul></div>
-    <div><h2>Action route</h2><ul><li><code>/api/actions</code> checks persona and workflow access</li><li>Agents SDK prepares tools and reviewer handoffs</li><li>Fallback action results preserve demo reliability</li></ul></div>
-    <div><h2>Controls and runtime</h2><ul><li>Role policy filters workflows and financial data</li><li>Tool and retrieval hooks live in <code>chat-extensions.ts</code></li><li>OpenNext deploys the app to Cloudflare Workers</li></ul></div>
+    <div><h2>App experience</h2><ul><li>Next.js App Router, React and strict TypeScript</li><li><code>app/supply-chain-app.tsx</code> uses AI SDK <code>useChat</code></li><li>Persona, model, thinking and source-selection controls</li></ul></div>
+    <div><h2>OpenAI chat path</h2><ul><li><code>/api/chat</code> validates requests and builds server context</li><li><code>@ai-sdk/openai</code> calls <code>openai.responses(...)</code></li><li>Vercel AI SDK streams output; deterministic demo stream remains fallback</li></ul></div>
+    <div><h2>Agentic action path</h2><ul><li><code>/api/actions</code> checks workflow and persona access</li><li><code>@openai/agents</code> uses Agent, tool, handoff and run</li><li>Reviewer handoffs plus trace flush; fallback results preserve demo reliability</li></ul></div>
+    <div><h2>Repo controls and runtime</h2><ul><li>AGENTS.md: shared logic in <code>lib/</code>; trust in <code>auth</code> / <code>permissions</code></li><li><code>chat-extensions.ts</code> is the MCP / RAG extension point</li><li>OpenNext + Wrangler deploy to Cloudflare Workers; Vitest covers routes and UI</li></ul></div>
   </div>
 </section>

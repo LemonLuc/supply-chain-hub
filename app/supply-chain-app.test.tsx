@@ -10,8 +10,14 @@ import { resolveSupplierPortfolioVisualization } from "@/lib/supplier-portfolio"
 
 import { SupplyChainApp } from "./supply-chain-app";
 
+const originalClipboard = navigator.clipboard;
+
 afterEach(() => {
   vi.restoreAllMocks();
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: originalClipboard,
+  });
 });
 
 function mockChatStream() {
@@ -426,7 +432,7 @@ describe("SupplyChainApp", () => {
     render(<SupplyChainApp currentUser={mockUsers.procurement} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
-    expect(screen.getAllByLabelText("SAP S/4HANA").some((input) => input instanceof HTMLInputElement && input.checked)).toBe(true);
+    expect(screen.getByLabelText("SAP S/4HANA")).toBeChecked();
     expect(screen.getByLabelText("Supplier qualification database")).toBeChecked();
     expect(screen.queryByRole("button", { name: /Executive supplier portfolio/i })).not.toBeInTheDocument();
 
@@ -437,6 +443,35 @@ describe("SupplyChainApp", () => {
     expect(requestBody.workflowKey).toBe("delay");
     expect(requestBody.selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity", "outlook"]);
     expect(screen.queryByRole("button", { name: /Share risk register with Lukas/i })).not.toBeInTheDocument();
+  });
+
+  it("shows shared procurement tools once and applies their selection to every workflow", async () => {
+    const fetchMock = mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.procurement} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
+    expect(screen.getAllByLabelText("SAP S/4HANA")).toHaveLength(1);
+    expect(screen.getAllByLabelText("Outlook")).toHaveLength(1);
+    expect(screen.getByText("7 / 8 data sources selected")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Outlook"));
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "Show me potential delivery risks for this week." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "What approved alternates can cover the delayed turret assemblies?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+    const bodies = fetchMock.mock.calls.map((call) => JSON.parse(String(call[1]?.body)));
+    expect(bodies[0]).toMatchObject({ workflowKey: "risks" });
+    expect(bodies[1]).toMatchObject({ workflowKey: "delay" });
+    expect(bodies[0].selectedSourceIds).toEqual(["sap", "carriers", "warehouse"]);
+    expect(bodies[1].selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity"]);
   });
 
   it("reveals the executive supplier matrix from merged executive sources only after a prompt", async () => {
@@ -557,6 +592,134 @@ describe("SupplyChainApp", () => {
     expect(screen.getByRole("button", { name: "Hide reasoning" })).toBeInTheDocument();
     expect(screen.getByText("Checked role permissions, selected tools, retrieved grounded records, and prepared the response summary.")).toBeInTheDocument();
     expect(screen.queryByText("Traceability process")).not.toBeInTheDocument();
+  });
+
+  it("places copy and feedback actions below each generated answer", async () => {
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    const answer = await screen.findByRole("heading", { name: "Shipment options" });
+    const copy = screen.getByRole("button", { name: "Copy answer" });
+
+    expect(copy.closest(".answer-actions")).not.toBeNull();
+    expect(answer.compareDocumentPosition(copy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "Mark answer as helpful" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Mark answer as not helpful" })).toHaveLength(1);
+  });
+
+  it("copies the assistant answer and confirms a successful clipboard write", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    fireEvent.click(screen.getByRole("button", { name: "Copy answer" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+    expect(writeText.mock.calls[0][0]).toContain("Shipment options");
+    expect(await screen.findByRole("button", { name: "Answer copied" })).toBeInTheDocument();
+  });
+
+  it("does not confirm a rejected clipboard write", async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error("Clipboard unavailable"));
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    fireEvent.click(screen.getByRole("button", { name: "Copy answer" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+    expect(screen.queryByRole("button", { name: "Answer copied" })).not.toBeInTheDocument();
+  });
+
+  it("collects optional feedback, confirms submission, and clears it with the conversation", async () => {
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    const helpful = screen.getByRole("button", { name: "Mark answer as helpful" });
+    fireEvent.click(helpful);
+
+    expect(helpful).toHaveAttribute("aria-pressed", "true");
+    fireEvent.change(screen.getByLabelText("Optional feedback"), {
+      target: { value: "Clear and useful." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit feedback" }));
+
+    expect(screen.queryByLabelText("Optional feedback")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Feedback received");
+    fireEvent.click(screen.getByRole("button", { name: "Clear conversation" }));
+    expect(screen.queryByText("Feedback received")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Copy answer" })).not.toBeInTheDocument();
+  });
+
+  it("cancels unsubmitted feedback and leaves user messages without answer actions", async () => {
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    const notHelpful = screen.getByRole("button", { name: "Mark answer as not helpful" });
+    fireEvent.click(notHelpful);
+    fireEvent.change(screen.getByLabelText("Optional feedback"), {
+      target: { value: "Needs a clearer recommendation." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Cancel feedback" }));
+
+    expect(screen.queryByLabelText("Optional feedback")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Copy answer" })).toHaveLength(1);
+    expect(notHelpful).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("retains an optional comment when changing or replacing a feedback rating", async () => {
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    fireEvent.click(screen.getByRole("button", { name: "Mark answer as helpful" }));
+    fireEvent.change(screen.getByLabelText("Optional feedback"), {
+      target: { value: "Keep this context." },
+    });
+    const notHelpful = screen.getByRole("button", { name: "Mark answer as not helpful" });
+    fireEvent.click(notHelpful);
+
+    expect(notHelpful).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText("Optional feedback")).toHaveValue("Keep this context.");
+    fireEvent.click(screen.getByRole("button", { name: "Submit feedback" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mark answer as helpful" }));
+
+    expect(screen.getByRole("button", { name: "Mark answer as helpful" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText("Optional feedback")).toHaveValue("Keep this context.");
+  });
+
+  it("removes submitted message feedback when the persona changes", async () => {
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    fireEvent.click(screen.getByRole("button", { name: "Mark answer as helpful" }));
+    fireEvent.click(screen.getByRole("button", { name: "Submit feedback" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Feedback received");
+
+    fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
+
+    expect(screen.queryByText("Feedback received")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Copy answer" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Chat messages")).not.toBeInTheDocument();
   });
 
   it("renders assistant markdown tables as table markup", async () => {

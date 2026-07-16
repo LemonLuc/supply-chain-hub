@@ -180,26 +180,51 @@ describe("buildAppContext", () => {
 });
 
 describe("buildRoleToolSources", () => {
-  it("exposes only risk-radar sources to logistics planners", () => {
+  it("exposes unique stable tools to logistics planners", () => {
     const sources = buildRoleToolSources("logistics");
 
     expect(sources.map((source) => source.toolId)).toEqual([
-      "risks:sap",
-      "risks:carriers",
-      "risks:warehouse",
-      "risks:outlook",
+      "sap",
+      "carriers",
+      "warehouse",
+      "outlook",
     ]);
-    expect(sources.map((source) => source.workflowKey)).not.toContain("delay");
-    expect(sources.map((source) => source.workflowKey)).not.toContain("consolidate");
+    expect(sources.every((source) => source.workflowKeys.every((key) => key === "risks"))).toBe(true);
   });
 
-  it("exposes sources from all three authorized workflows to executives", () => {
+  it("deduplicates shared procurement tools and retains their workflows", () => {
+    const sources = buildRoleToolSources("procurement");
+    const outlook = sources.find((source) => source.toolId === "outlook");
+
+    expect(new Set(sources.map((source) => source.toolId)).size).toBe(sources.length);
+    expect(sources.map((source) => source.toolId)).toEqual([
+      "sap",
+      "carriers",
+      "warehouse",
+      "outlook",
+      "quality",
+      "excel",
+      "capacity",
+      "teams",
+    ]);
+    expect(outlook).toMatchObject({
+      selected: true,
+      workflowKeys: ["risks", "delay"],
+    });
+  });
+
+  it("exposes only unique strategic tools to executives", () => {
     const sources = buildRoleToolSources("executive");
 
-    expect(sources.some((source) => source.toolId === "consolidate:contracts")).toBe(true);
-    expect(sources.some((source) => source.toolId.startsWith("risks:"))).toBe(false);
-    expect(sources.some((source) => source.toolId.startsWith("delay:"))).toBe(false);
-    expect(sources).toHaveLength(6);
+    expect(sources.map((source) => source.toolId)).toEqual([
+      "sap",
+      "contracts",
+      "quality",
+      "resilience",
+      "policy",
+      "word",
+    ]);
+    expect(sources.every((source) => source.workflowKeys.includes("consolidate"))).toBe(true);
   });
 });
 

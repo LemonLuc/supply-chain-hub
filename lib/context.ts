@@ -9,21 +9,40 @@ export function normalizeWorkflowKey(value: unknown): WorkflowKey {
 
 export type RoleToolSource = WorkflowSource & {
   toolId: string;
-  workflowKey: WorkflowKey;
-  workflowLabel: string;
+  workflowKeys: WorkflowKey[];
+  workflowLabels: string[];
 };
 
 export function buildRoleToolSources(personaValue?: unknown): RoleToolSource[] {
   const policy = getPersonaPolicy(personaValue);
+  const sourcesById = new Map<string, RoleToolSource>();
 
-  return policy.allowedWorkflows.flatMap((workflowKey) =>
-    workflows[workflowKey].sources.map((source) => ({
-      ...source,
-      toolId: `${workflowKey}:${source.id}`,
-      workflowKey,
-      workflowLabel: workflows[workflowKey].navLabel,
-    })),
-  );
+  for (const workflowKey of policy.allowedWorkflows) {
+    const workflow = workflows[workflowKey];
+
+    for (const source of workflow.sources) {
+      const existing = sourcesById.get(source.id);
+
+      if (existing) {
+        sourcesById.set(source.id, {
+          ...existing,
+          selected: existing.selected || source.selected,
+          workflowKeys: [...existing.workflowKeys, workflowKey],
+          workflowLabels: [...existing.workflowLabels, workflow.navLabel],
+        });
+        continue;
+      }
+
+      sourcesById.set(source.id, {
+        ...source,
+        toolId: source.id,
+        workflowKeys: [workflowKey],
+        workflowLabels: [workflow.navLabel],
+      });
+    }
+  }
+
+  return [...sourcesById.values()];
 }
 
 export function resolveWorkflowForPrompt(prompt: string, personaValue?: unknown): WorkflowKey {

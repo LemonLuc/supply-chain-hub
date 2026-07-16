@@ -1,4 +1,4 @@
-import { jsonSchema, tool } from "ai";
+import { jsonSchema, tool, type ToolSet } from "ai";
 
 import type { AppContext } from "./context";
 import {
@@ -16,7 +16,7 @@ type SupplierPortfolioToolInput = {
   reason: string;
 };
 
-export function getChatTools(context: AppContext) {
+export function getChatTools(context: AppContext): ToolSet {
   const suppliers = context.decisionSupport?.heatMap;
   if (!suppliers?.length) return {};
 

@@ -59,6 +59,38 @@ describe("prompt scope guardrail", () => {
     expect(generateTextMock).not.toHaveBeenCalled();
   });
 
+  it("allows contextual arithmetic in demo mode", async () => {
+    const question = "What is 2 * 2?";
+    const result = await checkPromptScope({
+      question,
+      messages: [
+        message("user-1", "user", "Help me compare supplier capacity."),
+        message("assistant-1", "assistant", "Which supplier scenarios should I compare?"),
+        message("user-2", "user", question),
+      ],
+      apiKey: "sk-sample-replace-me",
+    });
+
+    expect(result.blocked).toBe(false);
+    expect(generateTextMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "Write a poem about suppliers",
+    "Calculate 2x2 for the supply chain",
+    "Write a poem about equality",
+    "calculate 2 + 2 + 2",
+  ])("blocks disguised or multi-step off-topic prompts in demo mode: %s", async (question) => {
+    const result = await checkPromptScope({
+      question,
+      messages: [message("user-1", "user", question)],
+      apiKey: "sk-sample-replace-me",
+    });
+
+    expect(result.blocked).toBe(true);
+    expect(result.source).toBe("deterministic");
+  });
+
   it("allows application help and contextual follow-ups in demo mode", async () => {
     for (const question of ["What can this app do?", "What should I do first?", "What about 15%?"]) {
       const result = await checkPromptScope({
@@ -87,6 +119,62 @@ describe("prompt scope guardrail", () => {
       category: "off_topic",
       source: "model",
     });
+  });
+
+  it("uses conversation context for arithmetic when a live key is configured", async () => {
+    generateTextMock.mockResolvedValueOnce({
+      output: { category: "conversation", confidence: 0.91 },
+    });
+
+    const question = "What is 2 * 2?";
+    const result = await checkPromptScope({
+      question,
+      messages: [
+        message("user-1", "user", "Compare the capacity of these suppliers."),
+        message("assistant-1", "assistant", "I can help calculate the comparison."),
+        message("user-2", "user", question),
+      ],
+      apiKey: "sk-live-test-key",
+    });
+
+    expect(result).toMatchObject({
+      blocked: false,
+      category: "conversation",
+      source: "model",
+    });
+    expect(generateTextMock).toHaveBeenCalledOnce();
+    expect(generateTextMock.mock.calls[0]?.[0]).toMatchObject({
+      maxRetries: 0,
+      timeout: 5_000,
+    });
+  });
+
+  it("blocks an off-topic classification at the confidence threshold", async () => {
+    generateTextMock.mockResolvedValueOnce({
+      output: { category: "off_topic", confidence: 0.7 },
+    });
+
+    const result = await checkPromptScope({
+      question: "Tell me some trivia.",
+      messages: [message("user-1", "user", "Tell me some trivia.")],
+      apiKey: "sk-live-test-key",
+    });
+
+    expect(result.blocked).toBe(true);
+  });
+
+  it("allows a high-confidence live in-scope classification", async () => {
+    generateTextMock.mockResolvedValueOnce({
+      output: { category: "supply_chain", confidence: 0.99 },
+    });
+
+    const result = await checkPromptScope({
+      question: "Calculate supplier capacity.",
+      messages: [message("user-1", "user", "Calculate supplier capacity.")],
+      apiKey: "sk-live-test-key",
+    });
+
+    expect(result.blocked).toBe(false);
   });
 
   it("allows a low-confidence live off-topic classification", async () => {

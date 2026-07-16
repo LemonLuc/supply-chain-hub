@@ -12,6 +12,7 @@ export const OFF_TOPIC_RESPONSE =
 const GUARDRAIL_MODEL = "gpt-5.4-nano";
 const CONFIDENCE_THRESHOLD = 0.7;
 const MAX_CONTEXT_MESSAGES = 10;
+const GUARDRAIL_TIMEOUT_MS = 5_000;
 
 const categories = ["supply_chain", "app_help", "conversation", "off_topic"] as const;
 type PromptScopeCategory = (typeof categories)[number];
@@ -45,45 +46,61 @@ Allowed categories:
 
 Use off_topic for general mathematics, trivia, unrelated writing, unrelated programming, or any request without a material connection to the application. A bare request such as "calculate 2x2" is off-topic. Incidental supply-chain wording must not make an unrelated task allowed.`;
 
-const supplyChainTerms = [
-  "supply chain",
-  "supplier",
-  "procurement",
-  "sourcing",
-  "inventory",
-  "logistics",
-  "shipment",
-  "carrier",
-  "freight",
-  "purchase order",
-  " po ",
-  "forecast",
-  "demand",
-  "production",
-  "capacity",
-  "safety stock",
-  "lead time",
-  "quality",
-  "warehouse",
-  "material",
-  "workbook",
-  "register",
-  "resilience",
-  "consolidation",
+const supplyChainSignals = [
+  /\bsupply[\s-]+chain\b/i,
+  /\bsuppliers?\b/i,
+  /\bprocurement\b/i,
+  /\bsourcing\b/i,
+  /\binventory\b/i,
+  /\blogistics\b/i,
+  /\bshipments?\b/i,
+  /\bcarriers?\b/i,
+  /\bfreight\b/i,
+  /\bpurchase orders?\b/i,
+  /\bPOs?\b/,
+  /\bforecasts?\b/i,
+  /\bdemand\b/i,
+  /\bproduction\b/i,
+  /\bcapacity\b/i,
+  /\bsafety[\s-]+stock\b/i,
+  /\blead[\s-]+time\b/i,
+  /\bquality\b/i,
+  /\bwarehouses?\b/i,
+  /\bmaterials?\b/i,
+  /\bworkbooks?\b/i,
+  /\bregisters?\b/i,
+  /\bresilience\b/i,
+  /\bconsolidation\b/i,
+];
+
+const materialCalculationSignals = [
+  /\bsafety[\s-]+stock\b/i,
+  /\breorder(?:ing)?[\s-]+point\b/i,
+  /\border[\s-]+quantity\b/i,
+  /\blead[\s-]+time\b/i,
+  /\binventory\b/i,
+  /\bdemand\b/i,
+  /\bcapacity\b/i,
+  /\bshipments?\b/i,
+  /\bfreight\b/i,
+  /\bpurchase orders?\b/i,
+  /\bproduction\b/i,
+  /\bwarehouse\b/i,
+  /\bsupplier(?:s|'s)?\s+(?:capacity|cost|price|quote|risk|score|lead[\s-]+time|delivery|performance)\b/i,
 ];
 
 const applicationHelpPattern =
   /^(?:what can (?:this app|you) do|how do i use (?:this|the) app|help)[.!?]*$/i;
 const conversationPattern =
   /^(?:hi|hello|hey|thanks|thank you|yes|no|why|show me more|what should i do first|what (?:else|about .+))[.!?]*$/i;
-const standaloneArithmeticPattern =
-  /^\s*(?:(?:calculate|calcualte|compute|solve|what(?:'s| is))\s+)?-?\d+(?:\.\d+)?\s*(?:x|×|\*|\/|\+|-)\s*-?\d+(?:\.\d+)?\s*\??\s*$/i;
+const arithmeticRequestPattern =
+  /^\s*(?:(?:calculate|calcualte|compute|solve|what(?:'s| is))\s+)?-?\d+(?:\.\d+)?(?:\s*(?:x|×|\*|\/|\+|-)\s*-?\d+(?:\.\d+)?)+(?:\s|[?!.,:]|\b.*$)/i;
 
 const obviousOffTopicPatterns = [
-  /^(?:write|compose) (?:me )?(?:a )?(?:poem|story|song|essay)\b/i,
-  /^(?:tell me )?(?:a )?joke\b/i,
-  /^(?:what is|what's) the capital of\b/i,
-  /^(?:write|debug|explain) (?:some )?(?:code|javascript|typescript|python)\b/i,
+  /\b(?:write|compose) (?:me )?(?:a )?(?:poem|story|song|essay)\b/i,
+  /\b(?:tell me )?(?:a )?joke\b/i,
+  /\b(?:what is|what's) the capital of\b/i,
+  /\b(?:write|debug|explain) (?:some )?(?:code|javascript|typescript|python)\b/i,
 ];
 
 function hasLiveApiKey(value: string | undefined): value is string {
@@ -91,16 +108,21 @@ function hasLiveApiKey(value: string | undefined): value is string {
 }
 
 function hasSupplyChainSignal(question: string): boolean {
-  const normalized = ` ${question.toLowerCase()} `;
-  return supplyChainTerms.some((term) => normalized.includes(term));
+  return supplyChainSignals.some((pattern) => pattern.test(question));
 }
 
-function isObviouslyOffTopic(question: string): boolean {
-  if (hasSupplyChainSignal(question)) return false;
-  return (
-    standaloneArithmeticPattern.test(question) ||
-    obviousOffTopicPatterns.some((pattern) => pattern.test(question))
-  );
+function hasRecentSupplyChainContext(messages: UIMessage[]): boolean {
+  return messages
+    .slice(0, -1)
+    .slice(-MAX_CONTEXT_MESSAGES)
+    .some((message) => hasSupplyChainSignal(getUIMessageText(message)));
+}
+
+function isObviouslyOffTopic(question: string, messages: UIMessage[]): boolean {
+  if (obviousOffTopicPatterns.some((pattern) => pattern.test(question))) return true;
+  if (!arithmeticRequestPattern.test(question)) return false;
+  if (materialCalculationSignals.some((pattern) => pattern.test(question))) return false;
+  return !hasRecentSupplyChainContext(messages);
 }
 
 function allowedDecision(
@@ -145,7 +167,41 @@ export async function checkPromptScope({
   messages: UIMessage[];
   apiKey?: string;
 }): Promise<PromptScopeDecision> {
-  if (isObviouslyOffTopic(question)) {
+  if (hasLiveApiKey(apiKey)) {
+    try {
+      const openai = createOpenAI({ apiKey });
+      const conversation = messages
+        .slice(-MAX_CONTEXT_MESSAGES)
+        .map((message) => ({ role: message.role, content: getUIMessageText(message) }))
+        .filter((message) => message.content);
+      const result = await generateText({
+        model: openai.responses(GUARDRAIL_MODEL),
+        system: scopePolicy,
+        prompt: JSON.stringify(conversation),
+        output: Output.object({
+          schema: outputSchema,
+          name: "prompt_scope_decision",
+          description: "Whether the latest request is within Supply Chain Hub's scope.",
+        }),
+        maxRetries: 0,
+        timeout: GUARDRAIL_TIMEOUT_MS,
+      });
+      const { category, confidence } = result.output;
+      return {
+        blocked: category === "off_topic" && confidence >= CONFIDENCE_THRESHOLD,
+        category,
+        confidence,
+        source: "model",
+      };
+    } catch (error) {
+      console.warn("Off-topic prompt guardrail failed; continuing because fail-open is enabled.", {
+        errorName: error instanceof Error ? error.name : "UnknownError",
+      });
+      return allowedDecision("conversation", "fail_open", 0);
+    }
+  }
+
+  if (isObviouslyOffTopic(question, messages)) {
     return {
       blocked: true,
       category: "off_topic",
@@ -154,45 +210,12 @@ export async function checkPromptScope({
     };
   }
 
-  if (!hasLiveApiKey(apiKey)) {
-    const category = hasSupplyChainSignal(question)
-      ? "supply_chain"
-      : applicationHelpPattern.test(question)
-        ? "app_help"
-        : conversationPattern.test(question)
-          ? "conversation"
-          : "conversation";
-    return allowedDecision(category, "deterministic");
-  }
-
-  try {
-    const openai = createOpenAI({ apiKey });
-    const conversation = messages
-      .slice(-MAX_CONTEXT_MESSAGES)
-      .map((message) => ({ role: message.role, content: getUIMessageText(message) }))
-      .filter((message) => message.content);
-    const result = await generateText({
-      model: openai.responses(GUARDRAIL_MODEL),
-      system: scopePolicy,
-      prompt: JSON.stringify(conversation),
-      output: Output.object({
-        schema: outputSchema,
-        name: "prompt_scope_decision",
-        description: "Whether the latest request is within Supply Chain Hub's scope.",
-      }),
-      maxRetries: 0,
-    });
-    const { category, confidence } = result.output;
-    return {
-      blocked: category === "off_topic" && confidence >= CONFIDENCE_THRESHOLD,
-      category,
-      confidence,
-      source: "model",
-    };
-  } catch (error) {
-    console.warn("Off-topic prompt guardrail failed; continuing because fail-open is enabled.", {
-      errorName: error instanceof Error ? error.name : "UnknownError",
-    });
-    return allowedDecision("conversation", "fail_open", 0);
-  }
+  const category = hasSupplyChainSignal(question)
+    ? "supply_chain"
+    : applicationHelpPattern.test(question)
+      ? "app_help"
+      : conversationPattern.test(question)
+        ? "conversation"
+        : "conversation";
+  return allowedDecision(category, "deterministic");
 }

@@ -1,0 +1,27 @@
+package-lock.json
+  s_9c171f473a3134::t_05558ae7fb448a 11,13,64-66,69-99,4358-4360,4363-4365,4367,4374-4376,4380,4395-4397,4400,4402,4409-4411,4414,4417,15758-15760,15763-15765,15770-15778
+package.json
+  s_9c171f473a3134::t_6b6ba2da374c13 19,21
+app/api/chat/route.test.ts
+  s_9c171f473a3134::t_5e6c899ef7ac31 53,175-176,185,188
+lib/chat.test.ts
+  s_9c171f473a3134::t_a9d65af2e38b54 6-7,11,15-18,22,24-25,27-28,31-46
+lib/chat.ts
+  s_9c171f473a3134::t_ae33b63eb632f9 4-6,15,21-23,32-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "95816cb41936ad17f96663f620eab4f2948933d0",
+  "prompts": {},
+  "sessions": {
+    "s_9c171f473a3134": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b44-a2a3-7f22-a9c3-a6bead38647d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

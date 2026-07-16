@@ -1,0 +1,25 @@
+app/globals.css
+  s_c4cb1d5a9d831b::t_1f8855c0a0b6db 232,298,318,320-369,373-375,380-381,385-429,432-434,469,626,628-629,695-703,706,709,711,720,734-1049,1064-1071,1084-1132
+app/supplier-portfolio-visualization.test.tsx
+  s_c4cb1d5a9d831b::t_c3718e5faff0f9 83
+app/supplier-portfolio-visualization.tsx
+  s_c4cb1d5a9d831b::t_bf1eaf9ab9f059 204
+app/supply-chain-app.test.tsx
+  s_c4cb1d5a9d831b::t_d5a91800fc482c 1-2,174-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "0a37f94de1c50435f8ea31fde85a338547f862ee",
+  "prompts": {},
+  "sessions": {
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

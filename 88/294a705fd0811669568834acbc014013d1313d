@@ -1,0 +1,29 @@
+tsconfig.json
+  s_9c171f473a3134::t_bcc253b8429a33 39-40
+vitest.config.ts
+  s_c4cb1d5a9d831b::t_8540fc3c4b6ac8 2,8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "88294a705fd0811669568834acbc014013d1313d",
+  "prompts": {},
+  "sessions": {
+    "s_9c171f473a3134": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b44-a2a3-7f22-a9c3-a6bead38647d",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

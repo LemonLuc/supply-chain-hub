@@ -1,25 +1,28 @@
 export const supplierPortfolioBands = ["Low", "Medium", "High"] as const;
-export const supplierActions = ["Retain", "Consolidate", "Protect", "Review"] as const;
+export const supplierPortfolioDecisions = [
+  "Keep",
+  "Consolidate",
+  "Strategic trade-off",
+  "Low priority",
+] as const;
 export const supplierPortfolioViews = ["matrix", "bubble"] as const;
 
 export type SupplierPortfolioBand = (typeof supplierPortfolioBands)[number];
-export type SupplierAction = (typeof supplierActions)[number];
+export type SupplierPortfolioDecision = (typeof supplierPortfolioDecisions)[number];
 export type SupplierPortfolioView = (typeof supplierPortfolioViews)[number];
 
 export type SupplierPortfolioItem = {
   supplier: string;
-  cost: SupplierPortfolioBand;
-  resilience: SupplierPortfolioBand;
-  action?: SupplierAction;
   recommendation: string;
   targetSupplier?: string;
-  costScore?: number;
-  resilienceScore?: number;
-  annualSpendMillions?: number;
+  annualCostUsd: number;
+  annualSavingsUsd: number;
+  relationshipScore: number;
+  relationshipDrivers?: string[];
 };
 
-export type ResolvedSupplierPortfolioItem = Omit<SupplierPortfolioItem, "action"> & {
-  action: SupplierAction;
+export type ResolvedSupplierPortfolioItem = SupplierPortfolioItem & {
+  decision: SupplierPortfolioDecision;
 };
 
 export type SupplierPortfolioVisualization = {
@@ -30,59 +33,85 @@ export type SupplierPortfolioVisualization = {
   suppliers: ResolvedSupplierPortfolioItem[];
 };
 
+const HIGH_SAVINGS_THRESHOLD_USD = 350_000;
+const HIGH_RELATIONSHIP_THRESHOLD = 65;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
-function isBand(value: unknown): value is SupplierPortfolioBand {
-  return typeof value === "string" && supplierPortfolioBands.includes(value as SupplierPortfolioBand);
-}
-
-function isAction(value: unknown): value is SupplierAction {
-  return typeof value === "string" && supplierActions.includes(value as SupplierAction);
+function isDecision(value: unknown): value is SupplierPortfolioDecision {
+  return (
+    typeof value === "string" &&
+    supplierPortfolioDecisions.includes(value as SupplierPortfolioDecision)
+  );
 }
 
 function isView(value: unknown): value is SupplierPortfolioView {
   return typeof value === "string" && supplierPortfolioViews.includes(value as SupplierPortfolioView);
 }
 
-function isOptionalFiniteNumber(value: unknown): value is number | undefined {
-  return value === undefined || (typeof value === "number" && Number.isFinite(value));
+function isNonNegativeFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
 }
 
-function isNormalizedScore(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
+function isRelationshipScore(value: unknown): value is number {
+  return isNonNegativeFiniteNumber(value) && value <= 100;
+}
+
+function hasValidRelationshipDrivers(value: unknown): value is string[] | undefined {
+  return (
+    value === undefined ||
+    (Array.isArray(value) &&
+      value.length > 0 &&
+      value.every((driver) => typeof driver === "string" && driver.trim().length > 0))
+  );
 }
 
 function isResolvedSupplier(value: unknown): value is ResolvedSupplierPortfolioItem {
   if (!isRecord(value)) return false;
 
-  return (
-    typeof value.supplier === "string" &&
-    value.supplier.trim().length > 0 &&
-    isBand(value.cost) &&
-    isBand(value.resilience) &&
-    isAction(value.action) &&
-    typeof value.recommendation === "string" &&
-    value.recommendation.trim().length > 0 &&
-    (value.targetSupplier === undefined || typeof value.targetSupplier === "string") &&
-    isOptionalFiniteNumber(value.costScore) &&
-    isOptionalFiniteNumber(value.resilienceScore) &&
-    isOptionalFiniteNumber(value.annualSpendMillions) &&
-    (value.costScore === undefined || isNormalizedScore(value.costScore)) &&
-    (value.resilienceScore === undefined || isNormalizedScore(value.resilienceScore)) &&
-    (value.annualSpendMillions === undefined || value.annualSpendMillions >= 0)
-  );
+  const supplier = value as Record<string, unknown>;
+  if (
+    typeof supplier.supplier !== "string" ||
+    supplier.supplier.trim().length === 0 ||
+    typeof supplier.recommendation !== "string" ||
+    supplier.recommendation.trim().length === 0 ||
+    (supplier.targetSupplier !== undefined && typeof supplier.targetSupplier !== "string") ||
+    !isNonNegativeFiniteNumber(supplier.annualCostUsd) ||
+    !isNonNegativeFiniteNumber(supplier.annualSavingsUsd) ||
+    !isRelationshipScore(supplier.relationshipScore) ||
+    !hasValidRelationshipDrivers(supplier.relationshipDrivers) ||
+    !isDecision(supplier.decision)
+  ) {
+    return false;
+  }
+
+  return supplier.decision === deriveSupplierDecision(supplier as ResolvedSupplierPortfolioItem);
 }
 
-export function deriveSupplierAction(item: SupplierPortfolioItem): SupplierAction {
-  if (item.action && isAction(item.action)) return item.action;
+export function deriveSupplierDecision(
+  item: Pick<SupplierPortfolioItem, "annualSavingsUsd" | "relationshipScore">,
+): SupplierPortfolioDecision {
+  const hasHighSavings = item.annualSavingsUsd >= HIGH_SAVINGS_THRESHOLD_USD;
+  const hasHighRelationship = item.relationshipScore >= HIGH_RELATIONSHIP_THRESHOLD;
 
-  const recommendation = item.recommendation.toLowerCase();
-  if (recommendation.includes("protect")) return "Protect";
-  if (recommendation.includes("retain")) return "Retain";
-  if (recommendation.includes("consolidate")) return "Consolidate";
-  return "Review";
+  if (hasHighSavings && hasHighRelationship) return "Strategic trade-off";
+  if (hasHighSavings) return "Consolidate";
+  if (hasHighRelationship) return "Keep";
+  return "Low priority";
+}
+
+export function getSavingsBand(annualSavingsUsd: number): SupplierPortfolioBand {
+  if (annualSavingsUsd < 250_000) return "Low";
+  if (annualSavingsUsd < 600_000) return "Medium";
+  return "High";
+}
+
+export function getRelationshipBand(relationshipScore: number): SupplierPortfolioBand {
+  if (relationshipScore < 50) return "Low";
+  if (relationshipScore < 75) return "Medium";
+  return "High";
 }
 
 export function canRenderBubble(suppliers: SupplierPortfolioItem[]): boolean {
@@ -90,7 +119,9 @@ export function canRenderBubble(suppliers: SupplierPortfolioItem[]): boolean {
     suppliers.length > 0 &&
     suppliers.every(
       (supplier) =>
-        isNormalizedScore(supplier.costScore) && isNormalizedScore(supplier.resilienceScore),
+        isNonNegativeFiniteNumber(supplier.annualCostUsd) &&
+        isNonNegativeFiniteNumber(supplier.annualSavingsUsd) &&
+        isRelationshipScore(supplier.relationshipScore),
     )
   );
 }
@@ -109,10 +140,12 @@ export function resolveSupplierPortfolioVisualization(
     fallbackApplied: view !== requestedView,
     reason:
       normalizedReason ||
-      (view === "bubble" ? "Quantitative portfolio comparison" : "Categorical portfolio comparison"),
+      (view === "bubble"
+        ? "Annual savings and strategic relationship comparison"
+        : "Supplier decision heat map"),
     suppliers: suppliers.map((supplier) => ({
       ...supplier,
-      action: deriveSupplierAction(supplier),
+      decision: deriveSupplierDecision(supplier),
     })),
   };
 }
@@ -123,8 +156,9 @@ export function getDemoPortfolioView(prompt: string): SupplierPortfolioView {
     "bubble",
     "plot",
     "quantitative",
-    "cost score",
-    "resilience score",
+    "annual savings",
+    "savings potential",
+    "relationship score",
   ].some((term) => normalizedPrompt.includes(term));
 
   return asksForQuantitativeView ? "bubble" : "matrix";

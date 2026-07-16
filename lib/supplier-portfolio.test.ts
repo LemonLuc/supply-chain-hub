@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   canRenderBubble,
-  deriveSupplierAction,
+  deriveSupplierDecision,
   getDemoPortfolioView,
+  getRelationshipBand,
+  getSavingsBand,
   parseSupplierPortfolioVisualization,
   resolveSupplierPortfolioVisualization,
   type SupplierPortfolioItem,
@@ -12,31 +14,70 @@ import {
 const quantitativeItems: SupplierPortfolioItem[] = [
   {
     supplier: "MediSeal Jena",
-    cost: "Medium",
-    resilience: "High",
-    action: "Retain",
-    recommendation: "Retain as strategic source",
-    costScore: 48,
-    resilienceScore: 86,
-    annualSpendMillions: 1.9,
+    recommendation: "Keep as a strategic packaging source",
+    annualCostUsd: 2_100_000,
+    annualSavingsUsd: 120_000,
+    relationshipScore: 93,
+    relationshipDrivers: ["Validated packaging", "Reliable delivery"],
   },
 ];
 
 describe("supplier portfolio visualization", () => {
-  it("uses a bubble chart only for complete finite normalized scores", () => {
+  it("derives the four decision heat zones at their thresholds", () => {
+    expect(
+      deriveSupplierDecision({
+        ...quantitativeItems[0],
+        annualSavingsUsd: 349_999,
+        relationshipScore: 65,
+      }),
+    ).toBe("Keep");
+    expect(
+      deriveSupplierDecision({
+        ...quantitativeItems[0],
+        annualSavingsUsd: 350_000,
+        relationshipScore: 64,
+      }),
+    ).toBe("Consolidate");
+    expect(
+      deriveSupplierDecision({
+        ...quantitativeItems[0],
+        annualSavingsUsd: 350_000,
+        relationshipScore: 65,
+      }),
+    ).toBe("Strategic trade-off");
+    expect(
+      deriveSupplierDecision({
+        ...quantitativeItems[0],
+        annualSavingsUsd: 349_999,
+        relationshipScore: 64,
+      }),
+    ).toBe("Low priority");
+  });
+
+  it("uses a bubble chart only for complete finite portfolio measures", () => {
     expect(canRenderBubble(quantitativeItems)).toBe(true);
-    expect(canRenderBubble([{ ...quantitativeItems[0], resilienceScore: undefined }])).toBe(false);
-    expect(canRenderBubble([{ ...quantitativeItems[0], costScore: 101 }])).toBe(false);
-    expect(canRenderBubble([{ ...quantitativeItems[0], costScore: Number.NaN }])).toBe(false);
+    expect(
+      canRenderBubble([
+        { ...quantitativeItems[0], relationshipScore: undefined } as unknown as SupplierPortfolioItem,
+      ]),
+    ).toBe(false);
+    expect(canRenderBubble([{ ...quantitativeItems[0], relationshipScore: 101 }])).toBe(false);
+    expect(canRenderBubble([{ ...quantitativeItems[0], annualSavingsUsd: Number.NaN }])).toBe(false);
+    expect(canRenderBubble([{ ...quantitativeItems[0], annualCostUsd: -1 }])).toBe(false);
     expect(canRenderBubble([])).toBe(false);
   });
 
   it("falls back to the matrix when bubble data is incomplete", () => {
     expect(
       resolveSupplierPortfolioVisualization(
-        [{ ...quantitativeItems[0], costScore: undefined }],
+        [
+          {
+            ...quantitativeItems[0],
+            relationshipScore: undefined,
+          } as unknown as SupplierPortfolioItem,
+        ],
         "bubble",
-        "Compare the quantitative measures.",
+        "Compare annual savings and relationship strength.",
       ),
     ).toMatchObject({
       view: "matrix",
@@ -45,50 +86,45 @@ describe("supplier portfolio visualization", () => {
     });
   });
 
-  it("preserves a valid bubble request", () => {
+  it("preserves a valid bubble request and derives its decision", () => {
     expect(
       resolveSupplierPortfolioVisualization(
         quantitativeItems,
         "bubble",
-        "Compare the quantitative measures.",
+        "Compare annual savings and relationship strength.",
       ),
     ).toMatchObject({
       view: "bubble",
       requestedView: "bubble",
       fallbackApplied: false,
-      reason: "Compare the quantitative measures.",
+      reason: "Compare annual savings and relationship strength.",
+      suppliers: [{ decision: "Keep" }],
     });
   });
 
-  it("derives a stable action for legacy items", () => {
-    expect(deriveSupplierAction({ ...quantitativeItems[0], action: undefined })).toBe("Retain");
-    expect(
-      deriveSupplierAction({
-        ...quantitativeItems[0],
-        action: undefined,
-        recommendation: "Protect and qualify backup capacity",
-      }),
-    ).toBe("Protect");
-    expect(
-      deriveSupplierAction({
-        ...quantitativeItems[0],
-        action: undefined,
-        recommendation: "Renegotiate or consolidate bracket volume",
-      }),
-    ).toBe("Consolidate");
+  it("maps savings and relationship measures into display bands", () => {
+    expect(getSavingsBand(249_999)).toBe("Low");
+    expect(getSavingsBand(250_000)).toBe("Medium");
+    expect(getSavingsBand(599_999)).toBe("Medium");
+    expect(getSavingsBand(600_000)).toBe("High");
+
+    expect(getRelationshipBand(49)).toBe("Low");
+    expect(getRelationshipBand(50)).toBe("Medium");
+    expect(getRelationshipBand(74)).toBe("Medium");
+    expect(getRelationshipBand(75)).toBe("High");
   });
 
   it("selects the demo view from explicit presentation intent", () => {
     expect(getDemoPortfolioView("Plot this as a quantitative bubble chart.")).toBe("bubble");
-    expect(getDemoPortfolioView("Compare the cost score and resilience score.")).toBe("bubble");
+    expect(getDemoPortfolioView("Compare annual savings and relationship score.")).toBe("bubble");
     expect(getDemoPortfolioView("Show the supplier heat map.")).toBe("matrix");
   });
 
-  it("accepts valid tool output and rejects malformed output", () => {
+  it("accepts valid tool output and rejects malformed or inconsistent output", () => {
     const output = resolveSupplierPortfolioVisualization(
       quantitativeItems,
       "bubble",
-      "Quantitative comparison",
+      "Savings and relationship comparison",
     );
 
     expect(parseSupplierPortfolioVisualization(output)).toEqual(output);
@@ -96,6 +132,12 @@ describe("supplier portfolio visualization", () => {
       parseSupplierPortfolioVisualization({
         ...output,
         suppliers: [{ supplier: "Invented" }],
+      }),
+    ).toBeUndefined();
+    expect(
+      parseSupplierPortfolioVisualization({
+        ...output,
+        suppliers: [{ ...output.suppliers[0], decision: "Consolidate" }],
       }),
     ).toBeUndefined();
     expect(

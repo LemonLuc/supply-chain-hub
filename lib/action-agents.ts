@@ -4,6 +4,7 @@ import {
   buildActionWorkflowResult,
   type ActionWorkflowResult,
 } from "./action-workflows";
+import type { SupportedModel, ThinkingLevel } from "./chat";
 import type { AppContext } from "./context";
 import type { WorkflowAction, WorkflowKey } from "./demo-data";
 import type { PersonaId } from "./permissions";
@@ -13,7 +14,8 @@ type RunActionAgentsOptions = {
   workflowKey: WorkflowKey;
   persona: PersonaId;
   action: WorkflowAction;
-  model: string;
+  model: SupportedModel;
+  thinking: ThinkingLevel;
 };
 
 const emptyToolParameters = {
@@ -36,13 +38,18 @@ function buildAgentInstructions(persona: PersonaId, context: AppContext, action:
   ].join("\n");
 }
 
-function buildReviewerAgent(name: string, instructions: string, model: string) {
+function buildReviewerAgent(
+  name: string,
+  instructions: string,
+  model: SupportedModel,
+  thinking: ThinkingLevel,
+) {
   return new Agent({
     name,
     handoffDescription: instructions,
     instructions,
     model,
-    modelSettings: {},
+    modelSettings: { reasoning: { effort: thinking } },
     tools: [],
     handoffs: [],
   });
@@ -54,6 +61,7 @@ export async function runActionAgentsWorkflow({
   persona,
   action,
   model,
+  thinking,
 }: RunActionAgentsOptions): Promise<ActionWorkflowResult> {
   const traceId = `trace_${crypto.randomUUID().replace(/-/g, "")}`;
   const baseResult = buildActionWorkflowResult({
@@ -92,11 +100,13 @@ export async function runActionAgentsWorkflow({
     "Procurement Review Agent",
     "Review logistics escalation requests as Dana Narid, the procurement team lead.",
     model,
+    thinking,
   );
   const executiveAgent = buildReviewerAgent(
     "Executive Decision Agent",
     "Review strategic escalation requests as Dr. Lucía López, the final C-level decision maker.",
     model,
+    thinking,
   );
   const agentHandoffs = [
     handoff(procurementAgent, {
@@ -115,7 +125,7 @@ export async function runActionAgentsWorkflow({
     handoffDescription: "Coordinates Supply Chain Hub action workflows, tools, and approval handoffs.",
     instructions: buildAgentInstructions(persona, context, action),
     model,
-    modelSettings: {},
+    modelSettings: { reasoning: { effort: thinking } },
     tools: [readContext, prepareAction],
     handoffs: agentHandoffs,
     toolUseBehavior: { stopAtToolNames: ["prepare_action_workflow"] },

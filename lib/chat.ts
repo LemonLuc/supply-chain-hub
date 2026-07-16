@@ -1,10 +1,9 @@
 import type { AppContext } from "./context";
 
 export const supportedModels = [
-  { id: "gpt-5.5", label: "GPT-5.5" },
-  { id: "gpt-5.4", label: "GPT-5.4" },
-  { id: "gpt-5.4-mini", label: "GPT-5.4 mini" },
-  { id: "gpt-5.4-nano", label: "GPT-5.4 nano" },
+  { id: "gpt-5.6-sol", label: "GPT-5.6 Sol" },
+  { id: "gpt-5.6-terra", label: "GPT-5.6 Terra" },
+  { id: "gpt-5.6-luna", label: "GPT-5.6 Luna" },
 ] as const;
 
 export const thinkingLevels = [
@@ -13,10 +12,14 @@ export const thinkingLevels = [
   { id: "medium", label: "Medium" },
   { id: "high", label: "High" },
   { id: "xhigh", label: "Extra high" },
+  { id: "max", label: "Max" },
 ] as const;
 
 export type SupportedModel = (typeof supportedModels)[number]["id"];
 export type ThinkingLevel = (typeof thinkingLevels)[number]["id"];
+
+export const defaultModel: SupportedModel = "gpt-5.6-sol";
+export const defaultThinkingLevel: ThinkingLevel = "high";
 
 export function normalizeChatOptions(model: unknown, thinking: unknown): {
   model: SupportedModel;
@@ -26,8 +29,8 @@ export function normalizeChatOptions(model: unknown, thinking: unknown): {
   const supportedThinking = thinkingLevels.find((option) => option.id === thinking)?.id;
 
   return {
-    model: supportedModel ?? "gpt-5.4-mini",
-    thinking: supportedThinking ?? "high",
+    model: supportedModel ?? defaultModel,
+    thinking: supportedThinking ?? defaultThinkingLevel,
   };
 }
 

@@ -1,0 +1,33 @@
+app/answer-actions.tsx
+  s_c4cb1d5a9d831b::t_aed812700a702d 1-94
+docs/superpowers/plans/2026-07-16-chat-answer-feedback-and-tool-deduplication.md
+  s_c4cb1d5a9d831b::t_63f4827529d799 1-560
+app/globals.css
+  s_aae6c65fce6804::t_22f3ec4366bbea 126-137
+app/supply-chain-app.tsx
+  s_aae6c65fce6804::t_8abe21eec62479 45,223,281-285,303-304,339-345,351-386,704-714
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "bbcafb16a42d8b3209e1bbd5771fa880b2ecd0f3",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

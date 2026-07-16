@@ -1,0 +1,21 @@
+lib/supplier-portfolio-chart.test.ts
+  s_c4cb1d5a9d831b::t_f5904437aedf76 1-66
+lib/supplier-portfolio-chart.ts
+  s_c4cb1d5a9d831b::t_72885fe468900e 1-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "500d07dadba90500cd2a0aeac8c6e1127e9ed763",
+  "prompts": {},
+  "sessions": {
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

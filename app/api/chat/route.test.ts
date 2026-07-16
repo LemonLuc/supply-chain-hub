@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { convertToModelMessagesMock, generateTextMock, streamTextMock } = vi.hoisted(() => ({
   convertToModelMessagesMock: vi.fn(async (messages) => messages),
-  generateTextMock: vi.fn(async () => ({
+  generateTextMock: vi.fn(async (_options: unknown) => ({
     output: { category: "supply_chain", confidence: 0.99 },
   })),
   streamTextMock: vi.fn((_options: unknown) => ({

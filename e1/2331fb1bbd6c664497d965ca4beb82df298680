@@ -1,0 +1,19 @@
+.gitignore
+  s_9c171f473a3134::t_c1cb768ad4f635 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e12331fb1bbd6c664497d965ca4beb82df298680",
+  "prompts": {},
+  "sessions": {
+    "s_9c171f473a3134": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b44-a2a3-7f22-a9c3-a6bead38647d",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

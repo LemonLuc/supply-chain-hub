@@ -1,0 +1,23 @@
+app/api/actions/route.test.ts
+  s_9c171f473a3134::t_c73df073cb8331 62-63,80-86
+app/api/actions/route.ts
+  s_9c171f473a3134::t_1c4b7c051ded58 69
+lib/action-agents.ts
+  s_9c171f473a3134::t_4afa297e3b85d4 7,17-18,41-46,52,64,103,109,128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d82f81502728b845cea33080616a5de653297121",
+  "prompts": {},
+  "sessions": {
+    "s_9c171f473a3134": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b44-a2a3-7f22-a9c3-a6bead38647d",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

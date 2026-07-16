@@ -59,7 +59,8 @@ describe("POST /api/actions", () => {
         demoPersona: "logistics",
         selectedSourceIds: ["sap", "carriers", "warehouse", "outlook"],
         actionLabel: "Write Dana Narid for review",
-        model: "gpt-5.4-mini",
+        model: "gpt-5.6-sol",
+        thinking: "max",
       }),
     );
     const body = await response.json();
@@ -76,6 +77,13 @@ describe("POST /api/actions", () => {
       expect.objectContaining({ name: "Procurement Review Agent" }),
       expect.objectContaining({ toolNameOverride: "handoff_to_procurement_lead" }),
     );
+    expect(agentConstructorMock).toHaveBeenCalledTimes(3);
+    for (const [config] of agentConstructorMock.mock.calls) {
+      expect(config).toMatchObject({
+        model: "gpt-5.6-sol",
+        modelSettings: { reasoning: { effort: "max" } },
+      });
+    }
     expect(runMock).toHaveBeenCalledOnce();
     expect(forceFlushMock).toHaveBeenCalledOnce();
   });

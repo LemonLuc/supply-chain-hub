@@ -66,6 +66,7 @@ export async function POST(request: Request): Promise<Response> {
     persona,
     action,
     model: options.model,
+    thinking: options.thinking,
   });
 
   return Response.json(result);

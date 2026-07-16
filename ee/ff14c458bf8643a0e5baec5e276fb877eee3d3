@@ -1,0 +1,19 @@
+lib/chat.test.ts
+  s_aae6c65fce6804::t_6816c458de0212 75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "eeff14c458bf8643a0e5baec5e276fb877eee3d3",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

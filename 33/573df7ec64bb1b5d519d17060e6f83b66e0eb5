@@ -1,0 +1,25 @@
+app/supplier-portfolio-visualization.test.tsx
+  s_c4cb1d5a9d831b::t_09aa945eb32618 143-177
+app/supplier-portfolio-visualization.tsx
+  s_c4cb1d5a9d831b::t_e4535611cf6df3 233-244
+app/supply-chain-app.test.tsx
+  s_c4cb1d5a9d831b::t_2185e7aa6848d5 6-7,135-170,376,384,388-392,397-399,405-433,661-665
+app/supply-chain-app.tsx
+  s_c4cb1d5a9d831b::t_01a80fc60904a1 34-42,246-258,827-828
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "33573df7ec64bb1b5d519d17060e6f83b66e0eb5",
+  "prompts": {},
+  "sessions": {
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

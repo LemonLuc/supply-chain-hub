@@ -735,6 +735,67 @@ h1, h2, h3, p { margin-top: 0; }
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--azure) 22%, transparent);
 }
 
+.app-shell .access-badge {
+  border-color: var(--info-border);
+  color: var(--info-ink);
+  background: var(--info-surface);
+}
+
+.app-shell .recommendation-notice {
+  color: var(--muted);
+}
+
+.app-shell .source-item.selected {
+  border-color: var(--info-border);
+}
+
+.app-shell .reasoning-summary {
+  border-color: var(--line);
+}
+
+.app-shell .reasoning-summary > button {
+  color: var(--info-ink);
+}
+
+.app-shell .reasoning-content {
+  border-top-color: var(--line);
+}
+
+.app-shell .markdown-content blockquote {
+  border-left-color: var(--info-border);
+}
+
+.app-shell .approval-controls button:first-child {
+  border-color: var(--success-border);
+  color: var(--success-ink);
+  background: var(--success-surface);
+}
+
+.app-shell .approval-controls button:last-child {
+  border-color: var(--danger-border);
+  color: var(--danger-ink);
+  background: var(--danger-surface);
+}
+
+.app-shell .action-loading {
+  border-color: var(--info-border);
+  color: var(--info-ink);
+  background: var(--info-surface);
+}
+
+.app-shell .action-loading > div {
+  background: var(--line);
+}
+
+.app-shell .action-loading > div span {
+  background: var(--info);
+}
+
+.app-shell .chat-composer:focus-within {
+  border-color: var(--info);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
 .app-shell :is(button, select, textarea, input, [tabindex="0"]):focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;

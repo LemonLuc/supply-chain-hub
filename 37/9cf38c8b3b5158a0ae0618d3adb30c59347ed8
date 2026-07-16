@@ -1,0 +1,19 @@
+app/supply-chain-app.tsx
+  s_aae6c65fce6804::t_5d9c6b21e938b5 28-33,404-405,407-410,417,452,508-510,512-514
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "379cf38c8b3b5158a0ae0618d3adb30c59347ed8",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

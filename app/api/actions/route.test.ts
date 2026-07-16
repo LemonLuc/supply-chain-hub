@@ -124,6 +124,67 @@ describe("POST /api/actions", () => {
     expect(runMock).not.toHaveBeenCalled();
   });
 
+  it("rejects Dana submitting a self-addressed review action", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+
+    const response = await POST(
+      actionRequest({
+        workflowKey: "risks",
+        demoPersona: "procurement",
+        selectedSourceIds: ["sap", "carriers", "warehouse", "outlook"],
+        actionLabel: "Write Dana Narid for review",
+      }),
+    );
+
+    expect(response.status).toBe(403);
+  });
+
+  it("assigns Dana's recovery check directly to Lukas", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+
+    const response = await POST(
+      actionRequest({
+        workflowKey: "delay",
+        demoPersona: "procurement",
+        selectedSourceIds: ["sap", "quality", "excel", "capacity", "outlook"],
+        actionLabel: "Assign recovery check to logistics",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      assigneePersona: "logistics",
+      assigneeName: "Lukas Weber",
+      reviewerPersona: null,
+      reviewerName: null,
+      handoff: null,
+    });
+  });
+
+  it("routes Dana's exception review only to Lucia", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+
+    const response = await POST(
+      actionRequest({
+        workflowKey: "delay",
+        demoPersona: "procurement",
+        selectedSourceIds: ["sap", "quality", "excel", "capacity", "outlook"],
+        actionLabel: "Ask Lucia Lopez for exception review",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      assigneePersona: null,
+      assigneeName: null,
+      reviewerPersona: "executive",
+      reviewerName: "Dr. Lucía López",
+      handoff: { from: "procurement", to: "executive" },
+    });
+  });
+
   it("lets Lucia run strategic actions without routing anything to Dana", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
 

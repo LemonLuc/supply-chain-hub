@@ -229,6 +229,21 @@ describe("buildRoleToolSources", () => {
 });
 
 describe("resolveWorkflowForPrompt", () => {
+  it("routes Dana's recovery assignment prompt to supplier alternatives", () => {
+    expect(
+      resolveWorkflowForPrompt(
+        "Assign the carrier recovery check for the uncovered builds.",
+        "procurement",
+      ),
+    ).toBe("delay");
+    expect(
+      resolveWorkflowForPrompt(
+        "Assign a carrier recovery check for uncovered builds today.",
+        "procurement",
+      ),
+    ).toBe("delay");
+  });
+
   it("selects the supplier alternatives workflow when an authorized prompt asks for alternates", () => {
     expect(resolveWorkflowForPrompt("Which approved alternatives can cover the turret delay?", "procurement")).toBe("delay");
   });
@@ -239,6 +254,50 @@ describe("resolveWorkflowForPrompt", () => {
 
   it("falls back to an authorized workflow when the matching workflow is restricted", () => {
     expect(resolveWorkflowForPrompt("Give me a cost-versus-resilience heat map.", "procurement")).toBe("risks");
+  });
+});
+
+describe("role-aware actions", () => {
+  it("filters actions by persona eligibility", () => {
+    const logistics = buildAppContext("risks", "logistics", [
+      "sap",
+      "carriers",
+      "warehouse",
+      "outlook",
+    ]);
+    const procurementRisk = buildAppContext("risks", "procurement", [
+      "sap",
+      "carriers",
+      "warehouse",
+      "outlook",
+    ]);
+    const procurementDelay = buildAppContext("delay", "procurement", [
+      "sap",
+      "quality",
+      "excel",
+      "capacity",
+      "outlook",
+    ]);
+
+    expect(logistics.recommendedActions).toContainEqual(
+      expect.objectContaining({
+        label: "Write Dana Narid for review",
+        reviewerPersona: "procurement",
+      }),
+    );
+    expect(procurementRisk.recommendedActions).toHaveLength(0);
+    expect(procurementDelay.recommendedActions).toContainEqual(
+      expect.objectContaining({
+        label: "Assign recovery check to logistics",
+        assigneePersona: "logistics",
+      }),
+    );
+    expect(procurementDelay.recommendedActions).toContainEqual(
+      expect.objectContaining({
+        label: "Ask Lucia Lopez for exception review",
+        reviewerPersona: "executive",
+      }),
+    );
   });
 });
 

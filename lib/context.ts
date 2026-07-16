@@ -48,9 +48,16 @@ export function buildRoleToolSources(personaValue?: unknown): RoleToolSource[] {
 export function resolveWorkflowForPrompt(prompt: string, personaValue?: unknown): WorkflowKey {
   const policy = getPersonaPolicy(personaValue);
   const normalizedPrompt = prompt.toLowerCase();
+  const exactSuggestedWorkflow = policy.allowedWorkflows.find((workflowKey) =>
+    workflows[workflowKey].suggestedPrompts.some(
+      (suggestedPrompt) => suggestedPrompt.toLowerCase() === normalizedPrompt,
+    ),
+  );
+  if (exactSuggestedWorkflow) return exactSuggestedWorkflow;
+
   const candidates: Array<[WorkflowKey, string[]]> = [
     ["consolidate", ["heat map", "heatmap", "consolidate", "portfolio", "tail-spend", "resilience", "savings", "relationship", "relationships", "board", "contract termination"]],
-    ["delay", ["alternative", "alternatives", "alternate", "turret", "supplier overview", "supplier risk", "capacity register", "delayed", "delay"]],
+    ["delay", ["alternative", "alternatives", "alternate", "turret", "supplier overview", "supplier risk", "capacity register", "delayed", "delay", "uncovered build", "uncovered builds", "recovery check"]],
     ["risks", ["risk", "delivery", "shipment", "carrier", "milestone", "freight", "fedex", "dhl", "ups", "pickup"]],
   ];
   const match = candidates.find(([workflowKey, keywords]) =>
@@ -154,8 +161,10 @@ export function buildAppContext(
     .filter((row) => sourceSetIncludesAll(selectedSourceIds, row.sourceIds))
     .map(({ financial, ...row }) => (policy.canViewFinancials ? { ...row, financial } : row));
   const allRowsAvailable = workflow.rows.every((row) => sourceSetIncludesAll(selectedSourceIds, row.sourceIds));
-  const selectedActions = workflow.actions.filter((action) =>
-    sourceSetIncludesAll(selectedSourceIds, action.sourceIds),
+  const selectedActions = workflow.actions.filter(
+    (action) =>
+      (!action.allowedPersonas || action.allowedPersonas.includes(persona)) &&
+      sourceSetIncludesAll(selectedSourceIds, action.sourceIds),
   );
   const selectedDocuments = workflow.documents?.filter((document) =>
     sourceSetIncludesAll(selectedSourceIds, document.sourceIds),

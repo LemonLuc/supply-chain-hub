@@ -10,6 +10,8 @@ export type ActionWorkflowResult = {
   workflowKey: WorkflowKey;
   requesterPersona: PersonaId;
   requesterName: string;
+  assigneePersona: PersonaId | null;
+  assigneeName: string | null;
   reviewerPersona: PersonaId | null;
   reviewerName: string | null;
   draft: string;
@@ -32,11 +34,18 @@ type BuildActionWorkflowResultOptions = {
   traceId?: string;
 };
 
-export function getActionReviewer(persona: PersonaId, action: WorkflowAction): PersonaId | null {
-  if (action.kind !== "approval") return null;
-  if (persona === "logistics") return "procurement";
-  if (persona === "procurement") return "executive";
-  return null;
+export function getActionReviewer(action: WorkflowAction): PersonaId | null;
+export function getActionReviewer(persona: PersonaId, action: WorkflowAction): PersonaId | null;
+export function getActionReviewer(
+  personaOrAction: PersonaId | WorkflowAction,
+  maybeAction?: WorkflowAction,
+): PersonaId | null {
+  const action = maybeAction ?? (personaOrAction as WorkflowAction);
+  return action.reviewerPersona ?? null;
+}
+
+export function getActionAssignee(action: WorkflowAction): PersonaId | null {
+  return action.assigneePersona ?? null;
 }
 
 export function findActionByLabel(context: AppContext, actionLabel: unknown): WorkflowAction | undefined {
@@ -50,17 +59,23 @@ export function buildActionDraft(
   workflowKey: WorkflowKey,
   persona: PersonaId,
   action: WorkflowAction,
-  reviewerPersona: PersonaId | null = getActionReviewer(persona, action),
+  reviewerPersona: PersonaId | null = getActionReviewer(action),
+  assigneePersona: PersonaId | null = getActionAssignee(action),
 ): string {
   const requester = mockUsers[persona];
   const reviewer = reviewerPersona ? mockUsers[reviewerPersona] : null;
+  const assignee = assigneePersona ? mockUsers[assigneePersona] : null;
   const evidence = context.rows.length
     ? context.rows.map((row) => `${row.subject}: ${row.evidence}`).join(" ")
     : context.answer.summary;
 
   return [
     `${action.label}`,
-    reviewer ? `From ${requester.name} to ${reviewer.name}.` : `Prepared for ${requester.name}.`,
+    reviewer
+      ? `From ${requester.name} to ${reviewer.name}.`
+      : assignee
+        ? `From ${requester.name} to ${assignee.name}.`
+        : `Prepared for ${requester.name}.`,
     `${context.answer.headline}: ${context.answer.summary}`,
     `Evidence: ${evidence}`,
     `Requested action: ${action.detail}`,
@@ -68,8 +83,16 @@ export function buildActionDraft(
   ].join("\n\n");
 }
 
-export function buildActionNotice(persona: PersonaId, action: WorkflowAction, reviewerPersona: PersonaId | null): string {
+export function buildActionNotice(
+  persona: PersonaId,
+  action: WorkflowAction,
+  reviewerPersona: PersonaId | null,
+  assigneePersona: PersonaId | null = getActionAssignee(action),
+): string {
   if (reviewerPersona) return `Approval request sent to ${mockUsers[reviewerPersona].name}.`;
+  if (assigneePersona) {
+    return `Task assigned to ${mockUsers[assigneePersona].name}. ${action.detail}`;
+  }
 
   const requester = mockUsers[persona];
   const actionLabel =
@@ -92,19 +115,30 @@ export function buildActionWorkflowResult({
   toolCalls = [],
   traceId,
 }: BuildActionWorkflowResultOptions): ActionWorkflowResult {
-  const reviewerPersona = getActionReviewer(persona, action);
+  const reviewerPersona = getActionReviewer(action);
+  const assigneePersona = getActionAssignee(action);
   const requester = mockUsers[persona];
   const reviewer = reviewerPersona ? mockUsers[reviewerPersona] : null;
+  const assignee = assigneePersona ? mockUsers[assigneePersona] : null;
 
   return {
     actionLabel: action.label,
     workflowKey,
     requesterPersona: persona,
     requesterName: requester.name,
+    assigneePersona,
+    assigneeName: assignee?.name ?? null,
     reviewerPersona,
     reviewerName: reviewer?.name ?? null,
-    draft: buildActionDraft(context, workflowKey, persona, action, reviewerPersona),
-    notice: buildActionNotice(persona, action, reviewerPersona),
+    draft: buildActionDraft(
+      context,
+      workflowKey,
+      persona,
+      action,
+      reviewerPersona,
+      assigneePersona,
+    ),
+    notice: buildActionNotice(persona, action, reviewerPersona, assigneePersona),
     agentName,
     orchestration,
     toolCalls,

@@ -29,6 +29,9 @@ export type WorkflowAction = {
   detail: string;
   kind: "draft" | "update" | "share" | "approval";
   sourceIds?: string[];
+  allowedPersonas?: PersonaId[];
+  assigneePersona?: PersonaId;
+  reviewerPersona?: PersonaId;
 };
 
 export type ResultRow = {
@@ -144,10 +147,10 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       ["Avoided downtime", "€185,000"],
     ],
     actions: [
-      { label: "Request DHL recovery routing", detail: "Draft a carrier message asking DHL Freight for confirmed Leipzig recovery routing and ETA.", kind: "draft", sourceIds: ["carriers", "outlook"] },
-      { label: "Create Outlook recovery task", detail: "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff before 12:00.", kind: "update", sourceIds: ["outlook"] },
-      { label: "Write Dana Narid for review", detail: "Send the delivery risk summary to the procurement team lead.", kind: "approval", sourceIds: ["outlook"] },
-      { label: "Log DHL exception on PO 4500872319", detail: "Attach the missed DHL milestone and hold promised-date changes until the recovery ETA is confirmed.", kind: "update", sourceIds: ["sap", "carriers"] },
+      { label: "Request DHL recovery routing", detail: "Draft a carrier message asking DHL Freight for confirmed Leipzig recovery routing and ETA.", kind: "draft", sourceIds: ["carriers", "outlook"], allowedPersonas: ["logistics"] },
+      { label: "Create Outlook recovery task", detail: "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff before 12:00.", kind: "update", sourceIds: ["outlook"], allowedPersonas: ["logistics"] },
+      { label: "Write Dana Narid for review", detail: "Send the delivery risk summary to the procurement team lead.", kind: "approval", sourceIds: ["outlook"], allowedPersonas: ["logistics"], reviewerPersona: "procurement" },
+      { label: "Log DHL exception on PO 4500872319", detail: "Attach the missed DHL milestone and hold promised-date changes until the recovery ETA is confirmed.", kind: "update", sourceIds: ["sap", "carriers"], allowedPersonas: ["logistics"] },
     ],
     rows: [
       {
@@ -223,10 +226,10 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       ["Expedite estimate", "€4,900"],
     ],
     actions: [
-      { label: "Add comment to supplier risk register", detail: "Update the primary supplier row with delay, owner and next review.", kind: "update" },
-      { label: "Assign recovery check to logistics", detail: "Create the carrier recovery task for the logistics planner to execute.", kind: "share" },
-      { label: "Draft alternate capacity request", detail: "Ask Mechatronik Süd to reserve eight MT-440B units.", kind: "draft", sourceIds: ["outlook"] },
-      { label: "Ask Lucia Lopez for exception review", detail: "Escalate the uncovered six-build gap for C-level decision.", kind: "approval", sourceIds: ["outlook"] },
+      { label: "Add comment to supplier risk register", detail: "Update the primary supplier row with delay, owner and next review.", kind: "update", allowedPersonas: ["procurement"] },
+      { label: "Assign recovery check to logistics", detail: "Create the carrier recovery task for the logistics planner to execute.", kind: "share", allowedPersonas: ["procurement"], assigneePersona: "logistics" },
+      { label: "Draft alternate capacity request", detail: "Ask Mechatronik Süd to reserve eight MT-440B units.", kind: "draft", sourceIds: ["outlook"], allowedPersonas: ["procurement"] },
+      { label: "Ask Lucia Lopez for exception review", detail: "Escalate the uncovered six-build gap for C-level decision.", kind: "approval", sourceIds: ["outlook"], allowedPersonas: ["procurement"], reviewerPersona: "executive" },
     ],
     rows: [
       {
@@ -366,9 +369,9 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       ["Transition budget", "€180K"],
     ],
     actions: [
-      { label: "Draft contract termination letter", detail: "Prepare a non-binding notice draft for Steripack Hohenlohe and PräziForm Aalen; no notice is sent.", kind: "draft" },
-      { label: "Prepare board decision record", detail: "Create the evidence summary, heat map and executive decision log.", kind: "draft" },
-      { label: "Create supplier negotiation mandate", detail: "Set savings target, guardrails and fallback terms for the procurement team.", kind: "share" },
+      { label: "Draft contract termination letter", detail: "Prepare a non-binding notice draft for Steripack Hohenlohe and PräziForm Aalen; no notice is sent.", kind: "draft", allowedPersonas: ["executive"] },
+      { label: "Prepare board decision record", detail: "Create the evidence summary, heat map and executive decision log.", kind: "draft", allowedPersonas: ["executive"] },
+      { label: "Create supplier negotiation mandate", detail: "Set savings target, guardrails and fallback terms for the procurement team.", kind: "share", allowedPersonas: ["executive"] },
     ],
     rows: [
       {

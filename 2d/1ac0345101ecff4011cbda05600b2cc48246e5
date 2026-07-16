@@ -1,0 +1,27 @@
+app/supply-chain-app.test.tsx
+  s_aae6c65fce6804::t_f036cb07c46261 310-311,368,445,449,455-457,471-477,481,483-512,534,587,784,797,825
+app/supply-chain-app.tsx
+  s_aae6c65fce6804::t_fc88111e1578f7 286
+lib/context.test.ts
+  s_aae6c65fce6804::t_ca887206c47154 183,191-192,194-198,202,204,207-210,214-219,222,224,226-233
+lib/context.ts
+  s_aae6c65fce6804::t_1ec6d08820dd83 12,17-24,26-27,49,56-84
+lib/demo-data.ts
+  s_aae6c65fce6804::t_161a4a8340d93c 123-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2d1ac0345101ecff4011cbda05600b2cc48246e5",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

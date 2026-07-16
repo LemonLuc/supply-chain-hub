@@ -209,6 +209,7 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
           {suppliers.map((supplier) => {
             const bubble = layoutBySupplier.get(supplier.supplier);
             if (!bubble) return null;
+            const compactCost = bubble.radius <= 20;
 
             return (
               <g
@@ -229,7 +230,7 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
                 </text>
                 <circle cx={bubble.x} cy={bubble.y} r={bubble.radius} />
                 <text
-                  className="portfolio-bubble-cost"
+                  className={`portfolio-bubble-cost${compactCost ? " is-compact" : ""}`}
                   x={bubble.x}
                   y={bubble.y + 5}
                   textAnchor="middle"
@@ -288,12 +289,10 @@ export function SupplierPortfolioVisualizationView({
         </div>
         {!isBubble && <span className="source-note">Savings versus strategic relationship</span>}
       </div>
-      {!isBubble && (
-        <div className="portfolio-legend-row">
-          <DecisionLegend />
-          <span className="portfolio-view-reason">{visualization.reason}</span>
-        </div>
-      )}
+      <div className={`portfolio-legend-row${isBubble ? " portfolio-bubble-legend-row" : ""}`}>
+        <DecisionLegend />
+        {!isBubble && <span className="portfolio-view-reason">{visualization.reason}</span>}
+      </div>
       {isBubble ? (
         <SupplierBubbleChart suppliers={visualization.suppliers} />
       ) : (

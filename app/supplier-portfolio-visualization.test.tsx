@@ -51,10 +51,13 @@ describe("SupplierPortfolioVisualizationView", () => {
     expect(screen.getByText("Annual consolidation savings (USD)")).toBeInTheDocument();
     expect(screen.getByText("Strategic relationship score (0–100)")).toBeInTheDocument();
     expect(screen.getByText("$4.6M")).toHaveClass("portfolio-bubble-cost");
+    expect(screen.getByText("$800K")).toHaveClass("portfolio-bubble-cost", "is-compact");
     expect(screen.queryByText(/annual cost/i)).not.toBeInTheDocument();
     expect(screen.getByText("MediSeal Jena")).toHaveAttribute("text-anchor", "middle");
     expect(screen.getByText(/reliability, quality, qualification depth/i)).toBeInTheDocument();
-    expect(screen.queryByRole("list", { name: /decision heat legend/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("list", { name: /decision heat legend/i })).toHaveTextContent(
+      "KeepConsolidateStrategic trade-offLow priority",
+    );
     expect(screen.queryByText("Quantitative comparison")).not.toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });

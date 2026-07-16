@@ -1,7 +1,11 @@
 import { APICallError } from "ai";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { streamTextMock } = vi.hoisted(() => ({
+const { convertToModelMessagesMock, generateTextMock, streamTextMock } = vi.hoisted(() => ({
+  convertToModelMessagesMock: vi.fn(async (messages) => messages),
+  generateTextMock: vi.fn(async () => ({
+    output: { category: "supply_chain", confidence: 0.99 },
+  })),
   streamTextMock: vi.fn((_options: unknown) => ({
     toUIMessageStreamResponse: vi.fn(() => new Response("live stream")),
   })),
@@ -17,7 +21,8 @@ vi.mock("ai", async (importOriginal) => {
   const actual = await importOriginal<typeof import("ai")>();
   return {
     ...actual,
-    convertToModelMessages: vi.fn(async (messages) => messages),
+    convertToModelMessages: convertToModelMessagesMock,
+    generateText: generateTextMock,
     streamText: streamTextMock,
   };
 });
@@ -32,6 +37,12 @@ afterEach(() => {
   process.env.OPENAI_API_KEY = previousApiKey;
   process.env.DEMO_USER_ROLE = previousDemoRole;
   process.env.LOCK_DEMO_USER_ROLE = previousLockedDemoRole;
+  vi.restoreAllMocks();
+  convertToModelMessagesMock.mockClear();
+  generateTextMock.mockReset();
+  generateTextMock.mockResolvedValue({
+    output: { category: "supply_chain", confidence: 0.99 },
+  });
   streamTextMock.mockClear();
 });
 
@@ -75,6 +86,123 @@ describe("POST /api/chat", () => {
     const response = await POST(request);
 
     expect(response.status).toBe(400);
+  });
+
+  it("blocks standalone arithmetic before any chat workflow runs", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "calcualte 2x2" }],
+          },
+        ],
+        workflowKey: "risks",
+      }),
+    });
+
+    const response = await POST(request);
+    const stream = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-vercel-ai-ui-message-stream")).toBe("v1");
+    expect(stream).toContain("I can only help with supply-chain operations and analysis");
+    expect(generateTextMock).not.toHaveBeenCalled();
+    expect(streamTextMock).not.toHaveBeenCalled();
+  });
+
+  it("blocks a live prompt classified as off-topic", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    generateTextMock.mockResolvedValueOnce({
+      output: { category: "off_topic", confidence: 0.97 },
+    });
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Who won the football match?" }],
+          },
+        ],
+        workflowKey: "risks",
+      }),
+    });
+
+    const response = await POST(request);
+    const stream = await response.text();
+
+    expect(stream).toContain("I can only help with supply-chain operations and analysis");
+    expect(streamTextMock).not.toHaveBeenCalled();
+  });
+
+  it("fails open when live prompt classification fails", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    generateTextMock.mockRejectedValueOnce(new Error("classifier unavailable"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Check carrier recovery options." }],
+          },
+        ],
+        workflowKey: "risks",
+      }),
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    expect(streamTextMock).toHaveBeenCalledOnce();
+    expect(warn).toHaveBeenCalledOnce();
+  });
+
+  it("removes blocked turns before sending a later allowed prompt to the model", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const refusal =
+      "I can only help with supply-chain operations and analysis. Please connect your question to suppliers, procurement, inventory, logistics, shipments, demand planning, production, or this application.";
+    const current = {
+      id: "message-3",
+      role: "user",
+      parts: [{ type: "text", text: "Check carrier recovery options." }],
+    };
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "calculate 2x2" }],
+          },
+          {
+            id: "message-2",
+            role: "assistant",
+            parts: [{ type: "text", text: refusal }],
+          },
+          current,
+        ],
+        workflowKey: "risks",
+      }),
+    });
+
+    await POST(request);
+
+    expect(convertToModelMessagesMock).toHaveBeenCalledWith([current]);
+    const guardrailPrompt = (generateTextMock.mock.calls[0][0] as { prompt: string }).prompt;
+    expect(guardrailPrompt).not.toContain("calculate 2x2");
   });
 
   it("uses the server-derived procurement identity without financial elevation", async () => {

@@ -14,6 +14,12 @@ import { getChatTools, loadExternalContext } from "@/lib/chat-extensions";
 import { buildAppContext } from "@/lib/context";
 import { getCurrentUser } from "@/lib/auth";
 import { normalizePersona } from "@/lib/permissions";
+import {
+  OFF_TOPIC_RESPONSE,
+  checkPromptScope,
+  getUIMessageText,
+  sanitizeGuardrailHistory,
+} from "@/lib/prompt-scope";
 
 export const runtime = "nodejs";
 
@@ -77,14 +83,6 @@ function formatChatStreamError(error: unknown): string {
   return error instanceof Error ? cleanErrorText(error.message) : cleanErrorText(error);
 }
 
-function getMessageText(message: UIMessage): string {
-  return message.parts
-    .filter((part): part is Extract<(typeof message.parts)[number], { type: "text" }> => part.type === "text")
-    .map((part) => part.text)
-    .join("\n")
-    .trim();
-}
-
 function createMockResponse(reply: string): Response {
   const stream = createUIMessageStream({
     execute: ({ writer }) => {
@@ -108,11 +106,22 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const messages = Array.isArray(body.messages) ? body.messages : [];
-  const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
-  const question = lastUserMessage ? getMessageText(lastUserMessage) : "";
+  const sanitizedMessages = sanitizeGuardrailHistory(messages);
+  const lastUserMessage = [...sanitizedMessages].reverse().find((message) => message.role === "user");
+  const question = lastUserMessage ? getUIMessageText(lastUserMessage) : "";
 
   if (!question) {
     return Response.json({ error: "A user message is required." }, { status: 400 });
+  }
+
+  const scopeDecision = await checkPromptScope({
+    question,
+    messages: sanitizedMessages,
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  if (scopeDecision.blocked) {
+    return createMockResponse(OFF_TOPIC_RESPONSE);
   }
 
   const serverPersona = getCurrentUser().persona;
@@ -137,7 +146,7 @@ export async function POST(request: Request): Promise<Response> {
     ]
       .filter(Boolean)
       .join("\n\n"),
-    messages: await convertToModelMessages(messages),
+    messages: await convertToModelMessages(sanitizedMessages),
     tools: getChatTools(context),
     stopWhen: stepCountIs(2),
     providerOptions: {

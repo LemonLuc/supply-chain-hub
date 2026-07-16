@@ -32,6 +32,13 @@ export function normalizeChatOptions(model: unknown, thinking: unknown): {
 }
 
 export function buildSystemPrompt(context: AppContext): string {
+  const portfolioInstructions = context.decisionSupport?.heatMap?.length
+    ? `
+- Call renderSupplierPortfolio exactly once for this supplier-portfolio answer.
+- Choose bubble only when the normalized numeric measures materially improve the comparison; otherwise choose matrix.
+- The tool supplies trusted supplier data. Do not repeat or invent supplier values in tool input.`
+    : "";
+
   return `You are Supply Chain Hub. Answer using the live application snapshot below.
 
 Priorities:
@@ -43,7 +50,7 @@ Priorities:
 - Respect workflow access, financial visibility, and approval gates in the snapshot.
 - Any source listed in \`sources\` or \`selectedAuthorizedSources\` is already authorized and available for this request.
 - Do not say you lack access to SAP, SharePoint, Excel, or any selected source. If selected evidence is present, answer from it.
-- If \`documents\` contains workbook data, use that workbook data directly for recent changes, rows, owners, versions, and locations.
+- If \`documents\` contains workbook data, use that workbook data directly for recent changes, rows, owners, versions, and locations.${portfolioInstructions}
 
 Application snapshot:
 ${JSON.stringify(context, null, 2)}`;

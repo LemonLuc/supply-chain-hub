@@ -158,6 +158,78 @@ describe("POST /api/chat", () => {
     expect(systemPrompt).toContain("Two consolidation candidates pass the resilience guardrails");
   });
 
+  it("registers a trusted model-selected portfolio tool for executive requests", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Compare supplier cost and resilience." }],
+          },
+        ],
+        workflowKey: "consolidate",
+        demoPersona: "executive",
+        selectedSourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
+      }),
+    });
+
+    await POST(request);
+
+    const options = streamTextMock.mock.calls[0][0] as {
+      tools: {
+        renderSupplierPortfolio?: {
+          execute?: (input: { preferredView: "matrix" | "bubble"; reason: string }) => unknown;
+        };
+      };
+      stopWhen?: unknown;
+      system: string;
+    };
+    expect(options.tools).toHaveProperty("renderSupplierPortfolio");
+    expect(options.stopWhen).toBeDefined();
+    expect(options.system).toContain("Call renderSupplierPortfolio exactly once");
+
+    const output = await options.tools.renderSupplierPortfolio?.execute?.({
+      preferredView: "bubble",
+      reason: "Quantitative measures are complete.",
+    });
+    expect(output).toMatchObject({
+      view: "bubble",
+      requestedView: "bubble",
+      fallbackApplied: false,
+      suppliers: expect.arrayContaining([
+        expect.objectContaining({ supplier: "Steripack Hohenlohe" }),
+      ]),
+    });
+  });
+
+  it("does not register the portfolio tool outside authorized decision support", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "What should I do first?" }],
+          },
+        ],
+        workflowKey: "risks",
+        demoPersona: "logistics",
+      }),
+    });
+
+    await POST(request);
+
+    const options = streamTextMock.mock.calls[0][0] as { tools: Record<string, unknown> };
+    expect(options.tools).toEqual({});
+  });
+
   it("enables OpenAI reasoning summaries for live responses", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
     const request = new Request("http://localhost/api/chat", {

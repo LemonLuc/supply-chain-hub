@@ -42,6 +42,15 @@ describe("chat grounding", () => {
     expect(prompt).toContain("Never reveal private chain-of-thought");
   });
 
+  it("requires a portfolio view tool call only for authorized decision support", () => {
+    const portfolioPrompt = buildSystemPrompt(buildAppContext("consolidate", "executive"));
+    const logisticsPrompt = buildSystemPrompt(buildAppContext("risks", "logistics"));
+
+    expect(portfolioPrompt).toContain("Call renderSupplierPortfolio exactly once");
+    expect(portfolioPrompt).toContain("Choose bubble only when the normalized numeric measures");
+    expect(logisticsPrompt).not.toContain("renderSupplierPortfolio");
+  });
+
   it("returns an operational, tool-grounded demo reply", () => {
     const reply = generateMockReply("What should I do first?", buildAppContext("risks"));
 

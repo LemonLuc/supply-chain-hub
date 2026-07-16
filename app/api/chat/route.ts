@@ -4,6 +4,7 @@ import {
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
+  stepCountIs,
   streamText,
   type UIMessage,
 } from "ai";
@@ -137,7 +138,8 @@ export async function POST(request: Request): Promise<Response> {
       .filter(Boolean)
       .join("\n\n"),
     messages: await convertToModelMessages(messages),
-    tools: getChatTools(),
+    tools: getChatTools(context),
+    stopWhen: stepCountIs(2),
     providerOptions: {
       openai: {
         reasoningEffort: options.thinking,

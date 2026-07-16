@@ -93,15 +93,16 @@ const applicationHelpPattern =
   /^(?:what can (?:this app|you) do|how do i use (?:this|the) app|help)[.!?]*$/i;
 const conversationPattern =
   /^(?:hi|hello|hey|thanks|thank you|yes|no|why|show me more|what should i do first|what (?:else|about .+))[.!?]*$/i;
-const arithmeticRequestPattern =
-  /^\s*(?:(?:calculate|calcualte|compute|solve|what(?:'s| is))\s+)?-?\d+(?:\.\d+)?(?:\s*(?:x|×|\*|\/|\+|-)\s*-?\d+(?:\.\d+)?)+(?:\s|[?!.,:]|\b.*$)/i;
+const arithmeticExpressionPattern =
+  /^\(?\s*-?\d+(?:\.\d+)?(?:\s*(?:x|×|\*|\/|\+|-)\s*-?\d+(?:\.\d+)?)+\s*\)?(?:\s|[?!.,:]|$)/i;
 
 const obviousOffTopicPatterns = [
   /\b(?:write|compose) (?:me )?(?:a )?(?:poem|story|song|essay)\b/i,
   /\b(?:tell me )?(?:a )?joke\b/i,
   /\b(?:what is|what's) the capital of\b/i,
-  /\b(?:write|debug|explain) (?:some )?(?:code|javascript|typescript|python)\b/i,
 ];
+const programmingRequestPattern =
+  /\b(?:write|debug|explain) (?:some )?(?:code|javascript|typescript|python)\b/i;
 
 function hasLiveApiKey(value: string | undefined): value is string {
   return Boolean(value && !value.startsWith("sk-sample") && value !== "replace-me");
@@ -118,9 +119,26 @@ function hasRecentSupplyChainContext(messages: UIMessage[]): boolean {
     .some((message) => hasSupplyChainSignal(getUIMessageText(message)));
 }
 
+function hasArithmeticRequest(question: string): boolean {
+  const withoutPolitePrefix = question
+    .trim()
+    .replace(/^(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?/i, "");
+  const expression = withoutPolitePrefix.replace(
+    /^(?:calculate|calcualte|compute|solve|what(?:'s| is))\s+/i,
+    "",
+  );
+  return arithmeticExpressionPattern.test(expression);
+}
+
 function isObviouslyOffTopic(question: string, messages: UIMessage[]): boolean {
   if (obviousOffTopicPatterns.some((pattern) => pattern.test(question))) return true;
-  if (!arithmeticRequestPattern.test(question)) return false;
+  if (
+    programmingRequestPattern.test(question) &&
+    !materialCalculationSignals.some((pattern) => pattern.test(question))
+  ) {
+    return true;
+  }
+  if (!hasArithmeticRequest(question)) return false;
   if (materialCalculationSignals.some((pattern) => pattern.test(question))) return false;
   return !hasRecentSupplyChainContext(messages);
 }

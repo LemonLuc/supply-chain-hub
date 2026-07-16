@@ -80,6 +80,9 @@ describe("prompt scope guardrail", () => {
     "Calculate 2x2 for the supply chain",
     "Write a poem about equality",
     "calculate 2 + 2 + 2",
+    "Please calculate 2x2",
+    "Can you calculate 2x2?",
+    "What is (2 * 2)?",
   ])("blocks disguised or multi-step off-topic prompts in demo mode: %s", async (question) => {
     const result = await checkPromptScope({
       question,
@@ -89,6 +92,17 @@ describe("prompt scope guardrail", () => {
 
     expect(result.blocked).toBe(true);
     expect(result.source).toBe("deterministic");
+  });
+
+  it("allows programming that materially supports supply-chain analysis in demo mode", async () => {
+    const question = "Write Python code to calculate safety stock for inventory.";
+    const result = await checkPromptScope({
+      question,
+      messages: [message("user-1", "user", question)],
+      apiKey: "sk-sample-replace-me",
+    });
+
+    expect(result.blocked).toBe(false);
   });
 
   it("allows application help and contextual follow-ups in demo mode", async () => {

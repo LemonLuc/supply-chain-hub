@@ -306,6 +306,43 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByLabelText("Contract repository")).not.toBeInTheDocument();
   });
 
+  it("defaults to GPT-5.6 Sol with high reasoning and offers only GPT-5.6 choices", () => {
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
+    const modelSelect = screen.getByLabelText("Model") as HTMLSelectElement;
+    const thinkingSelect = screen.getByLabelText("Thinking level") as HTMLSelectElement;
+
+    expect(modelSelect).toHaveValue("gpt-5.6-sol");
+    expect(within(modelSelect).getAllByRole("option").map((option) => (option as HTMLOptionElement).value)).toEqual([
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna",
+    ]);
+    expect(thinkingSelect).toHaveValue("high");
+    expect(within(thinkingSelect).getAllByRole("option").map((option) => (option as HTMLOptionElement).value)).toEqual([
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max",
+    ]);
+  });
+
+  it("sends Sol with high reasoning when the user keeps the defaults", async () => {
+    const fetchMock = mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toMatchObject({
+      model: "gpt-5.6-sol",
+      thinking: "high",
+    });
+  });
+
   it("collapses chat settings when switching demo persona", () => {
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 

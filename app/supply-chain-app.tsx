@@ -27,7 +27,14 @@ import remarkGfm from "remark-gfm";
 
 import { mockUsers, type CurrentUser } from "@/lib/auth";
 import { buildActionDraft, getActionReviewer, type ActionWorkflowResult } from "@/lib/action-workflows";
-import { supportedModels, thinkingLevels, type SupportedModel, type ThinkingLevel } from "@/lib/chat";
+import {
+  defaultModel,
+  defaultThinkingLevel,
+  supportedModels,
+  thinkingLevels,
+  type SupportedModel,
+  type ThinkingLevel,
+} from "@/lib/chat";
 import { buildAppContext, buildRoleToolSources, resolveWorkflowForPrompt } from "@/lib/context";
 import { workflows, type WorkflowAction, type WorkflowKey } from "@/lib/demo-data";
 import { getPersonaPolicy, personas, type PersonaId } from "@/lib/permissions";
@@ -197,8 +204,8 @@ function personalTaskTitle(action: WorkflowAction) {
 export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   const [persona, setPersona] = useState<PersonaId>(currentUser.persona);
   const [workflowKey, setWorkflowKey] = useState<WorkflowKey>("risks");
-  const [model, setModel] = useState<SupportedModel>("gpt-5.4-mini");
-  const [thinking, setThinking] = useState<ThinkingLevel>("high");
+  const [model, setModel] = useState<SupportedModel>(defaultModel);
+  const [thinking, setThinking] = useState<ThinkingLevel>(defaultThinkingLevel);
   const [input, setInput] = useState("");
   const [hasRun, setHasRun] = useState(false);
   const [actionNotice, setActionNotice] = useState("");

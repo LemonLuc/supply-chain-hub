@@ -1,0 +1,21 @@
+.gitignore
+  s_aae6c65fce6804::t_6c7399687df3e8 9
+docs/superpowers/specs/2026-07-16-supplier-savings-relationship-visualization-design.md
+  s_aae6c65fce6804::t_d0c44f23df5d9e 1-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "8f42c57cebebb99cd9cdbeb1b66845b750a300aa",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

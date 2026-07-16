@@ -7,7 +7,6 @@ import {
   ChevronDown,
   ChevronRight,
   Clock3,
-  Copy,
   Database,
   ExternalLink,
   FileCheck2,
@@ -43,6 +42,7 @@ import {
   resolveSupplierPortfolioVisualization,
 } from "@/lib/supplier-portfolio";
 
+import { AnswerActions, type AnswerFeedback, type FeedbackRating } from "./answer-actions";
 import {
   getMessagePortfolioVisualization,
   SupplierPortfolioVisualizationView,
@@ -220,6 +220,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>([]);
   const [personalTasks, setPersonalTasks] = useState<PersonalTask[]>([]);
   const [copiedMessageId, setCopiedMessageId] = useState("");
+  const [answerFeedback, setAnswerFeedback] = useState<Record<string, AnswerFeedback>>({});
   const [recommendationNotice, setRecommendationNotice] = useState("");
   const [openedRecommendationSource, setOpenedRecommendationSource] = useState("");
   const [localDateTime] = useState(() =>
@@ -277,11 +278,11 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   function getSelectedSourceIdsForWorkflow(nextWorkflowKey: WorkflowKey) {
     const selectedSourceIds = new Set(
       roleToolSources
-      .filter(
-        (source) =>
-          source.workflowKeys.includes(nextWorkflowKey) &&
-          sourceIsSelected(source.toolId, source.selected),
-      )
+        .filter(
+          (source) =>
+            source.workflowKeys.includes(nextWorkflowKey) &&
+            sourceIsSelected(source.toolId, source.selected),
+        )
         .map((source) => source.id),
     );
 
@@ -299,6 +300,8 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     setActivePrompt("");
     setRecommendationNotice("");
     setOpenedRecommendationSource("");
+    setCopiedMessageId("");
+    setAnswerFeedback({});
     setMessages([]);
     clearError();
   }
@@ -333,11 +336,52 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
 
   async function copyAnswer(message: UIMessage) {
     const text = messageText(message);
-    if (!text) return;
+    if (!text || typeof navigator.clipboard?.writeText !== "function") return;
 
-    await navigator.clipboard?.writeText(text);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      return;
+    }
+
     setCopiedMessageId(message.id);
     window.setTimeout(() => setCopiedMessageId((current) => (current === message.id ? "" : current)), 1800);
+  }
+
+  function selectAnswerFeedback(messageId: string, rating: FeedbackRating) {
+    setAnswerFeedback((current) => ({
+      ...current,
+      [messageId]: {
+        rating,
+        comment: current[messageId]?.comment ?? "",
+        formOpen: true,
+        submitted: false,
+      },
+    }));
+  }
+
+  function updateAnswerFeedbackComment(messageId: string, comment: string) {
+    setAnswerFeedback((current) => {
+      const feedback = current[messageId];
+      return feedback ? { ...current, [messageId]: { ...feedback, comment } } : current;
+    });
+  }
+
+  function submitAnswerFeedback(messageId: string) {
+    setAnswerFeedback((current) => {
+      const feedback = current[messageId];
+      return feedback
+        ? { ...current, [messageId]: { ...feedback, formOpen: false, submitted: true } }
+        : current;
+    });
+  }
+
+  function cancelAnswerFeedback(messageId: string) {
+    setAnswerFeedback((current) => {
+      const remaining = { ...current };
+      delete remaining[messageId];
+      return remaining;
+    });
   }
 
   function openRecommendedSource(source: string) {
@@ -649,11 +693,6 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                 >
                   <div className="message-heading">
                     <span>{message.role === "user" ? "You" : "Supply Chain Hub"}</span>
-                    {message.role === "assistant" && messageText(message) && (
-                      <button type="button" onClick={() => void copyAnswer(message)} aria-label="Copy answer" title="Copy answer">
-                        {copiedMessageId === message.id ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-                      </button>
-                    )}
                   </div>
                   {message.role === "assistant" && <ReasoningSummary message={message} />}
                   {messageText(message) &&
@@ -662,6 +701,17 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                     ) : (
                       <p>{messageText(message)}</p>
                     ))}
+                  {message.role === "assistant" && messageText(message) && (
+                    <AnswerActions
+                      copied={copiedMessageId === message.id}
+                      feedback={answerFeedback[message.id]}
+                      onCopy={() => void copyAnswer(message)}
+                      onSelectFeedback={(rating) => selectAnswerFeedback(message.id, rating)}
+                      onCommentChange={(comment) => updateAnswerFeedbackComment(message.id, comment)}
+                      onSubmitFeedback={() => submitAnswerFeedback(message.id)}
+                      onCancelFeedback={() => cancelAnswerFeedback(message.id)}
+                    />
+                  )}
                 </div>
               ))}
               {status === "submitted" && <div className="thinking-state">Connecting to authorized tools and retrieving records...</div>}

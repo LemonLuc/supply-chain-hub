@@ -1,0 +1,31 @@
+app/api/actions/route.test.ts
+  s_aae6c65fce6804::t_321bd1ab9f0d1c 127-187
+lib/action-agents.ts
+  s_aae6c65fce6804::t_9e47e5b65c4efe 85,143-145
+lib/action-workflows.test.ts
+  s_aae6c65fce6804::t_0a676745696849 1-44
+lib/action-workflows.ts
+  s_aae6c65fce6804::t_db1eeebc0e5592 13-14,37-48,62-63,67,74-78,86-91,93-95,118-119,122,129-130,133-141
+lib/context.test.ts
+  s_aae6c65fce6804::t_c093fe48d39c6f 232-246,260-303
+lib/context.ts
+  s_aae6c65fce6804::t_1f737e7d29a9c1 51-57,60,164-167
+lib/demo-data.ts
+  s_aae6c65fce6804::t_76695b3dea49c7 32-34,150-153,229-232,372-374
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2eb69892d829e409c86a6a06082fafc09a8ea049",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

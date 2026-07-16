@@ -1,0 +1,21 @@
+lib/prompt-scope.test.ts
+  s_3edbcf248d5d57::t_b318145abaf37c 62-93,124-179
+lib/prompt-scope.ts
+  s_3edbcf248d5d57::t_54aa1c0c31ab98 15,49-89,96-97,100-103,111-118,121-125,170-204,213-220
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "bac7ce3c4cb37dbb9c3f83932fd8b99c29a5046a",
+  "prompts": {},
+  "sessions": {
+    "s_3edbcf248d5d57": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b4c-bdda-7471-ae68-ce3d60e7b91a",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

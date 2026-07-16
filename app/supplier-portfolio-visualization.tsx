@@ -230,17 +230,18 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
 export function getMessagePortfolioVisualization(
   messages: UIMessage[],
 ): SupplierPortfolioVisualization | undefined {
-  for (const message of [...messages].reverse()) {
-    if (message.role !== "assistant") continue;
+  const latestAssistantMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === "assistant");
+  if (!latestAssistantMessage) return undefined;
 
-    for (const part of [...message.parts].reverse()) {
-      if (!isRecord(part)) continue;
-      if (part.type !== "tool-renderSupplierPortfolio") continue;
-      if (part.state !== "output-available") continue;
+  for (const part of [...latestAssistantMessage.parts].reverse()) {
+    if (!isRecord(part)) continue;
+    if (part.type !== "tool-renderSupplierPortfolio") continue;
+    if (part.state !== "output-available") continue;
 
-      const visualization = parseSupplierPortfolioVisualization(part.output);
-      if (visualization) return visualization;
-    }
+    const visualization = parseSupplierPortfolioVisualization(part.output);
+    if (visualization) return visualization;
   }
 
   return undefined;

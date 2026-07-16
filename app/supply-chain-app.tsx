@@ -31,6 +31,15 @@ import { supportedModels, thinkingLevels, type SupportedModel, type ThinkingLeve
 import { buildAppContext, buildRoleToolSources, resolveWorkflowForPrompt } from "@/lib/context";
 import { workflows, type WorkflowAction, type WorkflowKey } from "@/lib/demo-data";
 import { getPersonaPolicy, personas, type PersonaId } from "@/lib/permissions";
+import {
+  getDemoPortfolioView,
+  resolveSupplierPortfolioVisualization,
+} from "@/lib/supplier-portfolio";
+
+import {
+  getMessagePortfolioVisualization,
+  SupplierPortfolioVisualizationView,
+} from "./supplier-portfolio-visualization";
 
 type ApprovalStatus = "pending" | "approved" | "denied";
 
@@ -178,14 +187,6 @@ function approvalStatusText(request: ApprovalRequest) {
   return `Pending review by ${reviewer}`;
 }
 
-function heatMapDecision(item: { cost: string; resilience: string; recommendation: string }) {
-  const recommendation = item.recommendation.toLowerCase();
-  if (recommendation.includes("protect")) return "Protect";
-  if (recommendation.includes("retain")) return "Retain";
-  if (recommendation.includes("consolidate")) return "Consolidate";
-  return "Review";
-}
-
 function personalTaskTitle(action: WorkflowAction) {
   if (action.label === "Create Outlook recovery task") {
     return "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff with Supply Chain Hub";
@@ -242,6 +243,19 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     () => buildAppContext(workflowKey, persona, selectedSourceIds, activePrompt),
     [workflowKey, persona, selectedSourceIds, activePrompt],
   );
+  const portfolioVisualization = useMemo(() => {
+    const modelVisualization = getMessagePortfolioVisualization(messages);
+    if (modelVisualization) return modelVisualization;
+
+    const suppliers = appContext.decisionSupport?.heatMap;
+    return suppliers
+      ? resolveSupplierPortfolioVisualization(
+          suppliers,
+          getDemoPortfolioView(activePrompt),
+          "Selected from available portfolio measures",
+        )
+      : undefined;
+  }, [activePrompt, appContext.decisionSupport?.heatMap, messages]);
 
   useEffect(() => {
     if (!messages.length) return;
@@ -810,29 +824,8 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
 
         {canShowResults && (
           <section className="results" aria-label="Supply Chain Hub results">
-            {appContext.decisionSupport?.heatMap && (
-              <section className="heatmap-section">
-                <div className="section-title">
-                  <div><p className="eyebrow">Decision support</p><h3>Supplier portfolio heat map</h3></div>
-                  <span className="source-note">Cost versus resilience</span>
-                </div>
-                <div className="heatmap">
-                  {appContext.decisionSupport.heatMap.map((item) => (
-                    <article
-                      className={`heat-cell decision-${heatMapDecision(item).toLowerCase().replaceAll(" ", "-")} cost-${item.cost.toLowerCase()} resilience-${item.resilience.toLowerCase()}`}
-                      key={item.supplier}
-                    >
-                      <span>{item.supplier}</span>
-                      <strong>{item.recommendation}</strong>
-                      <small>
-                        <mark>{heatMapDecision(item)}</mark>
-                        <mark>Cost: {item.cost}</mark>
-                        <mark>Resilience: {item.resilience}</mark>
-                      </small>
-                    </article>
-                  ))}
-                </div>
-              </section>
+            {portfolioVisualization && (
+              <SupplierPortfolioVisualizationView visualization={portfolioVisualization} />
             )}
 
             <section className="records-section">

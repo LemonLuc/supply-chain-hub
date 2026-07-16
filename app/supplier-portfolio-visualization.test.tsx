@@ -140,4 +140,39 @@ describe("SupplierPortfolioVisualizationView", () => {
 
     expect(getMessagePortfolioVisualization(messages)).toBeUndefined();
   });
+
+  it("does not reuse a portfolio choice from an older assistant response", () => {
+    const visualization = resolveSupplierPortfolioVisualization(
+      suppliers,
+      "bubble",
+      "Quantitative comparison",
+    );
+    const messages = [
+      {
+        id: "assistant-1",
+        role: "assistant",
+        parts: [
+          {
+            type: "tool-renderSupplierPortfolio",
+            toolCallId: "call-1",
+            state: "output-available",
+            input: { preferredView: "bubble", reason: "Quantitative comparison" },
+            output: visualization,
+          },
+        ],
+      },
+      {
+        id: "user-2",
+        role: "user",
+        parts: [{ type: "text", text: "Show the matrix instead." }],
+      },
+      {
+        id: "assistant-2",
+        role: "assistant",
+        parts: [{ type: "text", text: "Using the categorical view." }],
+      },
+    ] as unknown as UIMessage[];
+
+    expect(getMessagePortfolioVisualization(messages)).toBeUndefined();
+  });
 });

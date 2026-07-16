@@ -3,6 +3,8 @@ import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { mockUsers } from "@/lib/auth";
+import { workflows } from "@/lib/demo-data";
+import { resolveSupplierPortfolioVisualization } from "@/lib/supplier-portfolio";
 
 import { SupplyChainApp } from "./supply-chain-app";
 
@@ -122,6 +124,42 @@ function mockChatStreamWithMarkdownTable() {
               "| DHL Freight | 25 June | Attention |",
               "| FedEx | 23 June | On schedule |",
             ].join("\n"),
+          });
+          writer.write({ type: "text-end", id: "answer-1" });
+        },
+      }),
+    }),
+  );
+}
+
+function mockChatStreamWithPortfolioTool(view: "matrix" | "bubble") {
+  const suppliers = workflows.consolidate.heatMap ?? [];
+  const visualization = resolveSupplierPortfolioVisualization(
+    suppliers,
+    view,
+    view === "bubble" ? "Numeric measures support a quantitative comparison." : "Categorical bands support a decision matrix.",
+  );
+
+  return vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    createUIMessageStreamResponse({
+      stream: createUIMessageStream({
+        execute: ({ writer }) => {
+          writer.write({
+            type: "tool-input-available",
+            toolCallId: "portfolio-view-1",
+            toolName: "renderSupplierPortfolio",
+            input: { preferredView: view, reason: visualization.reason },
+          });
+          writer.write({
+            type: "tool-output-available",
+            toolCallId: "portfolio-view-1",
+            output: visualization,
+          });
+          writer.write({ type: "text-start", id: "answer-1" });
+          writer.write({
+            type: "text-delta",
+            id: "answer-1",
+            delta: "The portfolio view reflects the available cost and resilience evidence.",
           });
           writer.write({ type: "text-end", id: "answer-1" });
         },
@@ -335,7 +373,7 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByRole("button", { name: /Share risk register with Lukas/i })).not.toBeInTheDocument();
   });
 
-  it("reveals the executive heat map from merged executive sources only after a prompt", async () => {
+  it("reveals the executive supplier matrix from merged executive sources only after a prompt", async () => {
     const fetchMock = mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
@@ -343,21 +381,54 @@ describe("SupplyChainApp", () => {
     expect(screen.getByLabelText("Contract repository")).toBeChecked();
     expect(screen.queryByLabelText("Shipping providers")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Supplier qualification database")).not.toBeInTheDocument();
-    expect(screen.queryByText("Supplier portfolio heat map")).not.toBeInTheDocument();
+    expect(screen.queryByText("Supplier cost–resilience matrix")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
 
-    await waitFor(() => expect(screen.getByText("Supplier portfolio heat map")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("table", { name: /supplier cost and resilience matrix/i }),
+      ).toBeInTheDocument(),
+    );
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     expect(requestBody.workflowKey).toBe("consolidate");
     expect(requestBody.selectedSourceIds).toEqual(["sap", "contracts", "quality", "resilience", "policy"]);
     expect(screen.queryByText("C-level approval required")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Consolidate")[0].closest(".heat-cell")).toHaveClass("decision-consolidate");
-    expect(screen.getAllByText("Retain")[0].closest(".heat-cell")).toHaveClass("decision-retain");
-    expect(screen.getByText("Protect").closest(".heat-cell")).toHaveClass("decision-protect");
+    expect(screen.getByText("Steripack Hohenlohe").closest(".supplier-marker")).toHaveClass("action-consolidate");
+    expect(screen.getByText("MediSeal Jena").closest(".supplier-marker")).toHaveClass("action-retain");
+    expect(screen.getByText("Glaswerke Mainz").closest(".supplier-marker")).toHaveClass("action-protect");
     expect(screen.getByRole("button", { name: /Draft contract termination letter/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Request executive review/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Terminate contract now/i })).not.toBeInTheDocument();
+  });
+
+  it("uses the quantitative bubble chart for an explicit demo prompt", async () => {
+    mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.executive} />);
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "Plot a quantitative bubble chart of supplier cost score and resilience score." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("img", { name: /supplier cost and resilience bubble chart/i }),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole("table", { name: /supplier cost and resilience matrix/i })).not.toBeInTheDocument();
+  });
+
+  it("prefers completed validated model tool output over the demo prompt fallback", async () => {
+    mockChatStreamWithPortfolioTool("bubble");
+    render(<SupplyChainApp currentUser={mockUsers.executive} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
+
+    expect(
+      await screen.findByRole("img", { name: /supplier cost and resilience bubble chart/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Numeric measures support a quantitative comparison.")).toBeInTheDocument();
   });
 
   it("keeps the executive prompts strategic", async () => {
@@ -587,7 +658,11 @@ describe("SupplyChainApp", () => {
     render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
-    await waitFor(() => expect(screen.getByText("Supplier portfolio heat map")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("table", { name: /supplier cost and resilience matrix/i }),
+      ).toBeInTheDocument(),
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /Draft contract termination letter/i }));
 

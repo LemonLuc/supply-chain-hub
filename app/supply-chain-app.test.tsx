@@ -307,8 +307,8 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByText("Agent activity")).not.toBeInTheDocument();
     const chatPanel = screen.getByLabelText("Ask Supply Chain Hub");
     expect(within(chatPanel).getByRole("button", { name: /Close actions/i })).toBeInTheDocument();
-    expect(within(chatPanel).queryByRole("button", { name: /Request DHL recovery routing/i })).not.toBeInTheDocument();
-    expect(within(chatPanel).queryByRole("button", { name: /Write Dana Narid for review/i })).not.toBeInTheDocument();
+    expect(within(chatPanel).getByRole("button", { name: /Request DHL recovery routing/i })).toBeInTheDocument();
+    expect(within(chatPanel).getByRole("button", { name: /Write Dana Narid for review/i })).toBeInTheDocument();
     expect(within(chatPanel).getByRole("button", { name: /Log DHL exception on PO 4500872319/i })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /Show me potential delivery risks/i })).toHaveLength(1);
   });
@@ -365,7 +365,7 @@ describe("SupplyChainApp", () => {
 
     expect(screen.queryByRole("button", { name: /Supplier alternatives/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Executive supplier portfolio/i })).not.toBeInTheDocument();
-    expect(screen.getByText("3 / 4 data sources selected")).toBeInTheDocument();
+    expect(screen.getByText("6 / 6 data sources selected")).toBeInTheDocument();
     expect(screen.queryByText(/Risk radar/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Tool access/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Choose authorized sources" })).not.toBeInTheDocument();
@@ -442,19 +442,19 @@ describe("SupplyChainApp", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     expect(requestBody.workflowKey).toBe("delay");
-    expect(requestBody.selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity", "outlook"]);
+    expect(requestBody.selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity", "outlook", "teams"]);
     expect(screen.queryByRole("button", { name: /Share risk register with Lukas/i })).not.toBeInTheDocument();
   });
 
-  it("shows shared procurement tools once and applies their selection to every workflow", async () => {
+  it("applies the Microsoft 365 Suite selection to every procurement workflow", async () => {
     const fetchMock = mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.procurement} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
     expect(screen.getAllByLabelText("SAP S/4HANA")).toHaveLength(1);
-    expect(screen.getAllByLabelText("Outlook")).toHaveLength(1);
-    expect(screen.getByText("7 / 8 data sources selected")).toBeInTheDocument();
-    fireEvent.click(screen.getByLabelText("Outlook"));
+    expect(screen.getAllByLabelText("Microsoft 365 Suite")).toHaveLength(1);
+    expect(screen.getByText("6 / 6 data sources selected")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Microsoft 365 Suite"));
 
     fireEvent.change(screen.getByLabelText("Message"), {
       target: { value: "Show me potential delivery risks for this week." },
@@ -468,11 +468,48 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send message" }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
 
+    fireEvent.click(screen.getByLabelText("Microsoft 365 Suite"));
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "What approved alternates can cover the delayed turret assemblies?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+
     const bodies = fetchMock.mock.calls.map((call) => JSON.parse(String(call[1]?.body)));
     expect(bodies[0]).toMatchObject({ workflowKey: "risks" });
     expect(bodies[1]).toMatchObject({ workflowKey: "delay" });
+    expect(bodies[2]).toMatchObject({ workflowKey: "delay" });
     expect(bodies[0].selectedSourceIds).toEqual(["sap", "carriers", "warehouse"]);
-    expect(bodies[1].selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity"]);
+    expect(bodies[1].selectedSourceIds).toEqual(["sap", "quality", "capacity"]);
+    expect(bodies[2].selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity", "outlook", "teams"]);
+  });
+
+  it("groups Microsoft settings at each persona's authorization level", () => {
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
+
+    expect(screen.getByLabelText("Outlook")).toBeChecked();
+    expect(screen.getByLabelText("Microsoft SharePoint")).toBeChecked();
+    expect(screen.getByLabelText("Microsoft Word")).toBeChecked();
+    expect(screen.queryByLabelText("Microsoft 365 Suite")).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Demo identity"), {
+      target: { value: "procurement" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
+
+    expect(screen.getAllByLabelText("Microsoft 365 Suite")).toHaveLength(1);
+    expect(screen.queryByLabelText("Outlook")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Microsoft SharePoint")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Microsoft Word")).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Demo identity"), {
+      target: { value: "executive" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
+
+    expect(screen.getAllByLabelText("Microsoft 365 Suite")).toHaveLength(1);
+    expect(screen.queryByLabelText("Microsoft Word")).not.toBeInTheDocument();
   });
 
   it("reveals the executive supplier matrix from merged executive sources only after a prompt", async () => {
@@ -494,7 +531,7 @@ describe("SupplyChainApp", () => {
     );
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     expect(requestBody.workflowKey).toBe("consolidate");
-    expect(requestBody.selectedSourceIds).toEqual(["sap", "contracts", "quality", "resilience", "policy"]);
+    expect(requestBody.selectedSourceIds).toEqual(["sap", "contracts", "quality", "resilience", "policy", "word"]);
     expect(screen.queryByText("C-level approval required")).not.toBeInTheDocument();
     expect(screen.getByText("Steripack Hohenlohe").closest(".supplier-marker")).toHaveClass("decision-strategic-trade-off");
     expect(screen.getByText("MediSeal Jena").closest(".supplier-marker")).toHaveClass("decision-keep");
@@ -547,7 +584,7 @@ describe("SupplyChainApp", () => {
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     expect(requestBody.workflowKey).toBe("consolidate");
     expect(requestBody.demoPersona).toBe("executive");
-    expect(requestBody.selectedSourceIds).toEqual(["sap", "contracts", "quality", "resilience", "policy"]);
+    expect(requestBody.selectedSourceIds).toEqual(["sap", "contracts", "quality", "resilience", "policy", "word"]);
   });
 
   it("does not show the simulated process summary after prompting", async () => {
@@ -744,7 +781,7 @@ describe("SupplyChainApp", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
-    expect(requestBody.selectedSourceIds).toEqual(["sap", "carriers", "warehouse"]);
+    expect(requestBody.selectedSourceIds).toEqual(["sap", "carriers", "warehouse", "outlook", "sharepoint", "word"]);
     expect(requestBody.selectedSourceIds).not.toContain("dhl");
     expect(requestBody.selectedSourceIds).not.toContain("fedex");
     expect(requestBody.selectedSourceIds).not.toContain("ups");
@@ -757,7 +794,7 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
     fireEvent.click(screen.getByLabelText("Shipping providers"));
 
-    expect(screen.getByText("2 / 4 data sources selected")).toBeInTheDocument();
+    expect(screen.getByText("5 / 6 data sources selected")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
@@ -775,9 +812,6 @@ describe("SupplyChainApp", () => {
     const fetchMock = mockChatAndActionStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
-    fireEvent.click(screen.getByLabelText("Outlook"));
-
     fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
     await screen.findByRole("button", { name: /Write Dana Narid for review/i });
 
@@ -788,7 +822,7 @@ describe("SupplyChainApp", () => {
     expect(JSON.parse(String(actionRequest?.[1]?.body))).toMatchObject({
       workflowKey: "risks",
       demoPersona: "logistics",
-      selectedSourceIds: ["sap", "carriers", "warehouse", "outlook"],
+      selectedSourceIds: ["sap", "carriers", "warehouse", "outlook", "sharepoint", "word"],
       actionLabel: "Write Dana Narid for review",
     });
     expect(screen.getByText("Submitted requests")).toBeInTheDocument();
@@ -814,9 +848,6 @@ describe("SupplyChainApp", () => {
   it("keeps approval controls visible while the action workflow is loading", async () => {
     const { resolveAction } = mockChatAndPendingActionStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
-    fireEvent.click(screen.getByLabelText("Outlook"));
 
     fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
     await screen.findByRole("button", { name: /Write Dana Narid for review/i });
@@ -857,9 +888,6 @@ describe("SupplyChainApp", () => {
       toolCalls: ["read_supply_chain_context", "prepare_action_workflow"],
     });
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
-    fireEvent.click(screen.getByLabelText("Outlook"));
 
     fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
     await screen.findByRole("button", { name: /Create Outlook recovery task/i });

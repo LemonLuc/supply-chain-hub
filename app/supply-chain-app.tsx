@@ -283,7 +283,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
             source.workflowKeys.includes(nextWorkflowKey) &&
             sourceIsSelected(source.toolId, source.selected),
         )
-        .map((source) => source.id),
+        .flatMap((source) => source.sourceIds),
     );
 
     return workflows[nextWorkflowKey].sources

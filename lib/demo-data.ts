@@ -120,7 +120,9 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       { id: "sap", name: "SAP S/4HANA", category: "ERP MCP", detail: "POs, material master, promised dates", selected: true },
       { id: "carriers", name: "Shipping providers", category: "Carrier MCP", detail: "DHL, FedEx, UPS milestones and exceptions", selected: true },
       { id: "warehouse", name: "EWM warehouse", category: "SAP MCP", detail: "Goods receipts and available stock", selected: true },
-      { id: "outlook", name: "Outlook", category: "Microsoft 365 MCP", detail: "Draft operational follow-ups", selected: false },
+      { id: "outlook", name: "Outlook", category: "Microsoft 365 MCP", detail: "Draft operational follow-ups", selected: true },
+      { id: "sharepoint", name: "Microsoft SharePoint", category: "Microsoft 365 MCP", detail: "Operational sites, lists and shared files", selected: true },
+      { id: "word", name: "Microsoft Word", category: "Microsoft 365 MCP", detail: "Create and update operational documents", selected: true },
     ],
     activity: [
       { tool: "SAP S/4HANA MCP", detail: "Read PO 4500872319 and material N-FK5-110-32", result: "480 blanks due 24 June", sourceIds: ["sap", "carriers"] },

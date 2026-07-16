@@ -180,7 +180,7 @@ describe("buildAppContext", () => {
 });
 
 describe("buildRoleToolSources", () => {
-  it("exposes unique stable tools to logistics planners", () => {
+  it("exposes separate active Microsoft tools to logistics", () => {
     const sources = buildRoleToolSources("logistics");
 
     expect(sources.map((source) => source.toolId)).toEqual([
@@ -188,42 +188,49 @@ describe("buildRoleToolSources", () => {
       "carriers",
       "warehouse",
       "outlook",
+      "sharepoint",
+      "word",
     ]);
+    expect(
+      sources
+        .filter((source) => ["outlook", "sharepoint", "word"].includes(source.toolId))
+        .every((source) => source.selected && source.sourceIds.length === 1),
+    ).toBe(true);
     expect(sources.every((source) => source.workflowKeys.every((key) => key === "risks"))).toBe(true);
   });
 
-  it("deduplicates shared procurement tools and retains their workflows", () => {
+  it("exposes one Microsoft 365 Suite connector to procurement", () => {
     const sources = buildRoleToolSources("procurement");
-    const outlook = sources.find((source) => source.toolId === "outlook");
+    const suite = sources.filter((source) => source.toolId === "microsoft-365");
 
     expect(new Set(sources.map((source) => source.toolId)).size).toBe(sources.length);
-    expect(sources.map((source) => source.toolId)).toEqual([
-      "sap",
-      "carriers",
-      "warehouse",
-      "outlook",
-      "quality",
-      "excel",
-      "capacity",
-      "teams",
-    ]);
-    expect(outlook).toMatchObject({
+    expect(suite).toHaveLength(1);
+    expect(suite[0]).toMatchObject({
+      name: "Microsoft 365 Suite",
+      category: "Microsoft 365 MCP",
       selected: true,
       workflowKeys: ["risks", "delay"],
     });
+    expect(suite[0].sourceIds).toEqual(["outlook", "sharepoint", "word", "excel", "teams"]);
+    expect(
+      sources.some((source) =>
+        ["outlook", "sharepoint", "word", "excel", "teams"].includes(source.toolId),
+      ),
+    ).toBe(false);
   });
 
-  it("exposes only unique strategic tools to executives", () => {
+  it("exposes one Microsoft 365 Suite connector to executives", () => {
     const sources = buildRoleToolSources("executive");
+    const suite = sources.filter((source) => source.toolId === "microsoft-365");
 
-    expect(sources.map((source) => source.toolId)).toEqual([
-      "sap",
-      "contracts",
-      "quality",
-      "resilience",
-      "policy",
-      "word",
-    ]);
+    expect(suite).toHaveLength(1);
+    expect(suite[0]).toMatchObject({
+      name: "Microsoft 365 Suite",
+      category: "Microsoft 365 MCP",
+      selected: true,
+      sourceIds: ["word"],
+    });
+    expect(sources.some((source) => source.toolId === "word")).toBe(false);
     expect(sources.every((source) => source.workflowKeys.includes("consolidate"))).toBe(true);
   });
 });

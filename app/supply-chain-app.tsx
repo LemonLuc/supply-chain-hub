@@ -275,8 +275,18 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   }
 
   function getSelectedSourceIdsForWorkflow(nextWorkflowKey: WorkflowKey) {
-    return roleToolSources
-      .filter((source) => source.workflowKey === nextWorkflowKey && sourceIsSelected(source.toolId, source.selected))
+    const selectedSourceIds = new Set(
+      roleToolSources
+      .filter(
+        (source) =>
+          source.workflowKeys.includes(nextWorkflowKey) &&
+          sourceIsSelected(source.toolId, source.selected),
+      )
+        .map((source) => source.id),
+    );
+
+    return workflows[nextWorkflowKey].sources
+      .filter((source) => selectedSourceIds.has(source.id))
       .map((source) => source.id);
   }
 

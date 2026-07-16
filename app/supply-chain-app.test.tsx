@@ -426,7 +426,7 @@ describe("SupplyChainApp", () => {
     render(<SupplyChainApp currentUser={mockUsers.procurement} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
-    expect(screen.getAllByLabelText("SAP S/4HANA").some((input) => input instanceof HTMLInputElement && input.checked)).toBe(true);
+    expect(screen.getByLabelText("SAP S/4HANA")).toBeChecked();
     expect(screen.getByLabelText("Supplier qualification database")).toBeChecked();
     expect(screen.queryByRole("button", { name: /Executive supplier portfolio/i })).not.toBeInTheDocument();
 
@@ -437,6 +437,35 @@ describe("SupplyChainApp", () => {
     expect(requestBody.workflowKey).toBe("delay");
     expect(requestBody.selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity", "outlook"]);
     expect(screen.queryByRole("button", { name: /Share risk register with Lukas/i })).not.toBeInTheDocument();
+  });
+
+  it("shows shared procurement tools once and applies their selection to every workflow", async () => {
+    const fetchMock = mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.procurement} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
+    expect(screen.getAllByLabelText("SAP S/4HANA")).toHaveLength(1);
+    expect(screen.getAllByLabelText("Outlook")).toHaveLength(1);
+    expect(screen.getByText("7 / 8 data sources selected")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Outlook"));
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "Show me potential delivery risks for this week." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "What approved alternates can cover the delayed turret assemblies?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+    const bodies = fetchMock.mock.calls.map((call) => JSON.parse(String(call[1]?.body)));
+    expect(bodies[0]).toMatchObject({ workflowKey: "risks" });
+    expect(bodies[1]).toMatchObject({ workflowKey: "delay" });
+    expect(bodies[0].selectedSourceIds).toEqual(["sap", "carriers", "warehouse"]);
+    expect(bodies[1].selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity"]);
   });
 
   it("reveals the executive supplier matrix from merged executive sources only after a prompt", async () => {

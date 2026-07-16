@@ -16,9 +16,9 @@
     "slides:deploy": "npm run slides:build && node -e \"require(\\\"fs\\\").rmSync(\\\"dist-slidev/_redirects\\\",{force:true})\" && wrangler deploy --config wrangler.deck.jsonc"
   },
   "dependencies": {
-    "@ai-sdk/openai": "latest",
+    "@ai-sdk/openai": "3.0.85",
     "@ai-sdk/react": "latest",
-    "@openai/agents": "^0.11.8",
+    "@openai/agents": "0.13.4",
     "@opennextjs/cloudflare": "^1.19.11",
     "ai": "latest",
     "lucide-react": "latest",

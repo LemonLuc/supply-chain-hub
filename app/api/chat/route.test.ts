@@ -50,7 +50,7 @@ describe("POST /api/chat", () => {
           },
         ],
         workflowKey: "risks",
-        model: "gpt-5.4-mini",
+        model: "gpt-5.6-sol",
         thinking: "medium",
       }),
     });
@@ -172,8 +172,8 @@ describe("POST /api/chat", () => {
           },
         ],
         workflowKey: "risks",
-        model: "gpt-5.4-mini",
-        thinking: "medium",
+        model: "gpt-5.6-terra",
+        thinking: "max",
       }),
     });
 
@@ -182,10 +182,10 @@ describe("POST /api/chat", () => {
     expect(response.status).toBe(200);
     expect(streamTextMock).toHaveBeenCalledOnce();
     expect(streamTextMock.mock.calls[0][0]).toMatchObject({
-      model: { model: "gpt-5.4-mini" },
+      model: { model: "gpt-5.6-terra" },
       providerOptions: {
         openai: {
-          reasoningEffort: "medium",
+          reasoningEffort: "max",
           reasoningSummary: "detailed",
         },
       },

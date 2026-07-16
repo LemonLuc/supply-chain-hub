@@ -3,32 +3,47 @@ import { describe, expect, it } from "vitest";
 import { buildAppContext } from "./context";
 import {
   buildSystemPrompt,
+  defaultModel,
+  defaultThinkingLevel,
   generateMockReply,
   normalizeChatOptions,
   supportedModels,
+  thinkingLevels,
 } from "./chat";
 
 describe("normalizeChatOptions", () => {
-  it("accepts supported model and thinking values", () => {
-    expect(normalizeChatOptions("gpt-5.4-mini", "high")).toEqual({
-      model: "gpt-5.4-mini",
-      thinking: "high",
+  it("accepts GPT-5.6 models and every supported reasoning effort", () => {
+    expect(normalizeChatOptions("gpt-5.6-luna", "max")).toEqual({
+      model: "gpt-5.6-luna",
+      thinking: "max",
     });
   });
 
-  it("uses safe defaults for unsupported values", () => {
+  it("uses Sol with high reasoning for unsupported values", () => {
     expect(normalizeChatOptions("legacy-model", "maximum")).toEqual({
-      model: "gpt-5.4-mini",
-      thinking: "high",
+      model: defaultModel,
+      thinking: defaultThinkingLevel,
     });
+    expect(defaultModel).toBe("gpt-5.6-sol");
+    expect(defaultThinkingLevel).toBe("high");
   });
 
-  it("offers the flagship, mini, and nano model families", () => {
-    expect(supportedModels.map((option) => option.id)).toEqual([
-      "gpt-5.5",
-      "gpt-5.4",
-      "gpt-5.4-mini",
-      "gpt-5.4-nano",
+  it("offers only the GPT-5.6 Sol, Terra, and Luna models", () => {
+    expect(supportedModels).toEqual([
+      { id: "gpt-5.6-sol", label: "GPT-5.6 Sol" },
+      { id: "gpt-5.6-terra", label: "GPT-5.6 Terra" },
+      { id: "gpt-5.6-luna", label: "GPT-5.6 Luna" },
+    ]);
+  });
+
+  it("offers all GPT-5.6 reasoning efforts", () => {
+    expect(thinkingLevels).toEqual([
+      { id: "none", label: "None" },
+      { id: "low", label: "Low" },
+      { id: "medium", label: "Medium" },
+      { id: "high", label: "High" },
+      { id: "xhigh", label: "Extra high" },
+      { id: "max", label: "Max" },
     ]);
   });
 });

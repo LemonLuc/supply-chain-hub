@@ -1,0 +1,19 @@
+docs/superpowers/plans/2026-07-16-gpt-5-6-model-selection.md
+  s_9c171f473a3134::t_8034c74c7dedd7 1-511
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "40275044d68a23cc680f000848f0983ed956492c",
+  "prompts": {},
+  "sessions": {
+    "s_9c171f473a3134": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b44-a2a3-7f22-a9c3-a6bead38647d",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

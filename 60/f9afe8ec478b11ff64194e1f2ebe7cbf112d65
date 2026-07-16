@@ -1,0 +1,27 @@
+app/api/chat/route.test.ts
+  s_c4cb1d5a9d831b::t_f5fe321130797f 161-232
+app/api/chat/route.ts
+  s_c4cb1d5a9d831b::t_f231e73e31795e 7,141-142
+lib/chat-extensions.ts
+  s_c4cb1d5a9d831b::t_3e3f33eedd7a0a 1-2,4-7,14-50
+lib/chat.test.ts
+  s_c4cb1d5a9d831b::t_89ce24d72817d2 45-53
+lib/chat.ts
+  s_c4cb1d5a9d831b::t_19d01da07eb6cd 35-41,53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "60f9afe8ec478b11ff64194e1f2ebe7cbf112d65",
+  "prompts": {},
+  "sessions": {
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

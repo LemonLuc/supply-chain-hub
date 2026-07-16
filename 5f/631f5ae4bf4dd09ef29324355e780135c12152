@@ -1,0 +1,21 @@
+app/supplier-portfolio-visualization.test.tsx
+  s_aae6c65fce6804::t_1ceb39305673ef 12,14,17,27,30-31,33-36,39,49,51-58
+app/supplier-portfolio-visualization.tsx
+  s_aae6c65fce6804::t_8fb0694f542d17 4-11,14,17,21-22,28-29,32,34-41,50,53,56-66,79-82,85-87,92-95,97-99,104-107,128-138,143,145,147,149-150,154-185,190-197,200-201,203,205,210-211,214-217,219-220,222-227,230-237,244-247,278-280,289,291-296
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5f631f5ae4bf4dd09ef29324355e780135c12152",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

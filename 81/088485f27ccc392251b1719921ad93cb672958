@@ -1,0 +1,21 @@
+app/globals.css
+  s_3edbcf248d5d57::t_94bc5efd0362fb 738-798
+docs/superpowers/specs/2026-07-16-off-topic-prompt-guardrail-design.md
+  s_3edbcf248d5d57::t_f91426691a3fa4 1-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "81088485f27ccc392251b1719921ad93cb672958",
+  "prompts": {},
+  "sessions": {
+    "s_3edbcf248d5d57": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b4c-bdda-7471-ae68-ce3d60e7b91a",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

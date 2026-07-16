@@ -253,7 +253,8 @@ h1, h2, h3, p { margin-top: 0; }
 .approval-card.status-approved .status-chip { color: #155c38; background: #dcfae6; }
 .approval-card.status-denied .status-chip { color: #7a271a; background: #fee4e2; }
 .approval-card.status-pending .status-chip { color: #6b4900; background: #fff0b5; }
-.status-on-schedule, .status-protected { color: #155c38; background: #dcfae6; }
+.status-on-schedule { color: #155c38; background: #dcfae6; }
+.status-protected { color: #285d9f; background: #eaf2ff; }
 .status-consolidation-candidate { color: #155c38; background: #dcfae6; }
 .status-attention, .status-rejected { color: #7a271a; background: #fee4e2; }
 .status-conditional-approval, .status-resequence-required { color: #6b4900; background: #fff0b5; }
@@ -359,16 +360,22 @@ h1, h2, h3, p { margin-top: 0; }
   --info-ink: #173b98;
   --info-surface: #edf2ff;
   --info-border: #b7c7f3;
+  --protected-ink: #285d9f;
+  --protected-surface: #eaf2ff;
   --decision-keep: #cf5561;
+  --decision-keep-fill: #f29aa3;
   --decision-keep-surface: #fdebed;
   --decision-keep-border: #efb4ba;
   --decision-consolidate: #1f9a68;
+  --decision-consolidate-fill: #73d2a8;
   --decision-consolidate-surface: #e8f7f0;
   --decision-consolidate-border: #a9ddc7;
   --decision-tradeoff: #e0a02d;
+  --decision-tradeoff-fill: #f2c467;
   --decision-tradeoff-surface: #fff4de;
   --decision-tradeoff-border: #efd092;
   --decision-low-priority: #738096;
+  --decision-low-priority-fill: #aeb8c7;
   --decision-low-priority-surface: #eef1f5;
   --decision-low-priority-border: #c8ced8;
   --chart-grid: rgba(21, 32, 51, 0.16);
@@ -415,16 +422,22 @@ h1, h2, h3, p { margin-top: 0; }
   --info-ink: #c9d6ff;
   --info-surface: rgba(75, 109, 206, 0.22);
   --info-border: rgba(142, 172, 255, 0.42);
+  --protected-ink: #b8d2ff;
+  --protected-surface: rgba(74, 128, 211, 0.22);
   --decision-keep: #ef7983;
+  --decision-keep-fill: #f3a5ad;
   --decision-keep-surface: rgba(207, 85, 97, 0.2);
   --decision-keep-border: rgba(239, 121, 131, 0.46);
   --decision-consolidate: #45c88b;
+  --decision-consolidate-fill: #80ddb7;
   --decision-consolidate-surface: rgba(31, 154, 104, 0.2);
   --decision-consolidate-border: rgba(69, 200, 139, 0.46);
   --decision-tradeoff: #efb44f;
+  --decision-tradeoff-fill: #f5ca75;
   --decision-tradeoff-surface: rgba(224, 160, 45, 0.2);
   --decision-tradeoff-border: rgba(239, 180, 79, 0.48);
   --decision-low-priority: #9aa6b9;
+  --decision-low-priority-fill: #bbc4d2;
   --decision-low-priority-surface: rgba(115, 128, 150, 0.22);
   --decision-low-priority-border: rgba(154, 166, 185, 0.46);
   --chart-grid: rgba(255, 255, 255, 0.16);
@@ -703,8 +716,8 @@ h1, h2, h3, p { margin-top: 0; }
 .app-shell .approval-card.status-denied .status-chip { color: var(--danger-ink); background: var(--danger-surface); }
 .app-shell .approval-card.status-pending .status-chip { color: var(--warning-ink); background: var(--warning-surface); }
 .app-shell .status-on-schedule,
-.app-shell .status-protected,
 .app-shell .status-consolidation-candidate { color: var(--success-ink); background: var(--success-surface); }
+.app-shell .status-protected { color: var(--protected-ink); background: var(--protected-surface); }
 .app-shell .status-attention,
 .app-shell .status-rejected,
 .app-shell .status-not-approved { color: var(--danger-ink); background: var(--danger-surface); }
@@ -900,10 +913,14 @@ h1, h2, h3, p { margin-top: 0; }
   background: currentColor;
 }
 
-.portfolio-action-swatch.decision-keep { color: var(--decision-keep); }
-.portfolio-action-swatch.decision-consolidate { color: var(--decision-consolidate); }
-.portfolio-action-swatch.decision-strategic-trade-off { color: var(--decision-tradeoff); }
-.portfolio-action-swatch.decision-low-priority { color: var(--decision-low-priority); }
+.portfolio-action-swatch.decision-keep { color: var(--decision-keep-fill); }
+.portfolio-action-swatch.decision-consolidate { color: var(--decision-consolidate-fill); }
+.portfolio-action-swatch.decision-strategic-trade-off { color: var(--decision-tradeoff-fill); }
+.portfolio-action-swatch.decision-low-priority { color: var(--decision-low-priority-fill); }
+
+.portfolio-bubble-legend-row {
+  justify-content: flex-start;
+}
 
 .portfolio-view-reason {
   max-width: 48ch;
@@ -1096,16 +1113,16 @@ h1, h2, h3, p { margin-top: 0; }
 }
 
 .portfolio-bubble circle {
-  fill: var(--decision-low-priority);
+  fill: var(--decision-low-priority-fill);
   stroke: color-mix(in srgb, var(--decision-low-priority) 70%, var(--ink));
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
   filter: drop-shadow(0 5px 7px color-mix(in srgb, var(--ink) 20%, transparent));
 }
 
-.portfolio-bubble.decision-keep circle { fill: var(--decision-keep); stroke: color-mix(in srgb, var(--decision-keep) 72%, var(--ink)); }
-.portfolio-bubble.decision-consolidate circle { fill: var(--decision-consolidate); stroke: color-mix(in srgb, var(--decision-consolidate) 72%, var(--ink)); }
-.portfolio-bubble.decision-strategic-trade-off circle { fill: var(--decision-tradeoff); stroke: color-mix(in srgb, var(--decision-tradeoff) 72%, var(--ink)); }
+.portfolio-bubble.decision-keep circle { fill: var(--decision-keep-fill); stroke: color-mix(in srgb, var(--decision-keep) 72%, var(--ink)); }
+.portfolio-bubble.decision-consolidate circle { fill: var(--decision-consolidate-fill); stroke: color-mix(in srgb, var(--decision-consolidate) 72%, var(--ink)); }
+.portfolio-bubble.decision-strategic-trade-off circle { fill: var(--decision-tradeoff-fill); stroke: color-mix(in srgb, var(--decision-tradeoff) 72%, var(--ink)); }
 
 .portfolio-bubble-name {
   fill: var(--ink);
@@ -1114,15 +1131,16 @@ h1, h2, h3, p { margin-top: 0; }
 }
 
 .portfolio-bubble-cost {
-  fill: #fff;
+  fill: #111827;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: -.015em;
   pointer-events: none;
 }
 
-.portfolio-bubble.decision-strategic-trade-off .portfolio-bubble-cost {
-  fill: #4b3205;
+.portfolio-bubble-cost.is-compact {
+  font-size: 9px;
+  letter-spacing: -.04em;
 }
 
 .portfolio-relationship-note {

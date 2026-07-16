@@ -184,9 +184,15 @@ describe("SupplyChainApp", () => {
     const darkTheme = themeLayer.match(/\.app-shell\[data-theme="dark"\] \{([\s\S]*?)\n\}/)?.[1] ?? "";
     const requiredTokens = [
       "--decision-keep",
+      "--decision-keep-fill",
       "--decision-consolidate",
+      "--decision-consolidate-fill",
       "--decision-tradeoff",
+      "--decision-tradeoff-fill",
       "--decision-low-priority",
+      "--decision-low-priority-fill",
+      "--protected-ink",
+      "--protected-surface",
       "--success-surface",
       "--warning-surface",
       "--danger-surface",
@@ -201,6 +207,15 @@ describe("SupplyChainApp", () => {
     );
     expect(themeLayer).toMatch(
       /\.results\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);/,
+    );
+    expect(themeLayer).toMatch(
+      /\.app-shell \.status-protected\s*\{[^}]*var\(--protected-ink\)[^}]*var\(--protected-surface\)/,
+    );
+    expect(themeLayer).toMatch(
+      /\.portfolio-bubble-cost\s*\{[^}]*fill:\s*#111827;/,
+    );
+    expect(themeLayer).not.toContain(
+      ".portfolio-bubble.decision-strategic-trade-off .portfolio-bubble-cost",
     );
     expect(css).not.toContain(".heat-cell");
   });

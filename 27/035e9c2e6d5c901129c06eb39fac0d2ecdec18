@@ -1,0 +1,29 @@
+app/api/actions/route.test.ts
+  s_aae6c65fce6804::t_492bcba215067c 127-151,220
+app/supply-chain-app.test.tsx
+  s_aae6c65fce6804::t_16b72d986f0858 1010-1012,1018-1039
+app/supply-chain-app.tsx
+  s_aae6c65fce6804::t_124f492f901aa6 9,780-784
+lib/context.test.ts
+  s_aae6c65fce6804::t_46a6c9fdc45291 60-79
+lib/demo-data.test.ts
+  s_aae6c65fce6804::t_532fa8f97a627d 11
+lib/demo-data.ts
+  s_aae6c65fce6804::t_83c3750c1bad27 112,231,346,374-376
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "27035e9c2e6d5c901129c06eb39fac0d2ecdec18",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

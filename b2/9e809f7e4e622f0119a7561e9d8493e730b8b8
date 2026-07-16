@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-16-adaptive-supplier-portfolio-visualization-design.md
+  s_c4cb1d5a9d831b::t_83673bfa1afbc8 1-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b29e809f7e4e622f0119a7561e9d8493e730b8b8",
+  "prompts": {},
+  "sessions": {
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

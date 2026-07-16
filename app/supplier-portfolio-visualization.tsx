@@ -1,46 +1,44 @@
 import type { UIMessage } from "ai";
 
 import {
+  buildBubbleChartLayout,
+  formatCompactUsd,
+  getSavingsAxisMaximum,
+  supplierBubbleChartBounds,
+} from "@/lib/supplier-portfolio-chart";
+import {
+  getRelationshipBand,
+  getSavingsBand,
   parseSupplierPortfolioVisualization,
-  supplierActions,
   supplierPortfolioBands,
+  supplierPortfolioDecisions,
   type ResolvedSupplierPortfolioItem,
-  type SupplierAction,
   type SupplierPortfolioBand,
+  type SupplierPortfolioDecision,
   type SupplierPortfolioVisualization,
 } from "@/lib/supplier-portfolio";
 
-const resilienceOrder: SupplierPortfolioBand[] = ["High", "Medium", "Low"];
+const relationshipOrder: SupplierPortfolioBand[] = ["High", "Medium", "Low"];
+const relationshipTicks = [0, 25, 50, 75, 100];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
-function actionSlug(action: SupplierAction): string {
-  return action.toLowerCase();
+function decisionSlug(decision: SupplierPortfolioDecision): string {
+  return decision.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-function cellZone(cost: SupplierPortfolioBand, resilience: SupplierPortfolioBand): string {
-  if (resilience === "Low") return "protect";
-  if (resilience === "Medium") return cost === "High" ? "watch" : "optimize";
-  return cost === "High" ? "optimize" : "balanced";
-}
-
-function formatSpend(value: number | undefined): string | undefined {
-  return typeof value === "number" ? `€${value.toFixed(1)}M` : undefined;
-}
-
-function ActionLegend({ suppliers }: { suppliers: ResolvedSupplierPortfolioItem[] }) {
-  const visibleActions = supplierActions.filter((action) =>
-    suppliers.some((supplier) => supplier.action === action),
-  );
-
+function DecisionLegend() {
   return (
-    <ul className="portfolio-action-legend" aria-label="Decision action legend">
-      {visibleActions.map((action) => (
-        <li key={action}>
-          <span className={`portfolio-action-swatch action-${actionSlug(action)}`} aria-hidden="true" />
-          {action}
+    <ul className="portfolio-action-legend" aria-label="Decision heat legend">
+      {supplierPortfolioDecisions.map((decision) => (
+        <li key={decision}>
+          <span
+            className={`portfolio-action-swatch decision-${decisionSlug(decision)}`}
+            aria-hidden="true"
+          />
+          {decision}
         </li>
       ))}
     </ul>
@@ -49,15 +47,23 @@ function ActionLegend({ suppliers }: { suppliers: ResolvedSupplierPortfolioItem[
 
 function SupplierMarker({ supplier }: { supplier: ResolvedSupplierPortfolioItem }) {
   return (
-    <article className={`supplier-marker action-${actionSlug(supplier.action)}`}>
+    <article className={`supplier-marker decision-${decisionSlug(supplier.decision)}`}>
       <div className="supplier-marker-heading">
         <strong>{supplier.supplier}</strong>
-        <span>{supplier.action}</span>
+        <span>{supplier.decision}</span>
       </div>
       <p>{supplier.recommendation}</p>
-      {supplier.targetSupplier && (
-        <small>Shift volume to {supplier.targetSupplier}</small>
-      )}
+      <dl className="supplier-marker-measures">
+        <div>
+          <dt>Savings</dt>
+          <dd>{formatCompactUsd(supplier.annualSavingsUsd)}</dd>
+        </div>
+        <div>
+          <dt>Relationship</dt>
+          <dd>{supplier.relationshipScore}/100</dd>
+        </div>
+      </dl>
+      {supplier.targetSupplier && <small>Shift volume to {supplier.targetSupplier}</small>}
     </article>
   );
 }
@@ -70,30 +76,35 @@ function SupplierMatrix({ suppliers }: { suppliers: ResolvedSupplierPortfolioIte
       aria-label="Scrollable supplier decision matrix"
       tabIndex={0}
     >
-      <table className="portfolio-matrix" aria-label="Supplier cost and resilience matrix">
+      <table
+        className="portfolio-matrix"
+        aria-label="Supplier savings and strategic relationship matrix"
+      >
         <thead>
           <tr>
-            <th scope="col">Resilience / Cost</th>
-            {supplierPortfolioBands.map((cost) => (
-              <th scope="col" key={cost}>{cost} cost</th>
+            <th scope="col">Strategic relationship / Annual savings</th>
+            {supplierPortfolioBands.map((savings) => (
+              <th scope="col" key={savings}>{savings} savings</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {resilienceOrder.map((resilience) => (
-            <tr key={resilience}>
-              <th scope="row">{resilience} resilience</th>
-              {supplierPortfolioBands.map((cost) => {
+          {relationshipOrder.map((relationship) => (
+            <tr key={relationship}>
+              <th scope="row">{relationship} relationship</th>
+              {supplierPortfolioBands.map((savings) => {
                 const cellSuppliers = suppliers.filter(
-                  (supplier) => supplier.cost === cost && supplier.resilience === resilience,
+                  (supplier) =>
+                    getSavingsBand(supplier.annualSavingsUsd) === savings &&
+                    getRelationshipBand(supplier.relationshipScore) === relationship,
                 );
 
                 return (
                   <td
-                    className={`portfolio-zone zone-${cellZone(cost, resilience)}`}
-                    data-cost={cost}
-                    data-resilience={resilience}
-                    key={`${resilience}-${cost}`}
+                    className="portfolio-zone"
+                    data-savings={savings}
+                    data-relationship={relationship}
+                    key={`${relationship}-${savings}`}
                   >
                     {cellSuppliers.length > 0 ? (
                       cellSuppliers.map((supplier) => (
@@ -113,116 +124,127 @@ function SupplierMatrix({ suppliers }: { suppliers: ResolvedSupplierPortfolioIte
   );
 }
 
-const bubblePlot = {
-  width: 920,
-  height: 500,
-  left: 90,
-  right: 70,
-  top: 40,
-  bottom: 70,
-};
-
-const plotWidth = bubblePlot.width - bubblePlot.left - bubblePlot.right;
-const plotHeight = bubblePlot.height - bubblePlot.top - bubblePlot.bottom;
-const chartTicks = [0, 25, 50, 75, 100];
-
-function xPosition(score: number): number {
-  return bubblePlot.left + (score / 100) * plotWidth;
-}
-
-function yPosition(score: number): number {
-  return bubblePlot.top + (1 - score / 100) * plotHeight;
-}
-
-function bubbleRadius(
-  supplier: ResolvedSupplierPortfolioItem,
-  suppliers: ResolvedSupplierPortfolioItem[],
-): number {
-  const spends = suppliers
-    .map((item) => item.annualSpendMillions)
-    .filter((value): value is number => typeof value === "number");
-  if (typeof supplier.annualSpendMillions !== "number" || spends.length === 0) return 21;
-
-  const minimum = Math.min(...spends);
-  const maximum = Math.max(...spends);
-  if (minimum === maximum) return 23;
-  const normalized = (supplier.annualSpendMillions - minimum) / (maximum - minimum);
-  return 17 + Math.sqrt(normalized) * 13;
-}
-
 function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfolioItem[] }) {
+  const bounds = supplierBubbleChartBounds;
+  const plotWidth = bounds.width - bounds.left - bounds.right;
+  const plotHeight = bounds.height - bounds.top - bounds.bottom;
+  const savingsMaximum = getSavingsAxisMaximum(suppliers);
+  const savingsTicks = Array.from({ length: 5 }, (_, index) => (savingsMaximum * index) / 4);
+  const layout = buildBubbleChartLayout(suppliers, bounds);
+  const layoutBySupplier = new Map(layout.map((bubble) => [bubble.supplier, bubble]));
+  const xPosition = (savings: number) => bounds.left + (savings / savingsMaximum) * plotWidth;
+  const yPosition = (relationship: number) =>
+    bounds.top + (1 - relationship / 100) * plotHeight;
+
   return (
     <div className="portfolio-bubble-wrap">
       <svg
         className="portfolio-bubble-chart"
-        viewBox={`0 0 ${bubblePlot.width} ${bubblePlot.height}`}
+        viewBox={`0 0 ${bounds.width} ${bounds.height}`}
         role="img"
-        aria-label="Supplier cost and resilience bubble chart"
+        aria-label="Supplier savings and strategic relationship map"
       >
-        <title>Supplier cost and resilience bubble chart</title>
+        <title>Supplier savings and strategic relationship map</title>
         <desc>
-          Cost index increases from left to right. Resilience score increases from bottom to top.
-          Bubble size represents annual spend where available.
+          Annual consolidation savings increase from left to right. Strategic relationship score
+          increases from bottom to top. Bubble area represents annual supplier cost.
         </desc>
 
-        <g className="portfolio-chart-zones" aria-hidden="true">
-          <rect className="zone-balanced" x={bubblePlot.left} y={bubblePlot.top} width={plotWidth / 2} height={plotHeight / 2} />
-          <rect className="zone-optimize" x={bubblePlot.left + plotWidth / 2} y={bubblePlot.top} width={plotWidth / 2} height={plotHeight / 2} />
-          <rect className="zone-watch" x={bubblePlot.left} y={bubblePlot.top + plotHeight / 2} width={plotWidth / 2} height={plotHeight / 2} />
-          <rect className="zone-protect" x={bubblePlot.left + plotWidth / 2} y={bubblePlot.top + plotHeight / 2} width={plotWidth / 2} height={plotHeight / 2} />
-        </g>
-
         <g className="portfolio-chart-grid" aria-hidden="true">
-          {chartTicks.map((tick) => (
-            <g key={`grid-${tick}`}>
-              <line x1={xPosition(tick)} x2={xPosition(tick)} y1={bubblePlot.top} y2={bubblePlot.top + plotHeight} />
-              <line x1={bubblePlot.left} x2={bubblePlot.left + plotWidth} y1={yPosition(tick)} y2={yPosition(tick)} />
-              <text x={xPosition(tick)} y={bubblePlot.top + plotHeight + 27} textAnchor="middle">{tick}</text>
-              <text x={bubblePlot.left - 18} y={yPosition(tick) + 4} textAnchor="end">{tick}</text>
+          {savingsTicks.map((tick) => (
+            <g key={`savings-${tick}`}>
+              <line
+                x1={xPosition(tick)}
+                x2={xPosition(tick)}
+                y1={bounds.top}
+                y2={bounds.top + plotHeight}
+              />
+              <text
+                x={xPosition(tick)}
+                y={bounds.top + plotHeight + 29}
+                textAnchor="middle"
+              >
+                {formatCompactUsd(tick)}
+              </text>
+            </g>
+          ))}
+          {relationshipTicks.map((tick) => (
+            <g key={`relationship-${tick}`}>
+              <line
+                x1={bounds.left}
+                x2={bounds.left + plotWidth}
+                y1={yPosition(tick)}
+                y2={yPosition(tick)}
+              />
+              <text
+                x={bounds.left - 18}
+                y={yPosition(tick) + 4}
+                textAnchor="end"
+              >
+                {tick}
+              </text>
             </g>
           ))}
         </g>
 
-        <text className="portfolio-axis-label axis-x" x={bubblePlot.left + plotWidth / 2} y={bubblePlot.height - 15} textAnchor="middle">Cost index</text>
+        <text
+          className="portfolio-axis-label axis-x"
+          x={bounds.left + plotWidth / 2}
+          y={bounds.height - 21}
+          textAnchor="middle"
+        >
+          Annual consolidation savings (USD)
+        </text>
         <text
           className="portfolio-axis-label axis-y"
-          x={22}
-          y={bubblePlot.top + plotHeight / 2}
+          x={25}
+          y={bounds.top + plotHeight / 2}
           textAnchor="middle"
-          transform={`rotate(-90 22 ${bubblePlot.top + plotHeight / 2})`}
+          transform={`rotate(-90 25 ${bounds.top + plotHeight / 2})`}
         >
-          Resilience score
+          Strategic relationship score (0–100)
         </text>
 
         <g className="portfolio-bubbles">
           {suppliers.map((supplier) => {
-            const costScore = supplier.costScore ?? 0;
-            const resilienceScore = supplier.resilienceScore ?? 0;
-            const x = xPosition(costScore);
-            const y = yPosition(resilienceScore);
-            const radius = bubbleRadius(supplier, suppliers);
-            const labelOnLeft = costScore >= 45;
-            const labelX = labelOnLeft ? x - radius - 10 : x + radius + 10;
-            const spend = formatSpend(supplier.annualSpendMillions);
+            const bubble = layoutBySupplier.get(supplier.supplier);
+            if (!bubble) return null;
 
             return (
-              <g className={`portfolio-bubble action-${actionSlug(supplier.action)}`} key={supplier.supplier}>
+              <g
+                className={`portfolio-bubble decision-${decisionSlug(supplier.decision)}`}
+                key={supplier.supplier}
+              >
                 <title>
-                  {supplier.supplier}: cost index {costScore}, resilience score {resilienceScore}, {supplier.action}
-                  {spend ? `, ${spend} annual spend` : ""}
+                  {supplier.supplier}: {formatCompactUsd(supplier.annualSavingsUsd)} savings,
+                  {` ${supplier.relationshipScore}/100 relationship, ${supplier.decision}, ${formatCompactUsd(supplier.annualCostUsd)} supplier cost`}
                 </title>
-                <circle cx={x} cy={y} r={radius} />
-                <text className="portfolio-bubble-name" x={labelX} y={y - 3} textAnchor={labelOnLeft ? "end" : "start"}>
+                <text
+                  className="portfolio-bubble-name"
+                  x={bubble.x}
+                  y={bubble.labelY}
+                  textAnchor="middle"
+                >
                   {supplier.supplier}
                 </text>
-                <text className="portfolio-bubble-detail" x={labelX} y={y + 15} textAnchor={labelOnLeft ? "end" : "start"}>
-                  {supplier.action}{spend ? ` · ${spend}` : ""}
+                <circle cx={bubble.x} cy={bubble.y} r={bubble.radius} />
+                <text
+                  className="portfolio-bubble-cost"
+                  x={bubble.x}
+                  y={bubble.y + 5}
+                  textAnchor="middle"
+                >
+                  {formatCompactUsd(supplier.annualCostUsd)}
                 </text>
               </g>
             );
           })}
         </g>
       </svg>
+      <p className="portfolio-relationship-note">
+        Relationship score combines reliability, quality, qualification depth, supply continuity,
+        and switching complexity.
+      </p>
     </div>
   );
 }
@@ -253,10 +275,9 @@ export function SupplierPortfolioVisualizationView({
   visualization: SupplierPortfolioVisualization;
 }) {
   const isBubble = visualization.view === "bubble";
-  const title = isBubble ? "Supplier portfolio bubble chart" : "Supplier cost–resilience matrix";
-  const description = isBubble
-    ? "Quantitative view · bubble size represents annual spend"
-    : "Categorical view · cost versus resilience";
+  const title = isBubble
+    ? "Supplier savings–relationship map"
+    : "Supplier savings–relationship matrix";
 
   return (
     <section className="supplier-portfolio-section" aria-labelledby="supplier-portfolio-title">
@@ -265,12 +286,14 @@ export function SupplierPortfolioVisualizationView({
           <p className="eyebrow">Decision support</p>
           <h3 id="supplier-portfolio-title">{title}</h3>
         </div>
-        <span className="source-note">{description}</span>
+        {!isBubble && <span className="source-note">Savings versus strategic relationship</span>}
       </div>
-      <div className="portfolio-legend-row">
-        <ActionLegend suppliers={visualization.suppliers} />
-        <span className="portfolio-view-reason">{visualization.reason}</span>
-      </div>
+      {!isBubble && (
+        <div className="portfolio-legend-row">
+          <DecisionLegend />
+          <span className="portfolio-view-reason">{visualization.reason}</span>
+        </div>
+      )}
       {isBubble ? (
         <SupplierBubbleChart suppliers={visualization.suppliers} />
       ) : (

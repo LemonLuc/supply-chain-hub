@@ -8,45 +8,13 @@ import {
 } from "./supplier-portfolio-visualization";
 import {
   resolveSupplierPortfolioVisualization,
-  type SupplierPortfolioItem,
 } from "@/lib/supplier-portfolio";
+import { workflows } from "@/lib/demo-data";
 
-const suppliers: SupplierPortfolioItem[] = [
-  {
-    supplier: "Steripack Hohenlohe",
-    cost: "High",
-    resilience: "High",
-    action: "Consolidate",
-    recommendation: "Consolidate volume into MediSeal Jena",
-    targetSupplier: "MediSeal Jena",
-    costScore: 84,
-    resilienceScore: 82,
-    annualSpendMillions: 2.6,
-  },
-  {
-    supplier: "MediSeal Jena",
-    cost: "Medium",
-    resilience: "High",
-    action: "Retain",
-    recommendation: "Retain as strategic packaging source",
-    costScore: 48,
-    resilienceScore: 88,
-    annualSpendMillions: 2.2,
-  },
-  {
-    supplier: "Glaswerke Mainz",
-    cost: "High",
-    resilience: "Low",
-    action: "Protect",
-    recommendation: "Protect and qualify backup capacity",
-    costScore: 88,
-    resilienceScore: 28,
-    annualSpendMillions: 3.1,
-  },
-];
+const suppliers = workflows.consolidate.heatMap ?? [];
 
 describe("SupplierPortfolioVisualizationView", () => {
-  it("renders suppliers in a categorical cost and resilience matrix", () => {
+  it("renders suppliers in a savings and strategic relationship matrix", () => {
     const visualization = resolveSupplierPortfolioVisualization(
       suppliers,
       "matrix",
@@ -56,16 +24,19 @@ describe("SupplierPortfolioVisualizationView", () => {
     render(<SupplierPortfolioVisualizationView visualization={visualization} />);
 
     expect(
-      screen.getByRole("table", { name: /supplier cost and resilience matrix/i }),
+      screen.getByRole("table", { name: /supplier savings and strategic relationship matrix/i }),
     ).toBeInTheDocument();
     const steripack = screen.getByText("Steripack Hohenlohe");
-    expect(steripack.closest("td")).toHaveAttribute("data-cost", "High");
-    expect(steripack.closest("td")).toHaveAttribute("data-resilience", "High");
+    expect(steripack.closest("td")).toHaveAttribute("data-savings", "Medium");
+    expect(steripack.closest("td")).toHaveAttribute("data-relationship", "Medium");
     expect(screen.getByText("Shift volume to MediSeal Jena")).toBeInTheDocument();
-    expect(screen.getAllByText("Protect").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Strategic trade-off").length).toBeGreaterThan(0);
+    expect(screen.getByRole("list", { name: /decision heat legend/i })).toHaveTextContent(
+      "KeepConsolidateStrategic trade-offLow priority",
+    );
   });
 
-  it("renders a quantitative bubble chart with named axes and supplier details", () => {
+  it("renders a savings and relationship bubble chart with annual cost amounts inside", () => {
     const visualization = resolveSupplierPortfolioVisualization(
       suppliers,
       "bubble",
@@ -75,12 +46,16 @@ describe("SupplierPortfolioVisualizationView", () => {
     render(<SupplierPortfolioVisualizationView visualization={visualization} />);
 
     expect(
-      screen.getByRole("img", { name: /supplier cost and resilience bubble chart/i }),
+      screen.getByRole("img", { name: /supplier savings and strategic relationship map/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Cost index")).toBeInTheDocument();
-    expect(screen.getByText("Resilience score")).toBeInTheDocument();
-    expect(screen.getByText("Protect · €3.1M")).toBeInTheDocument();
-    expect(screen.getByText("MediSeal Jena")).toHaveAttribute("text-anchor", "end");
+    expect(screen.getByText("Annual consolidation savings (USD)")).toBeInTheDocument();
+    expect(screen.getByText("Strategic relationship score (0–100)")).toBeInTheDocument();
+    expect(screen.getByText("$4.6M")).toHaveClass("portfolio-bubble-cost");
+    expect(screen.queryByText(/annual cost/i)).not.toBeInTheDocument();
+    expect(screen.getByText("MediSeal Jena")).toHaveAttribute("text-anchor", "middle");
+    expect(screen.getByText(/reliability, quality, qualification depth/i)).toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: /decision heat legend/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("Quantitative comparison")).not.toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 

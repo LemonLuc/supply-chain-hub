@@ -57,6 +57,26 @@ describe("buildAppContext", () => {
     ]);
   });
 
+  it("hides Microsoft-backed actions when the suite sources are not selected", () => {
+    const procurement = buildAppContext("delay", "procurement", [
+      "sap",
+      "quality",
+      "capacity",
+    ]);
+    const executive = buildAppContext("consolidate", "executive", [
+      "sap",
+      "contracts",
+      "quality",
+      "resilience",
+      "policy",
+    ]);
+
+    expect(procurement.recommendedActions.map((action) => action.label)).toEqual([
+      "Assign recovery check to logistics",
+    ]);
+    expect(executive.recommendedActions).toHaveLength(0);
+  });
+
   it("falls back to the risk radar when logistics requests a restricted workflow", () => {
     const context = buildAppContext("delay", "logistics");
 
@@ -180,7 +200,7 @@ describe("buildAppContext", () => {
 });
 
 describe("buildRoleToolSources", () => {
-  it("exposes unique stable tools to logistics planners", () => {
+  it("exposes separate active Microsoft tools to logistics", () => {
     const sources = buildRoleToolSources("logistics");
 
     expect(sources.map((source) => source.toolId)).toEqual([
@@ -188,47 +208,69 @@ describe("buildRoleToolSources", () => {
       "carriers",
       "warehouse",
       "outlook",
+      "sharepoint",
+      "word",
     ]);
+    expect(
+      sources
+        .filter((source) => ["outlook", "sharepoint", "word"].includes(source.toolId))
+        .every((source) => source.selected && source.sourceIds.length === 1),
+    ).toBe(true);
     expect(sources.every((source) => source.workflowKeys.every((key) => key === "risks"))).toBe(true);
   });
 
-  it("deduplicates shared procurement tools and retains their workflows", () => {
+  it("exposes one Microsoft 365 Suite connector to procurement", () => {
     const sources = buildRoleToolSources("procurement");
-    const outlook = sources.find((source) => source.toolId === "outlook");
+    const suite = sources.filter((source) => source.toolId === "microsoft-365");
 
     expect(new Set(sources.map((source) => source.toolId)).size).toBe(sources.length);
-    expect(sources.map((source) => source.toolId)).toEqual([
-      "sap",
-      "carriers",
-      "warehouse",
-      "outlook",
-      "quality",
-      "excel",
-      "capacity",
-      "teams",
-    ]);
-    expect(outlook).toMatchObject({
+    expect(suite).toHaveLength(1);
+    expect(suite[0]).toMatchObject({
+      name: "Microsoft 365 Suite",
+      category: "Microsoft 365 MCP",
       selected: true,
       workflowKeys: ["risks", "delay"],
     });
+    expect(suite[0].sourceIds).toEqual(["outlook", "sharepoint", "word", "excel", "teams"]);
+    expect(
+      sources.some((source) =>
+        ["outlook", "sharepoint", "word", "excel", "teams"].includes(source.toolId),
+      ),
+    ).toBe(false);
   });
 
-  it("exposes only unique strategic tools to executives", () => {
+  it("exposes one Microsoft 365 Suite connector to executives", () => {
     const sources = buildRoleToolSources("executive");
+    const suite = sources.filter((source) => source.toolId === "microsoft-365");
 
-    expect(sources.map((source) => source.toolId)).toEqual([
-      "sap",
-      "contracts",
-      "quality",
-      "resilience",
-      "policy",
-      "word",
-    ]);
+    expect(suite).toHaveLength(1);
+    expect(suite[0]).toMatchObject({
+      name: "Microsoft 365 Suite",
+      category: "Microsoft 365 MCP",
+      selected: true,
+      sourceIds: ["word"],
+    });
+    expect(sources.some((source) => source.toolId === "word")).toBe(false);
     expect(sources.every((source) => source.workflowKeys.includes("consolidate"))).toBe(true);
   });
 });
 
 describe("resolveWorkflowForPrompt", () => {
+  it("routes Dana's recovery assignment prompt to supplier alternatives", () => {
+    expect(
+      resolveWorkflowForPrompt(
+        "Assign the carrier recovery check for the uncovered builds.",
+        "procurement",
+      ),
+    ).toBe("delay");
+    expect(
+      resolveWorkflowForPrompt(
+        "Assign a carrier recovery check for uncovered builds today.",
+        "procurement",
+      ),
+    ).toBe("delay");
+  });
+
   it("selects the supplier alternatives workflow when an authorized prompt asks for alternates", () => {
     expect(resolveWorkflowForPrompt("Which approved alternatives can cover the turret delay?", "procurement")).toBe("delay");
   });
@@ -239,6 +281,50 @@ describe("resolveWorkflowForPrompt", () => {
 
   it("falls back to an authorized workflow when the matching workflow is restricted", () => {
     expect(resolveWorkflowForPrompt("Give me a cost-versus-resilience heat map.", "procurement")).toBe("risks");
+  });
+});
+
+describe("role-aware actions", () => {
+  it("filters actions by persona eligibility", () => {
+    const logistics = buildAppContext("risks", "logistics", [
+      "sap",
+      "carriers",
+      "warehouse",
+      "outlook",
+    ]);
+    const procurementRisk = buildAppContext("risks", "procurement", [
+      "sap",
+      "carriers",
+      "warehouse",
+      "outlook",
+    ]);
+    const procurementDelay = buildAppContext("delay", "procurement", [
+      "sap",
+      "quality",
+      "excel",
+      "capacity",
+      "outlook",
+    ]);
+
+    expect(logistics.recommendedActions).toContainEqual(
+      expect.objectContaining({
+        label: "Write Dana Narid for review",
+        reviewerPersona: "procurement",
+      }),
+    );
+    expect(procurementRisk.recommendedActions).toHaveLength(0);
+    expect(procurementDelay.recommendedActions).toContainEqual(
+      expect.objectContaining({
+        label: "Assign recovery check to logistics",
+        assigneePersona: "logistics",
+      }),
+    );
+    expect(procurementDelay.recommendedActions).toContainEqual(
+      expect.objectContaining({
+        label: "Ask Lucia Lopez for exception review",
+        reviewerPersona: "executive",
+      }),
+    );
   });
 });
 

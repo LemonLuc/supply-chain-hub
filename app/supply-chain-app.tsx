@@ -6,6 +6,7 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  CircleX,
   Clock3,
   Database,
   ExternalLink,
@@ -25,7 +26,12 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { mockUsers, type CurrentUser } from "@/lib/auth";
-import { buildActionDraft, getActionReviewer, type ActionWorkflowResult } from "@/lib/action-workflows";
+import {
+  buildActionDraft,
+  getActionAssignee,
+  getActionReviewer,
+  type ActionWorkflowResult,
+} from "@/lib/action-workflows";
 import {
   defaultModel,
   defaultThinkingLevel,
@@ -283,7 +289,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
             source.workflowKeys.includes(nextWorkflowKey) &&
             sourceIsSelected(source.toolId, source.selected),
         )
-        .map((source) => source.id),
+        .flatMap((source) => source.sourceIds),
     );
 
     return workflows[nextWorkflowKey].sources
@@ -396,16 +402,20 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
 
   function applyActionResult(action: WorkflowAction, result?: ActionWorkflowResult) {
     const requester = mockUsers[persona];
-    const reviewerPersona = result?.reviewerPersona ?? getActionReviewer(persona, action);
+    const reviewerPersona = result?.reviewerPersona ?? getActionReviewer(action);
+    const assigneePersona = result?.assigneePersona ?? getActionAssignee(action);
     if (!reviewerPersona) {
-      if (action.kind === "update" && action.label.toLowerCase().includes("task")) {
+      const createsTask =
+        Boolean(assigneePersona) ||
+        (action.kind === "update" && action.label.toLowerCase().includes("task"));
+      if (createsTask) {
         setPersonalTasks((current) => [
           ...current,
           {
             id: `task-${crypto.randomUUID()}`,
             actionLabel: personalTaskTitle(action),
             workflowKey,
-            ownerPersona: persona,
+            ownerPersona: assigneePersona ?? persona,
             detail: action.detail,
             status: "open",
           },
@@ -440,7 +450,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   async function runAction(action: WorkflowAction) {
     if (actionInFlightLabel) return;
 
-    const reviewerPersona = getActionReviewer(persona, action);
+    const reviewerPersona = getActionReviewer(action);
     const optimisticApprovalId = `approval-${crypto.randomUUID()}`;
 
     if (reviewerPersona) {
@@ -496,12 +506,13 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
       }
     } catch {
       if (reviewerPersona) {
-        setActionMenuOpen(false);
-        setActionNotice(`Approval request sent to ${mockUsers[reviewerPersona].name}.`);
-        setActionNoticeTone("pending");
-      } else {
-        applyActionResult(action);
+        setApprovalRequests((current) =>
+          current.filter((request) => request.id !== optimisticApprovalId),
+        );
       }
+      setActionMenuOpen(false);
+      setActionNotice("Action could not be completed. Please try again.");
+      setActionNoticeTone("error");
     } finally {
       setActionInFlightLabel("");
     }
@@ -766,7 +777,11 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
               )}
               {actionNotice && (
                 <p className={`action-notice tone-${actionNoticeTone}`} role="status">
-                  <Check aria-hidden="true" />
+                  {actionNoticeTone === "error" ? (
+                    <CircleX aria-hidden="true" />
+                  ) : (
+                    <Check aria-hidden="true" />
+                  )}
                   {actionNotice}
                 </p>
               )}

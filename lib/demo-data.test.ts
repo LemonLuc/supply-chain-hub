@@ -8,6 +8,7 @@ describe("operational workflow data", () => {
     expect(workflows.risks.sources.map((source) => source.name)).toEqual(
       expect.arrayContaining(["SAP S/4HANA", "Shipping providers", "Outlook"]),
     );
+    expect(workflows.risks.sourceStatus).toBe("6 available tools · live demo data");
     expect(workflows.risks.actions.map((action) => action.label)).toEqual(
       expect.arrayContaining(["Request DHL recovery routing", "Write Dana Narid for review", "Log DHL exception on PO 4500872319"]),
     );

@@ -9,12 +9,22 @@ export function normalizeWorkflowKey(value: unknown): WorkflowKey {
 
 export type RoleToolSource = WorkflowSource & {
   toolId: string;
+  sourceIds: string[];
   workflowKeys: WorkflowKey[];
   workflowLabels: string[];
 };
 
+const microsoftSourceIds = new Set([
+  "outlook",
+  "sharepoint",
+  "word",
+  "excel",
+  "teams",
+]);
+
 export function buildRoleToolSources(personaValue?: unknown): RoleToolSource[] {
-  const policy = getPersonaPolicy(personaValue);
+  const persona = normalizePersona(personaValue);
+  const policy = getPersonaPolicy(persona);
   const sourcesById = new Map<string, RoleToolSource>();
 
   for (const workflowKey of policy.allowedWorkflows) {
@@ -36,21 +46,57 @@ export function buildRoleToolSources(personaValue?: unknown): RoleToolSource[] {
       sourcesById.set(source.id, {
         ...source,
         toolId: source.id,
+        sourceIds: [source.id],
         workflowKeys: [workflowKey],
         workflowLabels: [workflow.navLabel],
       });
     }
   }
 
-  return [...sourcesById.values()];
+  const sources = [...sourcesById.values()];
+  if (persona === "logistics") return sources;
+
+  const microsoftSources = sources.filter((source) => microsoftSourceIds.has(source.id));
+  if (microsoftSources.length === 0) return sources;
+
+  const suite: RoleToolSource = {
+    ...microsoftSources[0],
+    id: "microsoft-365",
+    toolId: "microsoft-365",
+    sourceIds: microsoftSources.map((source) => source.id),
+    name: "Microsoft 365 Suite",
+    category: "Microsoft 365 MCP",
+    detail:
+      "SharePoint, Word, Outlook, PowerPoint, Teams, Excel, and authorized Microsoft 365 apps",
+    selected: true,
+    workflowKeys: [
+      ...new Set(microsoftSources.flatMap((source) => source.workflowKeys)),
+    ],
+    workflowLabels: [
+      ...new Set(microsoftSources.flatMap((source) => source.workflowLabels)),
+    ],
+  };
+  const firstMicrosoftSourceId = microsoftSources[0].id;
+
+  return sources.flatMap((source) => {
+    if (!microsoftSourceIds.has(source.id)) return [source];
+    return source.id === firstMicrosoftSourceId ? [suite] : [];
+  });
 }
 
 export function resolveWorkflowForPrompt(prompt: string, personaValue?: unknown): WorkflowKey {
   const policy = getPersonaPolicy(personaValue);
   const normalizedPrompt = prompt.toLowerCase();
+  const exactSuggestedWorkflow = policy.allowedWorkflows.find((workflowKey) =>
+    workflows[workflowKey].suggestedPrompts.some(
+      (suggestedPrompt) => suggestedPrompt.toLowerCase() === normalizedPrompt,
+    ),
+  );
+  if (exactSuggestedWorkflow) return exactSuggestedWorkflow;
+
   const candidates: Array<[WorkflowKey, string[]]> = [
     ["consolidate", ["heat map", "heatmap", "consolidate", "portfolio", "tail-spend", "resilience", "savings", "relationship", "relationships", "board", "contract termination"]],
-    ["delay", ["alternative", "alternatives", "alternate", "turret", "supplier overview", "supplier risk", "capacity register", "delayed", "delay"]],
+    ["delay", ["alternative", "alternatives", "alternate", "turret", "supplier overview", "supplier risk", "capacity register", "delayed", "delay", "uncovered build", "uncovered builds", "recovery check"]],
     ["risks", ["risk", "delivery", "shipment", "carrier", "milestone", "freight", "fedex", "dhl", "ups", "pickup"]],
   ];
   const match = candidates.find(([workflowKey, keywords]) =>
@@ -154,8 +200,10 @@ export function buildAppContext(
     .filter((row) => sourceSetIncludesAll(selectedSourceIds, row.sourceIds))
     .map(({ financial, ...row }) => (policy.canViewFinancials ? { ...row, financial } : row));
   const allRowsAvailable = workflow.rows.every((row) => sourceSetIncludesAll(selectedSourceIds, row.sourceIds));
-  const selectedActions = workflow.actions.filter((action) =>
-    sourceSetIncludesAll(selectedSourceIds, action.sourceIds),
+  const selectedActions = workflow.actions.filter(
+    (action) =>
+      (!action.allowedPersonas || action.allowedPersonas.includes(persona)) &&
+      sourceSetIncludesAll(selectedSourceIds, action.sourceIds),
   );
   const selectedDocuments = workflow.documents?.filter((document) =>
     sourceSetIncludesAll(selectedSourceIds, document.sourceIds),

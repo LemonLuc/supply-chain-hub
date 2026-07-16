@@ -82,6 +82,7 @@ export async function runActionAgentsWorkflow({
       persona,
       workflowKey,
       action,
+      assigneePersona: baseResult.assigneePersona,
       reviewerPersona: baseResult.reviewerPersona,
       answer: context.answer,
       selectedAuthorizedSources: context.selectedAuthorizedSources,
@@ -139,7 +140,9 @@ export async function runActionAgentsWorkflow({
         `Action: ${baseResult.actionLabel}.`,
         baseResult.reviewerPersona
           ? `Reviewer persona: ${baseResult.reviewerPersona}. Use the handoff before preparing the workflow.`
-          : "No reviewer persona is required. Prepare the action workflow directly.",
+          : baseResult.assigneePersona
+            ? `Assignee persona: ${baseResult.assigneePersona}. Prepare the direct task assignment without a reviewer handoff.`
+            : "No reviewer persona is required. Prepare the action workflow directly.",
       ].join("\n"),
       { maxTurns: 4 },
     );

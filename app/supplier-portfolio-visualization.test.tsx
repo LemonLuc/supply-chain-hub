@@ -80,6 +80,7 @@ describe("SupplierPortfolioVisualizationView", () => {
     expect(screen.getByText("Cost index")).toBeInTheDocument();
     expect(screen.getByText("Resilience score")).toBeInTheDocument();
     expect(screen.getByText("Protect · €3.1M")).toBeInTheDocument();
+    expect(screen.getByText("MediSeal Jena")).toHaveAttribute("text-anchor", "end");
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 

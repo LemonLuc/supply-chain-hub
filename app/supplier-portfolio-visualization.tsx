@@ -201,7 +201,7 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
             const x = xPosition(costScore);
             const y = yPosition(resilienceScore);
             const radius = bubbleRadius(supplier, suppliers);
-            const labelOnLeft = costScore >= 70;
+            const labelOnLeft = costScore >= 45;
             const labelX = labelOnLeft ? x - radius - 10 : x + radius + 10;
             const spend = formatSpend(supplier.annualSpendMillions);
 

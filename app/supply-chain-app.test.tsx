@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -169,6 +171,33 @@ function mockChatStreamWithPortfolioTool(view: "matrix" | "bubble") {
 }
 
 describe("SupplyChainApp", () => {
+  it("defines semantic light and dark theme tokens without legacy heat cards", () => {
+    const css = readFileSync("app/globals.css", "utf8");
+    const themeLayer = css.slice(css.indexOf("/* Unified enterprise theme layer"));
+    const lightTheme = themeLayer.match(/\.app-shell \{([\s\S]*?)\n\}/)?.[1] ?? "";
+    const darkTheme = themeLayer.match(/\.app-shell\[data-theme="dark"\] \{([\s\S]*?)\n\}/)?.[1] ?? "";
+    const requiredTokens = [
+      "--action-retain",
+      "--action-consolidate",
+      "--action-protect",
+      "--success-surface",
+      "--warning-surface",
+      "--danger-surface",
+    ];
+
+    for (const token of requiredTokens) {
+      expect(lightTheme).toContain(`${token}:`);
+      expect(darkTheme).toContain(`${token}:`);
+    }
+    expect(themeLayer).toMatch(
+      /\.results,\s*\.supplier-portfolio-section\s*\{[^}]*min-width:\s*0;/,
+    );
+    expect(themeLayer).toMatch(
+      /\.results\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);/,
+    );
+    expect(css).not.toContain(".heat-cell");
+  });
+
   it("defaults to light mode and lets users toggle dark mode", () => {
     const { container } = render(<SupplyChainApp currentUser={mockUsers.logistics} />);
     const shell = container.querySelector(".app-shell");

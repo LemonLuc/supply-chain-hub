@@ -1,0 +1,19 @@
+docs/superpowers/plans/2026-07-16-off-topic-prompt-guardrail.md
+  s_3edbcf248d5d57::t_e4a2431658f86b 1-585
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "cd19ed95185f411f925ea2d8e5c08c052bc6043b",
+  "prompts": {},
+  "sessions": {
+    "s_3edbcf248d5d57": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b4c-bdda-7471-ae68-ce3d60e7b91a",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

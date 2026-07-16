@@ -72,7 +72,7 @@ describe("chat grounding", () => {
     const reply = generateMockReply("What should I do first?", buildAppContext("risks"));
 
     expect(reply).toContain("DHL Freight shipment 00340434161094000012");
-    expect(reply).toContain("Log DHL exception on PO 4500872319");
+    expect(reply).toContain("Request DHL recovery routing");
     expect(reply).toContain("SAP S/4HANA MCP");
     expect(reply).toContain("demo mode");
   });

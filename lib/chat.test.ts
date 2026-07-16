@@ -62,7 +62,9 @@ describe("chat grounding", () => {
     const logisticsPrompt = buildSystemPrompt(buildAppContext("risks", "logistics"));
 
     expect(portfolioPrompt).toContain("Call renderSupplierPortfolio exactly once");
-    expect(portfolioPrompt).toContain("Choose bubble only when the normalized numeric measures");
+    expect(portfolioPrompt).toContain("annual consolidation savings");
+    expect(portfolioPrompt).toContain("strategic relationship score");
+    expect(portfolioPrompt).toContain("Use the derived decision wording exactly");
     expect(logisticsPrompt).not.toContain("renderSupplierPortfolio");
   });
 

@@ -72,38 +72,43 @@ describe("buildAppContext", () => {
     expect(context.workflow.key).toBe("consolidate");
     expect(context.workflow.accessAllowed).toBe(true);
     const portfolio = context.decisionSupport?.heatMap ?? [];
-    expect(portfolio).toHaveLength(5);
+    expect(portfolio).toHaveLength(7);
     expect(portfolio[0]).toMatchObject({
-      supplier: "Steripack Hohenlohe",
-      cost: "High",
-      resilience: "High",
-      action: "Consolidate",
-      targetSupplier: "MediSeal Jena",
-      costScore: 84,
-      resilienceScore: 82,
-      annualSpendMillions: 2.6,
+      supplier: "MediSeal Jena",
+      annualCostUsd: 2_100_000,
+      annualSavingsUsd: 120_000,
+      relationshipScore: 93,
     });
     expect(portfolio[1]).toMatchObject({
-      supplier: "MediSeal Jena",
-      action: "Retain",
-      costScore: 48,
-      resilienceScore: 88,
+      supplier: "OptiQuartz Suhl",
+      annualCostUsd: 2_800_000,
+      annualSavingsUsd: 250_000,
+      relationshipScore: 84,
     });
-    expect(portfolio[3]).toMatchObject({
-      supplier: "Glaswerke Mainz",
-      action: "Protect",
-      costScore: 88,
-      resilienceScore: 28,
+    expect(portfolio[4]).toMatchObject({
+      supplier: "FlexPack Esslingen",
+      annualCostUsd: 800_000,
+      annualSavingsUsd: 660_000,
+      relationshipScore: 35,
+    });
+    expect(portfolio[6]).toMatchObject({
+      supplier: "HelioGlass Dresden",
+      annualCostUsd: 2_300_000,
+      annualSavingsUsd: 910_000,
+      relationshipScore: 70,
     });
     expect(
       portfolio.every(
         (item) =>
-          typeof item.costScore === "number" &&
-          item.costScore >= 0 &&
-          item.costScore <= 100 &&
-          typeof item.resilienceScore === "number" &&
-          item.resilienceScore >= 0 &&
-          item.resilienceScore <= 100,
+          typeof item.annualCostUsd === "number" &&
+          item.annualCostUsd >= 0 &&
+          typeof item.annualSavingsUsd === "number" &&
+          item.annualSavingsUsd >= 0 &&
+          typeof item.relationshipScore === "number" &&
+          item.relationshipScore >= 0 &&
+          item.relationshipScore <= 100 &&
+          Array.isArray(item.relationshipDrivers) &&
+          item.relationshipDrivers.length >= 2,
       ),
     ).toBe(true);
     expect(context.approval).toBeUndefined();

@@ -180,8 +180,8 @@ const personaPromptSets: Record<PersonaId, string[]> = {
     "Which supplier decision needs Lucia Lopez's review?",
   ],
   executive: [
-    "Show supplier consolidation options with cost and resilience tradeoffs.",
-    "Which supplier relationships should we consolidate without weakening resilience?",
+    "Show supplier consolidation options by savings and strategic relationship.",
+    "Which supplier relationships should we consolidate without weakening continuity?",
     "Where can we capture savings while protecting strategic supply continuity?",
     "Draft a board-level decision record for supplier consolidation.",
   ],

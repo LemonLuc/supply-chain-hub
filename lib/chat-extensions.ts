@@ -33,7 +33,7 @@ export function getChatTools(context: AppContext): ToolSet {
             type: "string",
             enum: ["matrix", "bubble"],
             description:
-              "Use matrix for categorical comparison. Use bubble only when numeric cost and resilience measures materially improve the answer.",
+              "Use matrix for a compact decision heat map. Use bubble when annual consolidation savings, strategic relationship score, and annual supplier cost materially improve the answer.",
           },
           reason: {
             type: "string",

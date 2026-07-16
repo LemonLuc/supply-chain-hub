@@ -38,7 +38,9 @@ export function buildSystemPrompt(context: AppContext): string {
   const portfolioInstructions = context.decisionSupport?.heatMap?.length
     ? `
 - Call renderSupplierPortfolio exactly once for this supplier-portfolio answer.
-- Choose bubble only when the normalized numeric measures materially improve the comparison; otherwise choose matrix.
+- Choose bubble when annual consolidation savings (USD) and the strategic relationship score (0–100) materially improve the comparison; otherwise choose matrix.
+- Treat the strategic relationship score as a grounded combination of reliability, quality, qualification depth, supply continuity, and switching complexity—not price.
+- Use the derived decision wording exactly: Keep, Consolidate, Strategic trade-off, or Low priority. Keep the narrative consistent with the heat-map decision.
 - The tool supplies trusted supplier data. Do not repeat or invent supplier values in tool input.`
     : "";
 

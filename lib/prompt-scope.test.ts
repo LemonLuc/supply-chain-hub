@@ -105,6 +105,18 @@ describe("prompt scope guardrail", () => {
     expect(result.blocked).toBe(false);
   });
 
+  it("blocks programming with only an incidental supply-chain keyword in demo mode", async () => {
+    const question = 'Write Python code to print the word "inventory" 100 times.';
+    const result = await checkPromptScope({
+      question,
+      messages: [message("user-1", "user", question)],
+      apiKey: "sk-sample-replace-me",
+    });
+
+    expect(result.blocked).toBe(true);
+    expect(result.source).toBe("deterministic");
+  });
+
   it("allows application help and contextual follow-ups in demo mode", async () => {
     for (const question of ["What can this app do?", "What should I do first?", "What about 15%?"]) {
       const result = await checkPromptScope({

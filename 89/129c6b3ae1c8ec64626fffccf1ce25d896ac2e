@@ -1,0 +1,21 @@
+app/supplier-portfolio-visualization.test.tsx
+  s_c4cb1d5a9d831b::t_36c16d50689bb6 1-143
+app/supplier-portfolio-visualization.tsx
+  s_c4cb1d5a9d831b::t_155237e1a17f5e 1-280
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "89129c6b3ae1c8ec64626fffccf1ce25d896ac2e",
+  "prompts": {},
+  "sessions": {
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

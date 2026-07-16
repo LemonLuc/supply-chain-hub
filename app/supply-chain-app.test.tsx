@@ -145,7 +145,7 @@ function mockChatStreamWithPortfolioTool(view: "matrix" | "bubble") {
   const visualization = resolveSupplierPortfolioVisualization(
     suppliers,
     view,
-    view === "bubble" ? "Numeric measures support a quantitative comparison." : "Categorical bands support a decision matrix.",
+    view === "bubble" ? "Savings and relationship support a quantitative comparison." : "Decision bands support a compact matrix.",
   );
 
   return vi.spyOn(globalThis, "fetch").mockResolvedValue(
@@ -167,7 +167,7 @@ function mockChatStreamWithPortfolioTool(view: "matrix" | "bubble") {
           writer.write({
             type: "text-delta",
             id: "answer-1",
-            delta: "The portfolio view reflects the available cost and resilience evidence.",
+            delta: "The portfolio view reflects the available savings and strategic relationship evidence.",
           });
           writer.write({ type: "text-end", id: "answer-1" });
         },
@@ -183,9 +183,10 @@ describe("SupplyChainApp", () => {
     const lightTheme = themeLayer.match(/\.app-shell \{([\s\S]*?)\n\}/)?.[1] ?? "";
     const darkTheme = themeLayer.match(/\.app-shell\[data-theme="dark"\] \{([\s\S]*?)\n\}/)?.[1] ?? "";
     const requiredTokens = [
-      "--action-retain",
-      "--action-consolidate",
-      "--action-protect",
+      "--decision-keep",
+      "--decision-consolidate",
+      "--decision-tradeoff",
+      "--decision-low-priority",
       "--success-surface",
       "--warning-surface",
       "--danger-surface",
@@ -482,22 +483,22 @@ describe("SupplyChainApp", () => {
     expect(screen.getByLabelText("Contract repository")).toBeChecked();
     expect(screen.queryByLabelText("Shipping providers")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Supplier qualification database")).not.toBeInTheDocument();
-    expect(screen.queryByText("Supplier cost–resilience matrix")).not.toBeInTheDocument();
+    expect(screen.queryByText("Supplier savings–relationship matrix")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
 
     await waitFor(() =>
       expect(
-        screen.getByRole("table", { name: /supplier cost and resilience matrix/i }),
+        screen.getByRole("table", { name: /supplier savings and strategic relationship matrix/i }),
       ).toBeInTheDocument(),
     );
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     expect(requestBody.workflowKey).toBe("consolidate");
     expect(requestBody.selectedSourceIds).toEqual(["sap", "contracts", "quality", "resilience", "policy"]);
     expect(screen.queryByText("C-level approval required")).not.toBeInTheDocument();
-    expect(screen.getByText("Steripack Hohenlohe").closest(".supplier-marker")).toHaveClass("action-consolidate");
-    expect(screen.getByText("MediSeal Jena").closest(".supplier-marker")).toHaveClass("action-retain");
-    expect(screen.getByText("Glaswerke Mainz").closest(".supplier-marker")).toHaveClass("action-protect");
+    expect(screen.getByText("Steripack Hohenlohe").closest(".supplier-marker")).toHaveClass("decision-strategic-trade-off");
+    expect(screen.getByText("MediSeal Jena").closest(".supplier-marker")).toHaveClass("decision-keep");
+    expect(screen.getByText("FlexPack Esslingen").closest(".supplier-marker")).toHaveClass("decision-consolidate");
     expect(screen.getByRole("button", { name: /Draft contract termination letter/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Request executive review/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Terminate contract now/i })).not.toBeInTheDocument();
@@ -508,16 +509,16 @@ describe("SupplyChainApp", () => {
     render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
     fireEvent.change(screen.getByLabelText("Message"), {
-      target: { value: "Plot a quantitative bubble chart of supplier cost score and resilience score." },
+      target: { value: "Plot annual consolidation savings and strategic relationship score as a bubble chart." },
     });
     fireEvent.click(screen.getByRole("button", { name: "Send message" }));
 
     await waitFor(() =>
       expect(
-        screen.getByRole("img", { name: /supplier cost and resilience bubble chart/i }),
+        screen.getByRole("img", { name: /supplier savings and strategic relationship map/i }),
       ).toBeInTheDocument(),
     );
-    expect(screen.queryByRole("table", { name: /supplier cost and resilience matrix/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("table", { name: /supplier savings and strategic relationship matrix/i })).not.toBeInTheDocument();
   });
 
   it("prefers completed validated model tool output over the demo prompt fallback", async () => {
@@ -527,9 +528,9 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
 
     expect(
-      await screen.findByRole("img", { name: /supplier cost and resilience bubble chart/i }),
+      await screen.findByRole("img", { name: /supplier savings and strategic relationship map/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Numeric measures support a quantitative comparison.")).toBeInTheDocument();
+    expect(screen.queryByText("Savings and relationship support a quantitative comparison.")).not.toBeInTheDocument();
   });
 
   it("keeps the executive prompts strategic", async () => {
@@ -889,7 +890,7 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
     await waitFor(() =>
       expect(
-        screen.getByRole("table", { name: /supplier cost and resilience matrix/i }),
+        screen.getByRole("table", { name: /supplier savings and strategic relationship matrix/i }),
       ).toBeInTheDocument(),
     );
 

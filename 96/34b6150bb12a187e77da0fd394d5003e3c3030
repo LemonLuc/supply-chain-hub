@@ -1,0 +1,19 @@
+lib/supplier-portfolio.test.ts
+  s_aae6c65fce6804::t_aac48ba8fc2964 5,7-8,17-21,26-57,59-66,73-78,80,89,94,100-101,105-114,119,123,127,137-142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "9634b6150bb12a187e77da0fd394d5003e3c3030",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

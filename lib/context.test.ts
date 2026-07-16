@@ -71,13 +71,41 @@ describe("buildAppContext", () => {
 
     expect(context.workflow.key).toBe("consolidate");
     expect(context.workflow.accessAllowed).toBe(true);
-    expect(context.decisionSupport?.heatMap).toEqual([
-      { supplier: "Steripack Hohenlohe", cost: "High", resilience: "High", recommendation: "Consolidate volume into MediSeal Jena" },
-      { supplier: "MediSeal Jena", cost: "Medium", resilience: "High", recommendation: "Retain as strategic packaging source" },
-      { supplier: "PräziForm Aalen", cost: "High", resilience: "Medium", recommendation: "Renegotiate or consolidate bracket volume" },
-      { supplier: "Glaswerke Mainz", cost: "High", resilience: "Low", recommendation: "Protect and qualify backup capacity" },
-      { supplier: "OptiQuartz Suhl", cost: "Medium", resilience: "Low", recommendation: "Retain for optical glass redundancy" },
-    ]);
+    const portfolio = context.decisionSupport?.heatMap ?? [];
+    expect(portfolio).toHaveLength(5);
+    expect(portfolio[0]).toMatchObject({
+      supplier: "Steripack Hohenlohe",
+      cost: "High",
+      resilience: "High",
+      action: "Consolidate",
+      targetSupplier: "MediSeal Jena",
+      costScore: 84,
+      resilienceScore: 82,
+      annualSpendMillions: 2.6,
+    });
+    expect(portfolio[1]).toMatchObject({
+      supplier: "MediSeal Jena",
+      action: "Retain",
+      costScore: 48,
+      resilienceScore: 88,
+    });
+    expect(portfolio[3]).toMatchObject({
+      supplier: "Glaswerke Mainz",
+      action: "Protect",
+      costScore: 88,
+      resilienceScore: 28,
+    });
+    expect(
+      portfolio.every(
+        (item) =>
+          typeof item.costScore === "number" &&
+          item.costScore >= 0 &&
+          item.costScore <= 100 &&
+          typeof item.resilienceScore === "number" &&
+          item.resilienceScore >= 0 &&
+          item.resilienceScore <= 100,
+      ),
+    ).toBe(true);
     expect(context.approval).toBeUndefined();
     expect(context.recommendedActions.map((action) => action.label)).toEqual([
       "Draft contract termination letter",

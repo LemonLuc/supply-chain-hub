@@ -1,4 +1,5 @@
 import type { PersonaId } from "./permissions";
+import type { SupplierPortfolioItem } from "./supplier-portfolio";
 
 export type WorkflowKey = "risks" | "delay" | "consolidate";
 
@@ -68,12 +69,7 @@ export type WorkflowDocument = {
   }>;
 };
 
-export type HeatMapItem = {
-  supplier: string;
-  cost: "Low" | "Medium" | "High";
-  resilience: "Low" | "Medium" | "High";
-  recommendation: string;
-};
+export type HeatMapItem = SupplierPortfolioItem;
 
 export type Workflow = {
   navLabel: string;
@@ -410,11 +406,57 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       },
     ],
     heatMap: [
-      { supplier: "Steripack Hohenlohe", cost: "High", resilience: "High", recommendation: "Consolidate volume into MediSeal Jena" },
-      { supplier: "MediSeal Jena", cost: "Medium", resilience: "High", recommendation: "Retain as strategic packaging source" },
-      { supplier: "PräziForm Aalen", cost: "High", resilience: "Medium", recommendation: "Renegotiate or consolidate bracket volume" },
-      { supplier: "Glaswerke Mainz", cost: "High", resilience: "Low", recommendation: "Protect and qualify backup capacity" },
-      { supplier: "OptiQuartz Suhl", cost: "Medium", resilience: "Low", recommendation: "Retain for optical glass redundancy" },
+      {
+        supplier: "Steripack Hohenlohe",
+        cost: "High",
+        resilience: "High",
+        action: "Consolidate",
+        recommendation: "Consolidate volume into MediSeal Jena",
+        targetSupplier: "MediSeal Jena",
+        costScore: 84,
+        resilienceScore: 82,
+        annualSpendMillions: 2.6,
+      },
+      {
+        supplier: "MediSeal Jena",
+        cost: "Medium",
+        resilience: "High",
+        action: "Retain",
+        recommendation: "Retain as strategic packaging source",
+        costScore: 48,
+        resilienceScore: 88,
+        annualSpendMillions: 2.2,
+      },
+      {
+        supplier: "PräziForm Aalen",
+        cost: "High",
+        resilience: "Medium",
+        action: "Consolidate",
+        recommendation: "Renegotiate or consolidate bracket volume",
+        costScore: 78,
+        resilienceScore: 58,
+        annualSpendMillions: 1.7,
+      },
+      {
+        supplier: "Glaswerke Mainz",
+        cost: "High",
+        resilience: "Low",
+        action: "Protect",
+        recommendation: "Protect and qualify backup capacity",
+        costScore: 88,
+        resilienceScore: 28,
+        annualSpendMillions: 3.1,
+      },
+      {
+        supplier: "OptiQuartz Suhl",
+        cost: "Medium",
+        resilience: "Low",
+        action: "Retain",
+        recommendation: "Retain for optical glass redundancy",
+        costScore: 55,
+        resilienceScore: 34,
+        annualSpendMillions: 2.4,
+      },
     ],
   },
 };

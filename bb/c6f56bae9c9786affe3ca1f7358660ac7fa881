@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-16-decision-support-color-refinement-design.md
+  s_c4cb1d5a9d831b::t_362f4759496ff1 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "bbc6f56bae9c9786affe3ca1f7358660ac7fa881",
+  "prompts": {},
+  "sessions": {
+    "s_c4cb1d5a9d831b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b30-3597-7a23-b288-9883d85626e2",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

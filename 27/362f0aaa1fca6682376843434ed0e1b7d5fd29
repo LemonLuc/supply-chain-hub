@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-16-chat-answer-feedback-and-tool-deduplication-design.md
+  s_aae6c65fce6804::t_27309346ad2531 1-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "27362f0aaa1fca6682376843434ed0e1b7d5fd29",
+  "prompts": {},
+  "sessions": {
+    "s_aae6c65fce6804": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b9d-c0fe-7733-b0e7-cff5122f8ea8",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

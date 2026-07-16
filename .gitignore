@@ -5,6 +5,7 @@ dist-slidev/
 .next/
 .open-next/
 .wrangler/
+.worktrees/
 coverage/
 *.tsbuildinfo
 .env

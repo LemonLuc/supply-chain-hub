@@ -109,7 +109,7 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       "Checks open purchase orders and live carrier milestones, then reports only operational exceptions relevant to your role.",
     minimumPersona: "logistics",
     accessLabel: "Available to all supply chain roles",
-    sourceStatus: "4 available tools · live demo data",
+    sourceStatus: "6 available tools · live demo data",
     suggestedPrompts: [
       "Show me potential delivery risks for this week.",
       "Check whether any carrier milestone changed overnight.",
@@ -228,7 +228,7 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       ["Expedite estimate", "€4,900"],
     ],
     actions: [
-      { label: "Add comment to supplier risk register", detail: "Update the primary supplier row with delay, owner and next review.", kind: "update", allowedPersonas: ["procurement"] },
+      { label: "Add comment to supplier risk register", detail: "Update the primary supplier row with delay, owner and next review.", kind: "update", sourceIds: ["excel"], allowedPersonas: ["procurement"] },
       { label: "Assign recovery check to logistics", detail: "Create the carrier recovery task for the logistics planner to execute.", kind: "share", allowedPersonas: ["procurement"], assigneePersona: "logistics" },
       { label: "Draft alternate capacity request", detail: "Ask Mechatronik Süd to reserve eight MT-440B units.", kind: "draft", sourceIds: ["outlook"], allowedPersonas: ["procurement"] },
       { label: "Ask Lucia Lopez for exception review", detail: "Escalate the uncovered six-build gap for C-level decision.", kind: "approval", sourceIds: ["outlook"], allowedPersonas: ["procurement"], reviewerPersona: "executive" },
@@ -343,7 +343,7 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       { id: "quality", name: "Supplier scorecards", category: "Quality MCP", detail: "OTD, defects and corrective actions", selected: true },
       { id: "resilience", name: "Resilience signals", category: "Risk MCP", detail: "Capacity, geography and single-source data", selected: true },
       { id: "policy", name: "Procurement policy", category: "Policy RAG", detail: "Approval and dual-source guardrails", selected: true },
-      { id: "word", name: "Microsoft Word", category: "Microsoft 365 MCP", detail: "Draft review documents only", selected: false },
+      { id: "word", name: "Microsoft Word", category: "Microsoft 365 MCP", detail: "Draft review documents only", selected: true },
     ],
     activity: [
       { tool: "SAP Spend MCP", detail: "Aggregated 12 months of spend by category and supplier", result: "42 active suppliers across 9 categories" },
@@ -371,9 +371,9 @@ export const workflows: Record<WorkflowKey, Workflow> = {
       ["Transition budget", "€180K"],
     ],
     actions: [
-      { label: "Draft contract termination letter", detail: "Prepare a non-binding notice draft for Steripack Hohenlohe and PräziForm Aalen; no notice is sent.", kind: "draft", allowedPersonas: ["executive"] },
-      { label: "Prepare board decision record", detail: "Create the evidence summary, heat map and executive decision log.", kind: "draft", allowedPersonas: ["executive"] },
-      { label: "Create supplier negotiation mandate", detail: "Set savings target, guardrails and fallback terms for the procurement team.", kind: "share", allowedPersonas: ["executive"] },
+      { label: "Draft contract termination letter", detail: "Prepare a non-binding notice draft for Steripack Hohenlohe and PräziForm Aalen; no notice is sent.", kind: "draft", sourceIds: ["word"], allowedPersonas: ["executive"] },
+      { label: "Prepare board decision record", detail: "Create the evidence summary, heat map and executive decision log.", kind: "draft", sourceIds: ["word"], allowedPersonas: ["executive"] },
+      { label: "Create supplier negotiation mandate", detail: "Set savings target, guardrails and fallback terms for the procurement team.", kind: "share", sourceIds: ["word"], allowedPersonas: ["executive"] },
     ],
     rows: [
       {

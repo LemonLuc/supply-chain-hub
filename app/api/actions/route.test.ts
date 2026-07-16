@@ -124,6 +124,31 @@ describe("POST /api/actions", () => {
     expect(runMock).not.toHaveBeenCalled();
   });
 
+  it("rejects Microsoft-backed actions when the suite source is not selected", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+
+    const procurementResponse = await POST(
+      actionRequest({
+        workflowKey: "delay",
+        demoPersona: "procurement",
+        selectedSourceIds: ["sap", "quality", "capacity"],
+        actionLabel: "Add comment to supplier risk register",
+      }),
+    );
+    const executiveResponse = await POST(
+      actionRequest({
+        workflowKey: "consolidate",
+        demoPersona: "executive",
+        selectedSourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
+        actionLabel: "Draft contract termination letter",
+      }),
+    );
+
+    expect(procurementResponse.status).toBe(403);
+    expect(executiveResponse.status).toBe(403);
+    expect(runMock).not.toHaveBeenCalled();
+  });
+
   it("rejects Dana submitting a self-addressed review action", async () => {
     process.env.OPENAI_API_KEY = "sk-sample-replace-me";
 
@@ -192,7 +217,7 @@ describe("POST /api/actions", () => {
       actionRequest({
         workflowKey: "consolidate",
         demoPersona: "executive",
-        selectedSourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
+        selectedSourceIds: ["sap", "contracts", "quality", "resilience", "policy", "word"],
         actionLabel: "Draft contract termination letter",
       }),
     );

@@ -57,6 +57,26 @@ describe("buildAppContext", () => {
     ]);
   });
 
+  it("hides Microsoft-backed actions when the suite sources are not selected", () => {
+    const procurement = buildAppContext("delay", "procurement", [
+      "sap",
+      "quality",
+      "capacity",
+    ]);
+    const executive = buildAppContext("consolidate", "executive", [
+      "sap",
+      "contracts",
+      "quality",
+      "resilience",
+      "policy",
+    ]);
+
+    expect(procurement.recommendedActions.map((action) => action.label)).toEqual([
+      "Assign recovery check to logistics",
+    ]);
+    expect(executive.recommendedActions).toHaveLength(0);
+  });
+
   it("falls back to the risk radar when logistics requests a restricted workflow", () => {
     const context = buildAppContext("delay", "logistics");
 

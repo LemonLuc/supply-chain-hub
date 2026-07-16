@@ -1007,9 +1007,34 @@ describe("SupplyChainApp", () => {
     expect(
       await screen.findByText("Action could not be completed. Please try again."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("status").querySelector(".lucide-circle-x"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("My tasks")).not.toBeInTheDocument();
     expect(screen.queryByText("Approval queue")).not.toBeInTheDocument();
     expect(screen.queryByText("Submitted requests")).not.toBeInTheDocument();
+  });
+
+  it("removes an optimistic approval when a reviewer action is rejected", async () => {
+    mockChatAndRejectedActionStream();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Show me potential delivery risks for this week/i,
+      }),
+    );
+    await screen.findByRole("button", { name: /Write Dana Narid for review/i });
+    fireEvent.click(
+      screen.getByRole("button", { name: /Write Dana Narid for review/i }),
+    );
+
+    expect(
+      await screen.findByText("Action could not be completed. Please try again."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Approval queue")).not.toBeInTheDocument();
+    expect(screen.queryByText("Submitted requests")).not.toBeInTheDocument();
+    expect(screen.queryByText("Pending review by Dana Narid")).not.toBeInTheDocument();
   });
 
   it("lets Lucia execute strategic actions without sending approval to Dana", async () => {

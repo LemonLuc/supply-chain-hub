@@ -6,6 +6,7 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  CircleX,
   Clock3,
   Database,
   ExternalLink,
@@ -776,7 +777,11 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
               )}
               {actionNotice && (
                 <p className={`action-notice tone-${actionNoticeTone}`} role="status">
-                  <Check aria-hidden="true" />
+                  {actionNoticeTone === "error" ? (
+                    <CircleX aria-hidden="true" />
+                  ) : (
+                    <Check aria-hidden="true" />
+                  )}
                   {actionNotice}
                 </p>
               )}

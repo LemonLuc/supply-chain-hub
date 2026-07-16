@@ -59,6 +59,23 @@ function mockChatAndActionStream(actionResponse?: Record<string, unknown>) {
   });
 }
 
+function mockChatAndRejectedActionStream() {
+  return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
+
+    if (url.includes("/api/actions")) {
+      return Response.json({ error: "Action unavailable" }, { status: 403 });
+    }
+
+    return new Response("data: [DONE]\n\n", {
+      headers: {
+        "content-type": "text/event-stream",
+        "x-vercel-ai-ui-message-stream": "v1",
+      },
+    });
+  });
+}
+
 function mockChatAndPendingActionStream() {
   let resolveAction!: (response: Response) => void;
   const actionPromise = new Promise<Response>((resolve) => {
@@ -901,6 +918,98 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: /Mark Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff with Supply Chain Hub done/i }));
 
     expect(screen.getByText("Done")).toBeInTheDocument();
+  });
+
+  it("assigns Dana's recovery check directly to Lukas", async () => {
+    const fetchMock = mockChatAndActionStream({
+      actionLabel: "Assign recovery check to logistics",
+      assigneePersona: "logistics",
+      assigneeName: "Lukas Weber",
+      reviewerPersona: null,
+      reviewerName: null,
+      draft: "Assign recovery check to logistics\n\nFrom Dana Narid to Lukas Weber.",
+      notice:
+        "Task assigned to Lukas Weber. Create the carrier recovery task for the logistics planner to execute.",
+      orchestration: "demo-fallback",
+      toolCalls: [],
+    });
+    render(<SupplyChainApp currentUser={mockUsers.procurement} />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Assign the carrier recovery check for the uncovered builds/i,
+      }),
+    );
+
+    await screen.findByRole("button", {
+      name: /Assign recovery check to logistics/i,
+    });
+    expect(
+      screen.getByRole("button", { name: /Ask Lucia Lopez for exception review/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Write Dana Narid for review/i }),
+    ).not.toBeInTheDocument();
+    const chatRequest = fetchMock.mock.calls.find((call) =>
+      String(call[0]).includes("/api/chat"),
+    );
+    expect(JSON.parse(String(chatRequest?.[1]?.body))).toMatchObject({
+      workflowKey: "delay",
+      demoPersona: "procurement",
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Assign recovery check to logistics/i }),
+    );
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some((call) => String(call[0]).includes("/api/actions")),
+      ).toBe(true),
+    );
+
+    expect(
+      await screen.findByText(/Task assigned to Lukas Weber/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Approval queue")).not.toBeInTheDocument();
+    expect(screen.queryByText("Submitted requests")).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Demo identity"), {
+      target: { value: "logistics" },
+    });
+
+    expect(screen.getByText("My tasks")).toBeInTheDocument();
+    expect(screen.getByText("Assign recovery check to logistics")).toBeInTheDocument();
+  });
+
+  it("does not fabricate success for a rejected action", async () => {
+    const fetchMock = mockChatAndRejectedActionStream();
+    render(<SupplyChainApp currentUser={mockUsers.procurement} />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Assign the carrier recovery check for the uncovered builds/i,
+      }),
+    );
+    await screen.findByRole("button", {
+      name: /Assign recovery check to logistics/i,
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: /Assign recovery check to logistics/i }),
+    );
+
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some((call) => String(call[0]).includes("/api/actions")),
+      ).toBe(true),
+    );
+
+    expect(
+      await screen.findByText("Action could not be completed. Please try again."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("My tasks")).not.toBeInTheDocument();
+    expect(screen.queryByText("Approval queue")).not.toBeInTheDocument();
+    expect(screen.queryByText("Submitted requests")).not.toBeInTheDocument();
   });
 
   it("lets Lucia execute strategic actions without sending approval to Dana", async () => {

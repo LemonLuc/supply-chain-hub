@@ -34,13 +34,7 @@ type BuildActionWorkflowResultOptions = {
   traceId?: string;
 };
 
-export function getActionReviewer(action: WorkflowAction): PersonaId | null;
-export function getActionReviewer(persona: PersonaId, action: WorkflowAction): PersonaId | null;
-export function getActionReviewer(
-  personaOrAction: PersonaId | WorkflowAction,
-  maybeAction?: WorkflowAction,
-): PersonaId | null {
-  const action = maybeAction ?? (personaOrAction as WorkflowAction);
+export function getActionReviewer(action: WorkflowAction): PersonaId | null {
   return action.reviewerPersona ?? null;
 }
 

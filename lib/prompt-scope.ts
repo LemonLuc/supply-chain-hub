@@ -104,7 +104,7 @@ const obviousOffTopicPatterns = [
 const programmingRequestPattern =
   /\b(?:write|debug|explain) (?:some )?(?:code|javascript|typescript|python)\b/i;
 const materialProgrammingPattern =
-  /\b(?:calculat(?:e|ing)|analy[sz](?:e|ing)|compar(?:e|ing)|forecast(?:ing)?|optimi[sz](?:e|ing)|plan(?:ning)?|track(?:ing)?|monitor(?:ing)?|evaluat(?:e|ing)|scor(?:e|ing)|rank(?:ing)?|reconcil(?:e|ing)|load(?:ing)?|import(?:ing)?|export(?:ing)?|transform(?:ing)?|summari[sz](?:e|ing))\b[^.!?,;]{0,100}\b(?:safety[\s-]+stock|reorder(?:ing)?[\s-]+point|order[\s-]+quantity|lead[\s-]+time|inventory|demand|capacity|shipments?|freight|purchase orders?|production|warehouses?|supplier(?:s|'s)?\s+(?:capacity|cost|price|quote|risk|score|lead[\s-]+time|delivery|performance))\b/i;
+  /\b(?:calculat(?:e|ing)|analy[sz](?:e|ing)|compar(?:e|ing)|forecast(?:ing)?|optimi[sz](?:e|ing)|plan(?:ning)?|track(?:ing)?|monitor(?:ing)?|evaluat(?:e|ing)|scor(?:e|ing)|rank(?:ing)?|reconcil(?:e|ing)|load(?:ing)?|import(?:ing)?|export(?:ing)?|transform(?:ing)?|summari[sz](?:e|ing))\s+(?:(?:the|a|an|our|current|latest|recent|daily|weekly|monthly|average|total|optimal|recommended|historical|planned|projected)\s+){0,4}(?:safety[\s-]+stock|reorder(?:ing)?[\s-]+point|order[\s-]+quantity|lead[\s-]+time|inventory|demand|capacity|shipments?|freight|purchase orders?|production|warehouses?|supplier(?:s|'s)?\s+(?:capacity|cost|price|quote|risk|score|lead[\s-]+time|delivery|performance))\b/i;
 
 function hasLiveApiKey(value: string | undefined): value is string {
   return Boolean(value && !value.startsWith("sk-sample") && value !== "replace-me");

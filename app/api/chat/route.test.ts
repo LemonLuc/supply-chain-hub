@@ -206,7 +206,7 @@ describe("POST /api/chat", () => {
     expect(streamTextMock).not.toHaveBeenCalled();
   });
 
-  it("fails open when live prompt classification fails", async () => {
+  it("blocks the request when live prompt classification fails", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
     generateTextMock.mockRejectedValueOnce(new Error("classifier unavailable"));
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
@@ -218,7 +218,7 @@ describe("POST /api/chat", () => {
           {
             id: "message-1",
             role: "user",
-            parts: [{ type: "text", text: "Check carrier recovery options." }],
+            parts: [{ type: "text", text: "what's 2x2" }],
           },
         ],
         workflowKey: "risks",
@@ -226,9 +226,11 @@ describe("POST /api/chat", () => {
     });
 
     const response = await POST(request);
+    const stream = await response.text();
 
     expect(response.status).toBe(200);
-    expect(streamTextMock).toHaveBeenCalledOnce();
+    expect(stream).toContain("I can only help with supply-chain operations and analysis");
+    expect(streamTextMock).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledOnce();
   });
 
@@ -482,6 +484,52 @@ describe("POST /api/chat", () => {
     expect(imageGenerationMock).not.toHaveBeenCalled();
     expect(options.system).toContain("Produce exactly one visual");
     expect(options.system).toContain("Call renderOperationalChart");
+  });
+
+  it("routes a contextual Visualize this follow-up through GPT image generation", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Show me potential delivery risks for this week." }],
+          },
+          {
+            id: "message-2",
+            role: "assistant",
+            parts: [{ type: "text", text: "DHL Freight has the primary supply-chain delivery risk." }],
+          },
+          {
+            id: "message-3",
+            role: "user",
+            parts: [{ type: "text", text: "Visualize this." }],
+          },
+        ],
+        workflowKey: "risks",
+        demoPersona: "logistics",
+        selectedSourceIds: ["sap", "carriers"],
+      }),
+    });
+
+    await POST(request);
+
+    const options = streamTextMock.mock.calls[0][0] as {
+      tools: Record<string, unknown>;
+      system: string;
+    };
+    expect(options.tools).not.toHaveProperty("renderOperationalChart");
+    expect(options.tools).toHaveProperty("generateSlideVisual");
+    expect(imageGenerationMock).toHaveBeenCalledWith({
+      outputFormat: "webp",
+      quality: "medium",
+      size: "1536x1024",
+    });
+    expect(options.system).toContain("Call generateSlideVisual");
+    expect(options.system).not.toContain("Call renderOperationalChart");
   });
 
   it("registers the slide-image tool only when no trusted chart is available", async () => {

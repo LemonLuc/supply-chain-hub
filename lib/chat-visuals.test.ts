@@ -111,9 +111,22 @@ describe("demo visual routing", () => {
       ["sap", "quality", "excel", "capacity"],
     );
 
-    expect(getDemoChatVisual("Visualize this coverage plan.", context)).toMatchObject({
+    expect(getDemoChatVisual("Chart this coverage plan.", context)).toMatchObject({
       toolName: "renderOperationalChart",
       output: { id: "alternate-coverage" },
+    });
+  });
+
+  it("uses the generated-image path for a contextual Visualize this request", () => {
+    const context = buildAppContext(
+      "delay",
+      "procurement",
+      ["sap", "quality", "excel", "capacity"],
+    );
+
+    expect(getDemoChatVisual("Visualize this.", context)).toMatchObject({
+      toolName: "generateSlideVisual",
+      output: { kind: "slide-image" },
     });
   });
 

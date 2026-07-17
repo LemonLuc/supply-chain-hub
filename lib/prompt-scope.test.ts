@@ -59,7 +59,7 @@ describe("prompt scope guardrail", () => {
     expect(generateTextMock).not.toHaveBeenCalled();
   });
 
-  it("allows contextual arithmetic in demo mode", async () => {
+  it("blocks unrelated arithmetic in demo mode even after supply-chain context", async () => {
     const question = "What is 2 * 2?";
     const result = await checkPromptScope({
       question,
@@ -71,7 +71,8 @@ describe("prompt scope guardrail", () => {
       apiKey: "sk-sample-replace-me",
     });
 
-    expect(result.blocked).toBe(false);
+    expect(result.blocked).toBe(true);
+    expect(result.source).toBe("deterministic");
     expect(generateTextMock).not.toHaveBeenCalled();
   });
 
@@ -151,9 +152,9 @@ describe("prompt scope guardrail", () => {
     });
   });
 
-  it("uses conversation context for arithmetic when a live key is configured", async () => {
+  it("uses the live guardrail API to reject unrelated arithmetic with conversation history", async () => {
     generateTextMock.mockResolvedValueOnce({
-      output: { category: "conversation", confidence: 0.91 },
+      output: { category: "off_topic", confidence: 0.99 },
     });
 
     const question = "What is 2 * 2?";
@@ -168,14 +169,14 @@ describe("prompt scope guardrail", () => {
     });
 
     expect(result).toMatchObject({
-      blocked: false,
-      category: "conversation",
+      blocked: true,
+      category: "off_topic",
       source: "model",
     });
     expect(generateTextMock).toHaveBeenCalledOnce();
     expect(generateTextMock.mock.calls[0]?.[0]).toMatchObject({
-      maxRetries: 0,
-      timeout: 5_000,
+      maxRetries: 1,
+      timeout: 10_000,
     });
   });
 
@@ -221,7 +222,7 @@ describe("prompt scope guardrail", () => {
     expect(result.blocked).toBe(false);
   });
 
-  it("fails open without logging conversation content", async () => {
+  it("fails closed without logging conversation content when the guardrail API is unavailable", async () => {
     generateTextMock.mockRejectedValueOnce(new Error("classifier unavailable for secret prompt"));
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
@@ -231,7 +232,12 @@ describe("prompt scope guardrail", () => {
       apiKey: "sk-live-test-key",
     });
 
-    expect(result).toMatchObject({ blocked: false, source: "fail_open" });
+    expect(result).toMatchObject({
+      blocked: true,
+      category: "off_topic",
+      confidence: 1,
+      source: "fail_closed",
+    });
     expect(JSON.stringify(warn.mock.calls)).not.toContain("secret prompt");
   });
 

@@ -83,6 +83,21 @@ describe("chat grounding", () => {
     expect(prompt.indexOf("renderOperationalChart")).toBeLessThan(prompt.indexOf("generateSlideVisual"));
   });
 
+  it("routes a contextual Visualize this request directly to image generation", () => {
+    const prompt = buildSystemPrompt(
+      buildAppContext("delay", "procurement", ["sap", "quality", "excel", "capacity"]),
+      {
+        visualRequested: true,
+        operationalChartAvailable: true,
+        generatedImageRequested: true,
+      },
+    );
+
+    expect(prompt).toContain("Produce exactly one visual");
+    expect(prompt).toContain("Call generateSlideVisual");
+    expect(prompt).not.toContain("Call renderOperationalChart");
+  });
+
   it("returns an operational, tool-grounded demo reply", () => {
     const reply = generateMockReply("What should I do first?", buildAppContext("risks"));
 

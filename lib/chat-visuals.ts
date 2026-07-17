@@ -68,6 +68,12 @@ export function asksForVisualization(question: string): boolean {
   return /\b(visuali[sz]e|chart|graph|plot|diagram|heat\s*map|heatmap|illustrat(?:e|ion)|image|slide visual)\b/i.test(question);
 }
 
+export function asksForGeneratedImage(question: string): boolean {
+  const asksForChart = /\b(chart|graph|plot|heat\s*map|heatmap)\b/i.test(question);
+  const asksForImage = /\b(visuali[sz]e|diagram|illustrat(?:e|ion)|image|slide visual)\b/i.test(question);
+  return asksForImage && !asksForChart;
+}
+
 export function parseOperationalBarChart(value: unknown): OperationalBarChart | undefined {
   if (!isRecord(value) || value.kind !== "operational-bar") return undefined;
   if (
@@ -239,6 +245,14 @@ export function createDemoSlideVisual(context: AppContext): DemoSlideVisual {
 
 export function getDemoChatVisual(question: string, context: AppContext): DemoChatVisual | undefined {
   if (!asksForVisualization(question)) return undefined;
+
+  if (asksForGeneratedImage(question)) {
+    return {
+      toolName: "generateSlideVisual",
+      input: {},
+      output: createDemoSlideVisual(context),
+    };
+  }
 
   const suppliers = context.decisionSupport?.heatMap;
   if (suppliers?.length) {

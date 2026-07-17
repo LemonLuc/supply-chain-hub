@@ -12,6 +12,7 @@ import {
 import { asksForWorkbookReview, buildSystemPrompt, generateMockReply, hasLiveApiKey, normalizeChatOptions } from "@/lib/chat";
 import { getChatTools, loadExternalContext } from "@/lib/chat-extensions";
 import {
+  asksForGeneratedImage,
   asksForVisualization,
   getDemoChatVisual,
   resolveOperationalChart,
@@ -150,7 +151,10 @@ export async function POST(request: Request): Promise<Response> {
   const context = buildAppContext(body.workflowKey, demoPersona, body.selectedSourceIds, question);
   const options = normalizeChatOptions(body.model, body.thinking);
   const visualRequested = asksForVisualization(question);
-  const operationalChart = visualRequested ? resolveOperationalChart(context) : undefined;
+  const generatedImageRequested = asksForGeneratedImage(question);
+  const operationalChart = visualRequested && !generatedImageRequested
+    ? resolveOperationalChart(context)
+    : undefined;
   const trustedChartAvailable = Boolean(
     operationalChart || context.decisionSupport?.heatMap?.length,
   );
@@ -163,10 +167,10 @@ export async function POST(request: Request): Promise<Response> {
   const externalContext = await loadExternalContext(question, context);
   const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const tools = getChatTools(context, {
-    allowOperationalChart: visualRequested,
-    allowSupplierPortfolio: visualRequested,
+    allowOperationalChart: visualRequested && !generatedImageRequested,
+    allowSupplierPortfolio: visualRequested && !generatedImageRequested,
   });
-  if (visualRequested && !trustedChartAvailable) {
+  if (generatedImageRequested || (visualRequested && !trustedChartAvailable)) {
     Object.assign(tools, {
       generateSlideVisual: openai.tools.imageGeneration({
         outputFormat: "webp",
@@ -181,6 +185,7 @@ export async function POST(request: Request): Promise<Response> {
       buildSystemPrompt(context, {
         visualRequested,
         operationalChartAvailable: Boolean(operationalChart),
+        generatedImageRequested,
       }),
       externalContext.length ? `External context:\n${externalContext.join("\n\n")}` : "",
     ]

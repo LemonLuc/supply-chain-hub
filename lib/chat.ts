@@ -36,9 +36,16 @@ export function normalizeChatOptions(model: unknown, thinking: unknown): {
 
 export function buildSystemPrompt(
   context: AppContext,
-  options: { visualRequested?: boolean; operationalChartAvailable?: boolean } = {},
+  options: {
+    visualRequested?: boolean;
+    operationalChartAvailable?: boolean;
+    generatedImageRequested?: boolean;
+  } = {},
 ): string {
-  const portfolioInstructions = context.decisionSupport?.heatMap?.length && options.visualRequested
+  const portfolioInstructions =
+    context.decisionSupport?.heatMap?.length &&
+    options.visualRequested &&
+    !options.generatedImageRequested
     ? `
 - Call renderSupplierPortfolio exactly once for this supplier-portfolio answer.
 - Choose bubble when annual consolidation savings (USD) and the strategic relationship score (0–100) materially improve the comparison; otherwise choose matrix.
@@ -49,9 +56,11 @@ export function buildSystemPrompt(
   const visualInstructions = options.visualRequested
     ? `
 - Produce exactly one visual for this explicit visualization request.
-${options.operationalChartAvailable
-  ? "- Call renderOperationalChart because a server-derived quantitative comparison is available."
-  : "- Use a trusted chart tool when one is available."}
+${options.generatedImageRequested
+  ? "- Call generateSlideVisual exactly once to create the requested image."
+  : options.operationalChartAvailable
+    ? "- Call renderOperationalChart because a server-derived quantitative comparison is available."
+    : "- Use a trusted chart tool when one is available."}
 - Only when no trusted chart is suitable, call generateSlideVisual for a conceptual, narrative, or presentation-oriented image.
 - Do not use generated images for exact operational measurements, financial figures, supplier scores, or order identifiers.
 - Keep exact facts in the written answer and never invent visual data.`

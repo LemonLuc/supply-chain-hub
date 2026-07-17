@@ -12,7 +12,7 @@ export const OFF_TOPIC_RESPONSE =
 const GUARDRAIL_MODEL = "gpt-5.4-nano";
 const CONFIDENCE_THRESHOLD = 0.7;
 const MAX_CONTEXT_MESSAGES = 10;
-const GUARDRAIL_TIMEOUT_MS = 5_000;
+const GUARDRAIL_TIMEOUT_MS = 10_000;
 
 const categories = ["supply_chain", "app_help", "conversation", "off_topic"] as const;
 type PromptScopeCategory = (typeof categories)[number];
@@ -24,7 +24,7 @@ type PromptScopeModelOutput = {
 
 export type PromptScopeDecision = PromptScopeModelOutput & {
   blocked: boolean;
-  source: "deterministic" | "model" | "fail_open";
+  source: "deterministic" | "model" | "fail_closed";
 };
 
 const outputSchema = jsonSchema<PromptScopeModelOutput>({
@@ -42,7 +42,7 @@ const scopePolicy = `Classify the latest user request for Supply Chain Hub.
 Allowed categories:
 - supply_chain: procurement, sourcing, suppliers, supplier risk, capacity, quality, inventory, logistics, shipments, purchase orders, demand forecasting, production planning, and calculations materially supporting those topics.
 - app_help: questions about using Supply Chain Hub.
-- conversation: greetings, clarifications, and contextual follow-ups supporting an allowed conversation.
+- conversation: greetings, clarifications, and contextual follow-ups supporting an allowed conversation. A request such as "visualize this" is conversation only when "this" refers to a preceding in-scope supply-chain response; without that context it is off-topic.
 
 Use off_topic for general mathematics, trivia, unrelated writing, unrelated programming, or any request without a material connection to the application. A bare request such as "calculate 2x2" is off-topic. Incidental supply-chain wording must not make an unrelated task allowed.`;
 
@@ -114,13 +114,6 @@ function hasSupplyChainSignal(question: string): boolean {
   return supplyChainSignals.some((pattern) => pattern.test(question));
 }
 
-function hasRecentSupplyChainContext(messages: UIMessage[]): boolean {
-  return messages
-    .slice(0, -1)
-    .slice(-MAX_CONTEXT_MESSAGES)
-    .some((message) => hasSupplyChainSignal(getUIMessageText(message)));
-}
-
 function hasArithmeticRequest(question: string): boolean {
   const withoutPolitePrefix = question
     .trim()
@@ -142,7 +135,7 @@ function isObviouslyOffTopic(question: string, messages: UIMessage[]): boolean {
   }
   if (!hasArithmeticRequest(question)) return false;
   if (materialCalculationSignals.some((pattern) => pattern.test(question))) return false;
-  return !hasRecentSupplyChainContext(messages);
+  return true;
 }
 
 function allowedDecision(
@@ -203,7 +196,7 @@ export async function checkPromptScope({
           name: "prompt_scope_decision",
           description: "Whether the latest request is within Supply Chain Hub's scope.",
         }),
-        maxRetries: 0,
+        maxRetries: 1,
         timeout: GUARDRAIL_TIMEOUT_MS,
       });
       const { category, confidence } = result.output;
@@ -214,10 +207,15 @@ export async function checkPromptScope({
         source: "model",
       };
     } catch (error) {
-      console.warn("Off-topic prompt guardrail failed; continuing because fail-open is enabled.", {
+      console.warn("Off-topic prompt guardrail failed; blocking because fail-closed is enabled.", {
         errorName: error instanceof Error ? error.name : "UnknownError",
       });
-      return allowedDecision("conversation", "fail_open", 0);
+      return {
+        blocked: true,
+        category: "off_topic",
+        confidence: 1,
+        source: "fail_closed",
+      };
     }
   }
 

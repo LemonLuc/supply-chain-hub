@@ -33,8 +33,10 @@ export type SupplierPortfolioVisualization = {
   suppliers: ResolvedSupplierPortfolioItem[];
 };
 
-const HIGH_SAVINGS_THRESHOLD_USD = 350_000;
-const HIGH_RELATIONSHIP_THRESHOLD = 65;
+export const supplierPortfolioDecisionThresholds = {
+  annualSavingsUsd: 350_000,
+  relationshipScore: 65,
+} as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
@@ -93,8 +95,10 @@ function isResolvedSupplier(value: unknown): value is ResolvedSupplierPortfolioI
 export function deriveSupplierDecision(
   item: Pick<SupplierPortfolioItem, "annualSavingsUsd" | "relationshipScore">,
 ): SupplierPortfolioDecision {
-  const hasHighSavings = item.annualSavingsUsd >= HIGH_SAVINGS_THRESHOLD_USD;
-  const hasHighRelationship = item.relationshipScore >= HIGH_RELATIONSHIP_THRESHOLD;
+  const hasHighSavings =
+    item.annualSavingsUsd >= supplierPortfolioDecisionThresholds.annualSavingsUsd;
+  const hasHighRelationship =
+    item.relationshipScore >= supplierPortfolioDecisionThresholds.relationshipScore;
 
   if (hasHighSavings && hasHighRelationship) return "Strategic trade-off";
   if (hasHighSavings) return "Consolidate";
@@ -159,6 +163,8 @@ export function getDemoPortfolioView(prompt: string): SupplierPortfolioView {
     "annual savings",
     "savings potential",
     "relationship score",
+    "heat map",
+    "heatmap",
   ].some((term) => normalizedPrompt.includes(term));
 
   return asksForQuantitativeView ? "bubble" : "matrix";

@@ -1122,6 +1122,11 @@ h1, h2, h3, p { margin-top: 0; }
   overflow: visible;
 }
 
+.portfolio-chart-zones .zone-keep { fill: var(--decision-keep-surface); }
+.portfolio-chart-zones .zone-consolidate { fill: var(--decision-consolidate-surface); }
+.portfolio-chart-zones .zone-strategic-trade-off { fill: var(--decision-tradeoff-surface); }
+.portfolio-chart-zones .zone-low-priority { fill: var(--decision-low-priority-surface); }
+
 .portfolio-chart-grid line {
   stroke: var(--chart-grid);
   stroke-width: .8;

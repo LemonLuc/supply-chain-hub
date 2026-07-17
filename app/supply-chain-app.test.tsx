@@ -265,6 +265,11 @@ describe("SupplyChainApp", () => {
     expect(themeLayer).not.toContain(
       ".portfolio-bubble.decision-strategic-trade-off .portfolio-bubble-cost",
     );
+    for (const zone of ["keep", "consolidate", "strategic-trade-off", "low-priority"]) {
+      expect(themeLayer).toMatch(
+        new RegExp(`\\.portfolio-chart-zones \\.zone-${zone}\\s*\\{[^}]*fill:`),
+      );
+    }
     expect(css).not.toContain(".heat-cell");
   });
 
@@ -628,6 +633,25 @@ describe("SupplyChainApp", () => {
       ).toBeInTheDocument(),
     );
     expect(screen.queryByRole("table", { name: /supplier savings and strategic relationship matrix/i })).not.toBeInTheDocument();
+  });
+
+  it("restores the bubble heat map when an executive response has no inline visual", async () => {
+    mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.executive} />);
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "Show the supplier consolidation heat map." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+
+    await waitFor(() => {
+      const results = screen.getByLabelText("Supply Chain Hub results");
+      const heatMap = within(results).getByRole("img", {
+        name: /supplier savings and strategic relationship map/i,
+      });
+      expect(heatMap.closest(".message.assistant")).toBeNull();
+      expect(heatMap).toBeInTheDocument();
+    });
   });
 
   it("prefers completed validated model tool output over the demo prompt fallback", async () => {

@@ -41,12 +41,21 @@ import {
   type SupportedModel,
   type ThinkingLevel,
 } from "@/lib/chat";
+import { asksForGeneratedImage } from "@/lib/chat-visuals";
 import { buildAppContext, buildRoleToolSources, resolveWorkflowForPrompt } from "@/lib/context";
 import { workflows, type WorkflowAction, type WorkflowKey } from "@/lib/demo-data";
 import { getPersonaPolicy, personas, type PersonaId } from "@/lib/permissions";
+import {
+  getDemoPortfolioView,
+  resolveSupplierPortfolioVisualization,
+} from "@/lib/supplier-portfolio";
 
 import { AnswerActions, type AnswerFeedback, type FeedbackRating } from "./answer-actions";
 import { ChatMessageVisual, getMessageVisual } from "./chat-message-visual";
+import {
+  getMessagePortfolioVisualization,
+  SupplierPortfolioVisualizationView,
+} from "./supplier-portfolio-visualization";
 
 type ApprovalStatus = "pending" | "approved" | "denied";
 
@@ -238,6 +247,22 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     () => buildAppContext(workflowKey, persona, selectedSourceIds, activePrompt),
     [workflowKey, persona, selectedSourceIds, activePrompt],
   );
+  const inlinePortfolioVisualization = useMemo(
+    () => getMessagePortfolioVisualization(messages),
+    [messages],
+  );
+  const fallbackPortfolioVisualization = useMemo(() => {
+    if (inlinePortfolioVisualization || asksForGeneratedImage(activePrompt)) return undefined;
+
+    const suppliers = appContext.decisionSupport?.heatMap;
+    return suppliers
+      ? resolveSupplierPortfolioVisualization(
+          suppliers,
+          getDemoPortfolioView(activePrompt),
+          "Selected from the authorized supplier portfolio snapshot",
+        )
+      : undefined;
+  }, [activePrompt, appContext.decisionSupport?.heatMap, inlinePortfolioVisualization]);
   function sourceIsSelected(toolId: string, fallback: boolean) {
     return sourceSelection[toolId] ?? fallback;
   }
@@ -878,6 +903,10 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
 
         {canShowResults && (
           <section className="results" aria-label="Supply Chain Hub results">
+            {fallbackPortfolioVisualization && (
+              <SupplierPortfolioVisualizationView visualization={fallbackPortfolioVisualization} />
+            )}
+
             <section className="records-section">
               <div className="section-title">
                 <div><h3>Findings</h3></div>

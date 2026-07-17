@@ -11,6 +11,7 @@ import {
   getSavingsBand,
   parseSupplierPortfolioVisualization,
   supplierPortfolioBands,
+  supplierPortfolioDecisionThresholds,
   supplierPortfolioDecisions,
   type ResolvedSupplierPortfolioItem,
   type SupplierPortfolioBand,
@@ -139,6 +140,16 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
   const xPosition = (savings: number) => bounds.left + (savings / savingsMaximum) * plotWidth;
   const yPosition = (relationship: number) =>
     bounds.top + (1 - relationship / 100) * plotHeight;
+  const plotRight = bounds.left + plotWidth;
+  const plotBottom = bounds.top + plotHeight;
+  const decisionBoundaryX = Math.min(
+    plotRight,
+    Math.max(bounds.left, xPosition(supplierPortfolioDecisionThresholds.annualSavingsUsd)),
+  );
+  const decisionBoundaryY = Math.min(
+    plotBottom,
+    Math.max(bounds.top, yPosition(supplierPortfolioDecisionThresholds.relationshipScore)),
+  );
 
   return (
     <div className="portfolio-bubble-wrap">
@@ -153,6 +164,37 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
           Annual consolidation savings increase from left to right. Strategic relationship score
           increases from bottom to top. Bubble area represents annual supplier cost.
         </desc>
+
+        <g className="portfolio-chart-zones" aria-hidden="true">
+          <rect
+            className="zone-keep"
+            x={bounds.left}
+            y={bounds.top}
+            width={decisionBoundaryX - bounds.left}
+            height={decisionBoundaryY - bounds.top}
+          />
+          <rect
+            className="zone-strategic-trade-off"
+            x={decisionBoundaryX}
+            y={bounds.top}
+            width={plotRight - decisionBoundaryX}
+            height={decisionBoundaryY - bounds.top}
+          />
+          <rect
+            className="zone-low-priority"
+            x={bounds.left}
+            y={decisionBoundaryY}
+            width={decisionBoundaryX - bounds.left}
+            height={plotBottom - decisionBoundaryY}
+          />
+          <rect
+            className="zone-consolidate"
+            x={decisionBoundaryX}
+            y={decisionBoundaryY}
+            width={plotRight - decisionBoundaryX}
+            height={plotBottom - decisionBoundaryY}
+          />
+        </g>
 
         <g className="portfolio-chart-grid" aria-hidden="true">
           {savingsTicks.map((tick) => (

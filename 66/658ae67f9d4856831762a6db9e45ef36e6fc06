@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-17-slides-06-08-09-readability-design.md
+  s_8884df62cbd1af::t_f385d27282ff03 1-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "66658ae67f9d4856831762a6db9e45ef36e6fc06",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

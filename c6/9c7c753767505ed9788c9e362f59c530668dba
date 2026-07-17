@@ -1,0 +1,19 @@
+docs/superpowers/plans/2026-07-17-slide-deck-roi-deployment-evals.md
+  s_8884df62cbd1af::t_e06efe1d5930bd 1-474
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "c69c7c753767505ed9788c9e362f59c530668dba",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

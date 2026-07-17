@@ -30,6 +30,7 @@ import {
   buildActionDraft,
   getActionAssignee,
   getActionReviewer,
+  getRecipientActionLabel,
   type ActionWorkflowResult,
 } from "@/lib/action-workflows";
 import {
@@ -194,7 +195,7 @@ function approvalStatusText(request: ApprovalRequest) {
 }
 
 function personalTaskTitle(action: WorkflowAction) {
-  return action.recipientTaskLabel ?? action.label;
+  return getRecipientActionLabel(action);
 }
 
 export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {

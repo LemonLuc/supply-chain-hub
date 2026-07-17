@@ -24,16 +24,36 @@ export type AnalysisTraceStep = {
   outcome: string;
 };
 
-export type WorkflowAction = {
+type WorkflowActionBase = {
   label: string;
-  recipientTaskLabel?: string;
   detail: string;
   kind: "draft" | "update" | "share" | "approval";
   sourceIds?: string[];
   allowedPersonas?: PersonaId[];
-  assigneePersona?: PersonaId;
-  reviewerPersona?: PersonaId;
 };
+
+type LocalWorkflowAction = WorkflowActionBase & {
+  recipientLabel?: string;
+  assigneePersona?: never;
+  reviewerPersona?: never;
+};
+
+type AssignedWorkflowAction = WorkflowActionBase & {
+  recipientLabel: string;
+  assigneePersona: PersonaId;
+  reviewerPersona?: never;
+};
+
+type ReviewWorkflowAction = WorkflowActionBase & {
+  recipientLabel: string;
+  assigneePersona?: never;
+  reviewerPersona: PersonaId;
+};
+
+export type WorkflowAction =
+  | LocalWorkflowAction
+  | AssignedWorkflowAction
+  | ReviewWorkflowAction;
 
 export type ResultRow = {
   subject: string;
@@ -151,8 +171,8 @@ export const workflows: Record<WorkflowKey, Workflow> = {
     ],
     actions: [
       { label: "Request DHL recovery routing", detail: "Draft a carrier message asking DHL Freight for confirmed Leipzig recovery routing and ETA.", kind: "draft", sourceIds: ["carriers", "outlook"], allowedPersonas: ["logistics"] },
-      { label: "Create Outlook recovery task", recipientTaskLabel: "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff with Supply Chain Hub", detail: "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff before 12:00.", kind: "update", sourceIds: ["outlook"], allowedPersonas: ["logistics"] },
-      { label: "Write Dana Narid for review", detail: "Send the delivery risk summary to the procurement team lead.", kind: "approval", sourceIds: ["outlook"], allowedPersonas: ["logistics"], reviewerPersona: "procurement" },
+      { label: "Create Outlook recovery task", recipientLabel: "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff with Supply Chain Hub", detail: "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff before 12:00.", kind: "update", sourceIds: ["outlook"], allowedPersonas: ["logistics"] },
+      { label: "Write Dana Narid for review", recipientLabel: "Review delivery risk summary", detail: "Send the delivery risk summary to the procurement team lead.", kind: "approval", sourceIds: ["outlook"], allowedPersonas: ["logistics"], reviewerPersona: "procurement" },
       { label: "Log DHL exception on PO 4500872319", detail: "Attach the missed DHL milestone and hold promised-date changes until the recovery ETA is confirmed.", kind: "update", sourceIds: ["sap", "carriers"], allowedPersonas: ["logistics"] },
     ],
     rows: [
@@ -230,9 +250,9 @@ export const workflows: Record<WorkflowKey, Workflow> = {
     ],
     actions: [
       { label: "Add comment to supplier risk register", detail: "Update the primary supplier row with delay, owner and next review.", kind: "update", sourceIds: ["excel"], allowedPersonas: ["procurement"] },
-      { label: "Assign recovery check to logistics", recipientTaskLabel: "Run recovery check", detail: "Create the carrier recovery task for the logistics planner to execute.", kind: "share", allowedPersonas: ["procurement"], assigneePersona: "logistics" },
+      { label: "Assign recovery check to logistics", recipientLabel: "Run recovery check", detail: "Create the carrier recovery task for the logistics planner to execute.", kind: "share", allowedPersonas: ["procurement"], assigneePersona: "logistics" },
       { label: "Draft alternate capacity request", detail: "Ask Mechatronik Süd to reserve eight MT-440B units.", kind: "draft", sourceIds: ["outlook"], allowedPersonas: ["procurement"] },
-      { label: "Ask Lucia Lopez for exception review", detail: "Escalate the uncovered six-build gap for C-level decision.", kind: "approval", sourceIds: ["outlook"], allowedPersonas: ["procurement"], reviewerPersona: "executive" },
+      { label: "Ask Lucia Lopez for exception review", recipientLabel: "Review six-build coverage exception", detail: "Escalate the uncovered six-build gap for C-level decision.", kind: "approval", sourceIds: ["outlook"], allowedPersonas: ["procurement"], reviewerPersona: "executive" },
     ],
     rows: [
       {

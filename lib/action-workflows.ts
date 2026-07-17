@@ -7,6 +7,7 @@ export type ActionOrchestrationMode = "agents-sdk" | "demo-fallback";
 
 export type ActionWorkflowResult = {
   actionLabel: string;
+  recipientActionLabel: string | null;
   workflowKey: WorkflowKey;
   requesterPersona: PersonaId;
   requesterName: string;
@@ -40,6 +41,10 @@ export function getActionReviewer(action: WorkflowAction): PersonaId | null {
 
 export function getActionAssignee(action: WorkflowAction): PersonaId | null {
   return action.assigneePersona ?? null;
+}
+
+export function getRecipientActionLabel(action: WorkflowAction): string {
+  return action.recipientLabel ?? action.label;
 }
 
 export function findActionByLabel(context: AppContext, actionLabel: unknown): WorkflowAction | undefined {
@@ -117,6 +122,7 @@ export function buildActionWorkflowResult({
 
   return {
     actionLabel: action.label,
+    recipientActionLabel: action.recipientLabel ?? null,
     workflowKey,
     requesterPersona: persona,
     requesterName: requester.name,

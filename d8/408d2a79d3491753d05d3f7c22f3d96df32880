@@ -1,0 +1,45 @@
+lib/chat-visuals.ts
+  s_cbc3918efd1b19::t_28fb9cc4cdc003 1-269
+lib/chat-extensions.test.ts
+  s_4751f4adaa1796::t_3b1fe9ff40bec8 1-40
+lib/chat-extensions.ts
+  s_8f063ba3a5bbd9::t_158cbbac797e34 4,20-28,30-32,34-37,62-95
+lib/chat-visuals.test.ts
+  s_8f063ba3a5bbd9::t_ea65d4302734ad 1-134
+lib/chat.test.ts
+  s_4751f4adaa1796::t_5742379519a78e 71-82
+lib/chat.ts
+  s_8f063ba3a5bbd9::t_db3815a3201956 37-40,49-58,71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "d8408d2a79d3491753d05d3f7c22f3d96df32880",
+  "prompts": {},
+  "sessions": {
+    "s_4751f4adaa1796": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709e-8e45-7fa3-8461-23748333992d",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_8f063ba3a5bbd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709d-7e67-72e0-bd49-468f2d163cb9",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_cbc3918efd1b19": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f70be-fa4f-73d3-bd5f-253052a2881e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

@@ -30,6 +30,7 @@ export type MessageVisual =
   | { kind: "portfolio"; visualization: SupplierPortfolioVisualization }
   | { kind: "operational"; chart: OperationalBarChart }
   | ImageVisual
+  | { kind: "loading" }
   | { kind: "error" };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -103,6 +104,12 @@ export function getMessageVisual(message: UIMessage): MessageVisual | undefined 
     }
 
     if (part.state === "output-error") return { kind: "error" };
+    if (
+      toolName === "generateSlideVisual" &&
+      (part.state === "input-streaming" || part.state === "input-available")
+    ) {
+      return { kind: "loading" };
+    }
     if (part.state !== "output-available") continue;
 
     if (toolName === "renderSupplierPortfolio") {
@@ -118,6 +125,7 @@ export function getMessageVisual(message: UIMessage): MessageVisual | undefined 
     if (toolName === "generateSlideVisual") {
       const image = parseImageVisual(part.output);
       if (image) return image;
+      return { kind: "error" };
     }
   }
 
@@ -149,6 +157,15 @@ function ImageMessageVisual({ visual }: { visual: ImageVisual }) {
 
 export function ChatMessageVisual({ visual }: { visual: MessageVisual | undefined }) {
   if (!visual) return null;
+  if (visual.kind === "loading") {
+    return (
+      <div className="chat-message-visual">
+        <p className="chat-visual-loading" role="status" aria-live="polite">
+          Generating slide visual… This can take up to a minute.
+        </p>
+      </div>
+    );
+  }
   if (visual.kind === "error") {
     return <p className="chat-visual-error" role="status">Visual unavailable. Try asking again.</p>;
   }

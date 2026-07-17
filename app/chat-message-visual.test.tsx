@@ -95,18 +95,34 @@ describe("ChatMessageVisual", () => {
     );
   });
 
-  it("ignores incomplete and malformed visual output", () => {
+  it("shows progress while the image model is generating a visual", () => {
+    const visual = getMessageVisual(assistantMessage([{
+      type: "tool-generateSlideVisual",
+      state: "input-available",
+      toolCallId: "image-1",
+      input: {},
+    }]));
+
+    render(<ChatMessageVisual visual={visual} />);
+
+    expect(screen.getByRole("status")).toHaveTextContent("Generating slide visual");
+  });
+
+  it("ignores incomplete trusted chart output", () => {
     expect(getMessageVisual(assistantMessage([{
       type: "tool-renderOperationalChart",
       state: "input-streaming",
       toolCallId: "chart-1",
     }]))).toBeUndefined();
+  });
+
+  it("shows an error instead of silently dropping malformed completed image output", () => {
     expect(getMessageVisual(assistantMessage([{
       type: "tool-generateSlideVisual",
       state: "output-available",
       toolCallId: "image-1",
       output: { result: "not base64!" },
-    }]))).toBeUndefined();
+    }]))).toEqual({ kind: "error" });
     expect(getMessageVisual(assistantMessage([{
       type: "tool-generateSlideVisual",
       state: "output-available",
@@ -114,7 +130,7 @@ describe("ChatMessageVisual", () => {
       output: {
         result: Buffer.from("base64 text that is not a WebP image payload", "utf8").toString("base64"),
       },
-    }]))).toBeUndefined();
+    }]))).toEqual({ kind: "error" });
   });
 
   it("shows a compact retryable status for a visual tool error", () => {

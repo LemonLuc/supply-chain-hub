@@ -214,6 +214,17 @@ describe("SupplyChainApp", () => {
     expect(source).not.toContain("forceTranscriptScrollRef");
   });
 
+  it("keeps wide markdown tables inside the chat transcript", () => {
+    const css = readFileSync("app/globals.css", "utf8");
+    const messageListRule = css.match(/\.message-list\s*\{([^}]*)\}/)?.[1] ?? "";
+    const messageRule = css.match(/\.message\s*\{([^}]*)\}/)?.[1] ?? "";
+    const markdownRule = css.match(/\.markdown-content\s*\{([^}]*)\}/)?.[1] ?? "";
+
+    expect(messageListRule).toMatch(/grid-template-columns\s*:\s*minmax\(0,\s*1fr\)/);
+    expect(messageRule).toMatch(/min-width\s*:\s*0/);
+    expect(markdownRule).toMatch(/overflow-x\s*:\s*auto/);
+  });
+
   it("defines semantic light and dark theme tokens without legacy heat cards", () => {
     const css = readFileSync("app/globals.css", "utf8");
     const themeLayer = css.slice(css.indexOf("/* Unified enterprise theme layer"));

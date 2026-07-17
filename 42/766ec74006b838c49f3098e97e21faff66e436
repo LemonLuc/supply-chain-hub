@@ -1,0 +1,35 @@
+app/api/actions/route.test.ts
+  s_8f063ba3a5bbd9::t_08ba0edd6efdba 71,108,186,212,233
+app/api/chat/route.test.ts
+  s_8f063ba3a5bbd9::t_08f987c58a3ccf 614
+app/supply-chain-app.test.tsx
+  s_8f063ba3a5bbd9::t_b969070773a30e 189-190,326,355,372,389,444,520,551,562,655,670,686,895,908,927,939,943,995,1030,1032,1035,1042-1043,1045,1167
+app/supply-chain-app.tsx
+  s_8f063ba3a5bbd9::t_4272fb98e0c0bb 161,172,175
+lib/chat.test.ts
+  s_8f063ba3a5bbd9::t_40a1774201d52d 117
+lib/context.test.ts
+  s_8f063ba3a5bbd9::t_95f893280ac0d0 11,41,49,54,172
+lib/context.ts
+  s_8f063ba3a5bbd9::t_dad5d0fd6b1b48 70
+lib/demo-data.test.ts
+  s_8f063ba3a5bbd9::t_411457240230cc 6,9-13,15-19,22-27,29
+lib/demo-data.ts
+  s_8f063ba3a5bbd9::t_5784495a2d25ce 127-128,135,138,144,149,154,162,165,174,183,186,194,197,223,286-287,293,297,301,309,324,332,340
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "42766ec74006b838c49f3098e97e21faff66e436",
+  "prompts": {},
+  "sessions": {
+    "s_8f063ba3a5bbd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709d-7e67-72e0-bd49-468f2d163cb9",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

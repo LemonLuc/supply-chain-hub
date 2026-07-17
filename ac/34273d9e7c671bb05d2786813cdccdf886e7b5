@@ -1,0 +1,55 @@
+app/answer-actions.tsx
+  s_8f063ba3a5bbd9::t_33e7fb8e57363a 124
+app/api/chat/route.test.ts
+  s_4751f4adaa1796::t_1b77415c421a20 353,363,401-429,455,481-512,520
+app/api/chat/route.ts
+  s_4751f4adaa1796::t_9309beccb278e2 157-159,168-172
+app/chat-message-visual.test.tsx
+  s_8f063ba3a5bbd9::t_3d0f4564a27b35 56-61,110-117
+app/chat-message-visual.tsx
+  s_8f063ba3a5bbd9::t_7125362ba01aad 48-58,72
+app/globals.css
+  s_4751f4adaa1796::t_b27420b30bbebb 120
+app/supply-chain-app.test.tsx
+  s_4751f4adaa1796::t_756423667b8fd7 204-215,481-507,760
+app/supply-chain-app.tsx
+  s_4751f4adaa1796::t_378c7eae9ba443 24,299
+lib/chat-extensions.test.ts
+  s_4751f4adaa1796::t_054399e6147276 7-19
+lib/chat-extensions.ts
+  s_4751f4adaa1796::t_f7bd8a02227956 27,36
+lib/chat-visuals.test.ts
+  s_4751f4adaa1796::t_73cc3868809c84 16-17,104
+lib/chat-visuals.ts
+  s_4751f4adaa1796::t_7e9eced074bfdc 68,241-242
+lib/chat.test.ts
+  s_4751f4adaa1796::t_23410c710f5881 61-63,70
+lib/chat.ts
+  s_4751f4adaa1796::t_4a8ba7356e6fc1 41
+lib/context.ts
+  s_8f063ba3a5bbd9::t_52273b54a0be3e 87-91,109-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "ac34273d9e7c671bb05d2786813cdccdf886e7b5",
+  "prompts": {},
+  "sessions": {
+    "s_4751f4adaa1796": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709e-8e45-7fa3-8461-23748333992d",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_8f063ba3a5bbd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709d-7e67-72e0-bd49-468f2d163cb9",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

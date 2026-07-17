@@ -1051,7 +1051,7 @@
 
 .poc-slide {
   gap: 12px;
-  grid-template-rows: 18px 64px auto auto;
+  grid-template-rows: 18px 48px auto auto;
 }
 
 .poc-slide .poc-note {
@@ -1174,7 +1174,7 @@
 
 .roi-panel,
 .evaluation-panel {
-  min-height: 300px;
+  min-height: 280px;
   padding: 16px 18px;
 }
 

@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-17-audience-aware-actions-and-july-demo-data-design.md
+  s_8f063ba3a5bbd9::t_d410aa6cd1e867 1-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5b6b128515b2237548e5c7cdd61eafac3901a3e9",
+  "prompts": {},
+  "sessions": {
+    "s_8f063ba3a5bbd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709d-7e67-72e0-bd49-468f2d163cb9",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

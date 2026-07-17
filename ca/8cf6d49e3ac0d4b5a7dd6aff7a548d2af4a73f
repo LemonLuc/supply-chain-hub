@@ -1,0 +1,23 @@
+slides.md
+  s_8884df62cbd1af::t_6b703c3debd42e 125-130,146,148,150-158,160,162-174
+slides.test.ts
+  s_8884df62cbd1af::t_36c68e8b345635 1-71
+style.css
+  s_8884df62cbd1af::t_e7704e8c687c84 1165-1319,1559-1591,2011-2013
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "ca8cf6d49e3ac0d4b5a7dd6aff7a548d2af4a73f",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

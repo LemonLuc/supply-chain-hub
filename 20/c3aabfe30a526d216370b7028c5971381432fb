@@ -1,0 +1,19 @@
+docs/superpowers/plans/2026-07-17-action-workflow-reliability.md
+  s_eec980cd3f3b50::t_a55c4028821d20 1-309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "20c3aabfe30a526d216370b7028c5971381432fb",
+  "prompts": {},
+  "sessions": {
+    "s_eec980cd3f3b50": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7132-c5af-7223-8e22-036cfee732ad",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

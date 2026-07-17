@@ -1,0 +1,39 @@
+app/globals.css
+  s_8884df62cbd1af::t_8d1a1b4e8f08a8 1125-1129
+app/supplier-portfolio-visualization.test.tsx
+  s_eec980cd3f3b50::t_b4e564238ff306 84-93
+app/supplier-portfolio-visualization.tsx
+  s_8884df62cbd1af::t_a857fb65fb62b0 14,143-152,168-198
+app/supply-chain-app.test.tsx
+  s_eec980cd3f3b50::t_e676e211baf898 268-272,638-656
+app/supply-chain-app.tsx
+  s_8884df62cbd1af::t_58e43a4b25863c 44,48-51,55-58,250-265,906-909
+lib/supplier-portfolio.test.ts
+  s_eec980cd3f3b50::t_557710f291e3a7 120
+lib/supplier-portfolio.ts
+  s_8884df62cbd1af::t_13b2d1bf6184ff 36-39,98-101,166-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "f3052c0ec60879d87827a90fb9994c6182850092",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_eec980cd3f3b50": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7132-c5af-7223-8e22-036cfee732ad",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

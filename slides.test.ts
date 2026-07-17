@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const deck = readFileSync(resolve(process.cwd(), "slides.md"), "utf8");
 const styles = readFileSync(resolve(process.cwd(), "style.css"), "utf8");
+const runbook = readFileSync(resolve(process.cwd(), "executive-presentation.md"), "utf8");
 
 function numberedSlide(number: string) {
   const marker = `<span class="slide-number">${number}</span>`;
@@ -23,6 +24,20 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(numbers).toEqual(["02", "03", "04", "05", "06", "08", "09", "11"]);
   });
 
+  it("turns slide 03 discovery into a tangible working pain hypothesis", () => {
+    const slide = numberedSlide("03");
+
+    expect(slide).toContain("Working pain hypothesis from technical discovery");
+    expect(slide).toContain("roughly 20 minutes spent reconciling SAP");
+    expect(slide).toContain("scarce domain experts become the bottleneck");
+    expect(slide).toContain("avoidable expedite spend, schedule churn");
+    expect(slide).not.toContain("Which disruptions consume the most time?");
+    expect(slide).not.toContain("Where do handoffs reduce accuracy or predictability?");
+    expect(slide).not.toContain(
+      "Which recommendations need evidence, review and traceability?",
+    );
+  });
+
   it("keeps slide 06 deployment constraints concise", () => {
     const slide = numberedSlide("06");
 
@@ -34,31 +49,36 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(slide).not.toContain("API data is not used for model training");
   });
 
-  it("shows a euro-only value hypothesis and explicit ROI gate on slide 08", () => {
+  it("scopes slide 08 value to one workflow without visible formulas", () => {
     const slide = numberedSlide("08");
 
-    expect(slide).toContain("€180K–€310K");
-    expect(slide).toContain("€15K–€25K");
-    expect(slide).toContain("€101K–€151K");
-    expect(slide).toContain("€65K–€130K");
-    expect(slide).toContain(
-      "Net ROI = (validated benefit − annualized solution cost) ÷ annualized solution cost",
-    );
+    expect(slide).toContain("Validate value and control before scaling one workflow");
+    expect(slide).toContain("Annual value hypothesis · one workflow");
+    expect(slide).toContain("€0.2M–€0.3M");
+    expect(slide).toContain("Faster risk review");
+    expect(slide).toContain("Fewer urgent expedites");
+    expect(slide).toContain("Lower disruption exposure");
+    expect(slide).toContain("ZEISS confirms the baseline, attribution and annual run cost");
+    expect(slide).not.toMatch(/€180K–€310K|€15K–€25K|€101K–€151K|€65K–€130K/);
+    expect(slide).not.toContain("Net ROI =");
+    expect(slide).not.toContain("× €");
     expect(slide).not.toContain("$");
   });
 
-  it("explains the slide 08 proof plan in buyer language", () => {
+  it("shows four concise POC decision gates on slide 08", () => {
     const slide = numberedSlide("08");
 
-    expect(slide).toContain("Agree realistic test scenarios");
-    expect(slide).toContain("Compare each answer and proposed action");
-    expect(slide).toContain("Review failures together");
-    expect(slide).toContain("Business value · Process owner");
-    expect(slide).toContain("Decision quality · Supply-chain lead");
-    expect(slide).toContain("Technical reliability · IT / AI owner");
-    expect(slide).toContain("Governance · Risk owner");
-    expect(slide).not.toMatch(/SME-labelled gold set|Graders|Trace \+ SME review|Regression set/);
-    expect(slide).not.toMatch(/false negatives|tool \/ trace path/);
+    expect(slide).toContain("POC decision gates");
+    expect(slide).toContain(
+      "Test routine cases, high-impact exceptions and permission boundaries",
+    );
+    expect(slide).toContain("≥25% faster review · ≥80% useful");
+    expect(slide).toContain("≥90% source-backed · &lt;5% serious risks missed");
+    expect(slide).toContain("≥95% correct approved system and workflow");
+    expect(slide).toContain("100% human review for high-impact actions");
+    expect(slide).not.toContain("Agree realistic test scenarios");
+    expect(slide).not.toContain("Compare each answer and proposed action");
+    expect(slide).not.toContain("Review failures together");
   });
 
   it("removes the closing filler from slide 09", () => {
@@ -73,8 +93,21 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
   it("includes scoped styling hooks for the revised layouts", () => {
     expect(styles).toContain(".deployment-constraints");
     expect(styles).toContain(".roi-panel");
-    expect(styles).toContain(".proof-steps");
-    expect(styles).toContain(".buyer-gates");
+    expect(styles).toContain(".value-levers");
+    expect(styles).toContain(".decision-gates");
+    expect(styles).not.toContain(".proof-steps");
+    expect(styles).not.toContain(".buyer-gates");
     expect(styles).not.toContain(".openai-data-note");
+  });
+
+  it("keeps slide 08 arithmetic in the presenter talking track", () => {
+    expect(runbook).toContain("600–1,000 reviews × 20 minutes saved × €75 per hour");
+    expect(runbook).toContain("12–18 avoided cases × €8,400");
+    expect(runbook).toContain(
+      "0.35–0.70 probability-weighted events × €185,000",
+    );
+    expect(runbook).toContain("€181K–€306K");
+    expect(runbook).toContain("one repeatable workflow");
+    expect(runbook).toContain("not enterprise-wide ZEISS value");
   });
 });

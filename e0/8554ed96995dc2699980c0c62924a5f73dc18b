@@ -1,0 +1,19 @@
+docs/superpowers/plans/2026-07-17-slide-03-pain-and-slide-08-consolidation.md
+  s_8884df62cbd1af::t_faaf56a3c3c1ce 1-585
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e08554ed96995dc2699980c0c62924a5f73dc18b",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

@@ -31,7 +31,44 @@ function mockChatStream() {
   );
 }
 
-function mockChatAndActionStream(actionResponse?: Record<string, unknown>) {
+function createPortfolioToolResponse(view: "matrix" | "bubble") {
+  const suppliers = workflows.consolidate.heatMap ?? [];
+  const visualization = resolveSupplierPortfolioVisualization(
+    suppliers,
+    view,
+    view === "bubble" ? "Savings and relationship support a quantitative comparison." : "Decision bands support a compact matrix.",
+  );
+
+  return createUIMessageStreamResponse({
+    stream: createUIMessageStream({
+      execute: ({ writer }) => {
+        writer.write({
+          type: "tool-input-available",
+          toolCallId: "portfolio-view-1",
+          toolName: "renderSupplierPortfolio",
+          input: { preferredView: view, reason: visualization.reason },
+        });
+        writer.write({
+          type: "tool-output-available",
+          toolCallId: "portfolio-view-1",
+          output: visualization,
+        });
+        writer.write({ type: "text-start", id: "answer-1" });
+        writer.write({
+          type: "text-delta",
+          id: "answer-1",
+          delta: "The portfolio view reflects the available savings and strategic relationship evidence.",
+        });
+        writer.write({ type: "text-end", id: "answer-1" });
+      },
+    }),
+  });
+}
+
+function mockChatAndActionStream(
+  actionResponse?: Record<string, unknown>,
+  chatView?: "matrix" | "bubble",
+) {
   return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
     const url = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
 
@@ -49,6 +86,8 @@ function mockChatAndActionStream(actionResponse?: Record<string, unknown>) {
         },
       );
     }
+
+    if (chatView) return createPortfolioToolResponse(chatView);
 
     return new Response("data: [DONE]\n\n", {
       headers: {
@@ -158,39 +197,7 @@ function mockChatStreamWithMarkdownTable() {
 }
 
 function mockChatStreamWithPortfolioTool(view: "matrix" | "bubble") {
-  const suppliers = workflows.consolidate.heatMap ?? [];
-  const visualization = resolveSupplierPortfolioVisualization(
-    suppliers,
-    view,
-    view === "bubble" ? "Savings and relationship support a quantitative comparison." : "Decision bands support a compact matrix.",
-  );
-
-  return vi.spyOn(globalThis, "fetch").mockResolvedValue(
-    createUIMessageStreamResponse({
-      stream: createUIMessageStream({
-        execute: ({ writer }) => {
-          writer.write({
-            type: "tool-input-available",
-            toolCallId: "portfolio-view-1",
-            toolName: "renderSupplierPortfolio",
-            input: { preferredView: view, reason: visualization.reason },
-          });
-          writer.write({
-            type: "tool-output-available",
-            toolCallId: "portfolio-view-1",
-            output: visualization,
-          });
-          writer.write({ type: "text-start", id: "answer-1" });
-          writer.write({
-            type: "text-delta",
-            id: "answer-1",
-            delta: "The portfolio view reflects the available savings and strategic relationship evidence.",
-          });
-          writer.write({ type: "text-end", id: "answer-1" });
-        },
-      }),
-    }),
-  );
+  return vi.spyOn(globalThis, "fetch").mockResolvedValue(createPortfolioToolResponse(view));
 }
 
 describe("SupplyChainApp", () => {
@@ -559,7 +566,7 @@ describe("SupplyChainApp", () => {
   });
 
   it("reveals the executive supplier matrix from merged executive sources only after a prompt", async () => {
-    const fetchMock = mockChatStream();
+    const fetchMock = mockChatStreamWithPortfolioTool("matrix");
     render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Open chat settings/i }));
@@ -588,7 +595,7 @@ describe("SupplyChainApp", () => {
   });
 
   it("uses the quantitative bubble chart for an explicit demo prompt", async () => {
-    mockChatStream();
+    mockChatStreamWithPortfolioTool("bubble");
     render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
     fireEvent.change(screen.getByLabelText("Message"), {
@@ -610,9 +617,9 @@ describe("SupplyChainApp", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
 
-    expect(
-      await screen.findByRole("img", { name: /supplier savings and strategic relationship map/i }),
-    ).toBeInTheDocument();
+    const visual = await screen.findByRole("img", { name: /supplier savings and strategic relationship map/i });
+    expect(visual.closest(".message.assistant")).not.toBeNull();
+    expect(screen.getAllByRole("img", { name: /supplier savings and strategic relationship map/i })).toHaveLength(1);
     expect(screen.queryByText("Savings and relationship support a quantitative comparison.")).not.toBeInTheDocument();
   });
 
@@ -1141,7 +1148,7 @@ describe("SupplyChainApp", () => {
       notice: "Draft prepared for Dr. Lucía López. Prepare a non-binding notice draft for Steripack Hohenlohe and PräziForm Aalen; no notice is sent.",
       orchestration: "agents-sdk",
       toolCalls: ["read_supply_chain_context", "prepare_action_workflow"],
-    });
+    }, "matrix");
     render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));

@@ -43,16 +43,9 @@ import {
 import { buildAppContext, buildRoleToolSources, resolveWorkflowForPrompt } from "@/lib/context";
 import { workflows, type WorkflowAction, type WorkflowKey } from "@/lib/demo-data";
 import { getPersonaPolicy, personas, type PersonaId } from "@/lib/permissions";
-import {
-  getDemoPortfolioView,
-  resolveSupplierPortfolioVisualization,
-} from "@/lib/supplier-portfolio";
 
 import { AnswerActions, type AnswerFeedback, type FeedbackRating } from "./answer-actions";
-import {
-  getMessagePortfolioVisualization,
-  SupplierPortfolioVisualizationView,
-} from "./supplier-portfolio-visualization";
+import { ChatMessageVisual, getMessageVisual } from "./chat-message-visual";
 
 type ApprovalStatus = "pending" | "approved" | "denied";
 
@@ -259,20 +252,6 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     () => buildAppContext(workflowKey, persona, selectedSourceIds, activePrompt),
     [workflowKey, persona, selectedSourceIds, activePrompt],
   );
-  const portfolioVisualization = useMemo(() => {
-    const modelVisualization = getMessagePortfolioVisualization(messages);
-    if (modelVisualization) return modelVisualization;
-
-    const suppliers = appContext.decisionSupport?.heatMap;
-    return suppliers
-      ? resolveSupplierPortfolioVisualization(
-          suppliers,
-          getDemoPortfolioView(activePrompt),
-          "Selected from available portfolio measures",
-        )
-      : undefined;
-  }, [activePrompt, appContext.decisionSupport?.heatMap, messages]);
-
   useEffect(() => {
     if (!messages.length) return;
 
@@ -757,34 +736,38 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                   transcript.scrollHeight - transcript.scrollTop - transcript.clientHeight <= 48;
               }}
             >
-              {messages.map((message) => (
-                <div
-                  className={`message ${message.role}`}
-                  key={message.id}
-                >
-                  <div className="message-heading">
-                    <span>{message.role === "user" ? "You" : "Supply Chain Hub"}</span>
+              {messages.map((message) => {
+                const visual = message.role === "assistant" ? getMessageVisual(message) : undefined;
+                return (
+                  <div
+                    className={`message ${message.role}${visual ? " has-visual" : ""}`}
+                    key={message.id}
+                  >
+                    <div className="message-heading">
+                      <span>{message.role === "user" ? "You" : "Supply Chain Hub"}</span>
+                    </div>
+                    {message.role === "assistant" && <ReasoningSummary message={message} />}
+                    {messageText(message) &&
+                      (message.role === "assistant" ? (
+                        <AssistantMarkdown text={messageText(message)} />
+                      ) : (
+                        <p>{messageText(message)}</p>
+                      ))}
+                    {message.role === "assistant" && <ChatMessageVisual visual={visual} />}
+                    {message.role === "assistant" && messageText(message) && (
+                      <AnswerActions
+                        copied={copiedMessageId === message.id}
+                        feedback={answerFeedback[message.id]}
+                        onCopy={() => void copyAnswer(message)}
+                        onSelectFeedback={(rating) => selectAnswerFeedback(message.id, rating)}
+                        onCommentChange={(comment) => updateAnswerFeedbackComment(message.id, comment)}
+                        onSubmitFeedback={() => submitAnswerFeedback(message.id)}
+                        onCancelFeedback={() => cancelAnswerFeedback(message.id)}
+                      />
+                    )}
                   </div>
-                  {message.role === "assistant" && <ReasoningSummary message={message} />}
-                  {messageText(message) &&
-                    (message.role === "assistant" ? (
-                      <AssistantMarkdown text={messageText(message)} />
-                    ) : (
-                      <p>{messageText(message)}</p>
-                    ))}
-                  {message.role === "assistant" && messageText(message) && (
-                    <AnswerActions
-                      copied={copiedMessageId === message.id}
-                      feedback={answerFeedback[message.id]}
-                      onCopy={() => void copyAnswer(message)}
-                      onSelectFeedback={(rating) => selectAnswerFeedback(message.id, rating)}
-                      onCommentChange={(comment) => updateAnswerFeedbackComment(message.id, comment)}
-                      onSubmitFeedback={() => submitAnswerFeedback(message.id)}
-                      onCancelFeedback={() => cancelAnswerFeedback(message.id)}
-                    />
-                  )}
-                </div>
-              ))}
+                );
+              })}
               {status === "submitted" && <div className="thinking-state">Connecting to authorized tools and retrieving records...</div>}
             </div>
           )}
@@ -966,10 +949,6 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
 
         {canShowResults && (
           <section className="results" aria-label="Supply Chain Hub results">
-            {portfolioVisualization && (
-              <SupplierPortfolioVisualizationView visualization={portfolioVisualization} />
-            )}
-
             <section className="records-section">
               <div className="section-title">
                 <div><h3>Findings</h3></div>

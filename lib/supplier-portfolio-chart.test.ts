@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { workflows } from "./demo-data";
 import {
   buildBubbleChartLayout,
-  formatCompactUsd,
+  formatCompactEur,
   getSavingsAxisMaximum,
   supplierBubbleChartBounds,
 } from "./supplier-portfolio-chart";
@@ -11,11 +11,12 @@ import {
 const suppliers = workflows.consolidate.heatMap ?? [];
 
 describe("supplier portfolio chart geometry", () => {
-  it("formats compact USD values for axes and bubbles", () => {
-    expect(formatCompactUsd(0)).toBe("$0");
-    expect(formatCompactUsd(120_000)).toBe("$120K");
-    expect(formatCompactUsd(2_100_000)).toBe("$2.1M");
-    expect(formatCompactUsd(4_600_000)).toBe("$4.6M");
+  it("formats compact EUR values for axes and bubbles", () => {
+    expect(formatCompactEur(0)).toBe("€0");
+    expect(formatCompactEur(120_000)).toBe("€120K");
+    expect(formatCompactEur(2_100_000)).toBe("€2.1M");
+    expect(formatCompactEur(4_600_000)).toBe("€4.6M");
+    expect(formatCompactEur(-4_600_000)).toBe("-€4.6M");
   });
 
   it("rounds the savings axis up to a readable quarter-million interval", () => {

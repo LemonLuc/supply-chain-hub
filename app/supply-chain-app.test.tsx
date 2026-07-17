@@ -323,7 +323,7 @@ describe("SupplyChainApp", () => {
     const { fetchMock, resolveResponse } = mockPendingChatStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     expect(screen.getByText(/Connecting to authorized tools/i)).toBeInTheDocument();
@@ -352,7 +352,7 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByLabelText("No analysis yet")).not.toBeInTheDocument();
     expect(screen.queryByText("Delivery exception found")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     expect(await screen.findAllByText(/PO 4500872319/i)).not.toHaveLength(0);
     expect(screen.getByText(/480 N-FK5 optical glass blanks/i)).toBeInTheDocument();
@@ -369,7 +369,7 @@ describe("SupplyChainApp", () => {
     mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     await screen.findByLabelText("Chat messages");
     const suggestions = screen.getByLabelText("Suggested questions");
@@ -386,7 +386,7 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByText(/Revenue at risk/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "Impact" })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
     expect(await screen.findAllByText(/PO 4500872319/i)).not.toHaveLength(0);
 
     expect(screen.queryByText(/€/)).not.toBeInTheDocument();
@@ -441,10 +441,11 @@ describe("SupplyChainApp", () => {
     const fetchMock = mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toMatchObject({
+      workflowKey: "risks",
       model: "gpt-5.6-sol",
       thinking: "high",
     });
@@ -517,7 +518,7 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByLabelText("Microsoft 365 Suite"));
 
     fireEvent.change(screen.getByLabelText("Message"), {
-      target: { value: "Show me potential delivery risks for next week (CW 30)." },
+      target: { value: "Show me potential delivery risks for this week." },
     });
     fireEvent.click(screen.getByRole("button", { name: "Send message" }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
@@ -652,7 +653,7 @@ describe("SupplyChainApp", () => {
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
     expect(screen.queryByText("Analysis trace")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     expect(await screen.findAllByText(/PO 4500872319/i)).not.toHaveLength(0);
     expect(screen.queryByText("Analysis trace")).not.toBeInTheDocument();
@@ -667,7 +668,7 @@ describe("SupplyChainApp", () => {
     mockChatStreamWithReasoning();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     const toggle = await screen.findByRole("button", { name: "Show reasoning" });
     expect(screen.getByText("DHL Freight shipment 00340434161094000012 is the first risk to handle.")).toBeInTheDocument();
@@ -683,7 +684,7 @@ describe("SupplyChainApp", () => {
     mockChatStreamWithMarkdownTable();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     await screen.findByRole("table");
     expect(screen.getByRole("button", { name: /Copy answer/i })).toBeInTheDocument();
@@ -892,7 +893,7 @@ describe("SupplyChainApp", () => {
     mockChatStreamWithMarkdownTable();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     expect(await screen.findByRole("heading", { name: "Shipment options" })).toBeInTheDocument();
     expect(screen.getAllByRole("table").length).toBeGreaterThanOrEqual(1);
@@ -905,7 +906,7 @@ describe("SupplyChainApp", () => {
     const fetchMock = mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
@@ -924,7 +925,7 @@ describe("SupplyChainApp", () => {
 
     expect(screen.getByText("5 / 6 data sources selected")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
 
     const results = await screen.findByLabelText("Supply Chain Hub results");
     const requestBody = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
@@ -940,7 +941,7 @@ describe("SupplyChainApp", () => {
     const fetchMock = mockChatAndActionStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
     await screen.findByRole("button", { name: /Write Dana Narid for review/i });
 
     fireEvent.click(screen.getByRole("button", { name: /Write Dana Narid for review/i }));
@@ -992,7 +993,7 @@ describe("SupplyChainApp", () => {
     const { resolveAction } = mockChatAndPendingActionStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
     await screen.findByRole("button", { name: /Write Dana Narid for review/i });
 
     fireEvent.click(screen.getByRole("button", { name: /Write Dana Narid for review/i }));
@@ -1039,7 +1040,7 @@ describe("SupplyChainApp", () => {
     });
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for next week/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
     await screen.findByRole("button", { name: /Create Microsoft Outlook recovery task/i });
 
     fireEvent.click(screen.getByRole("button", { name: /Create Microsoft Outlook recovery task/i }));
@@ -1164,7 +1165,7 @@ describe("SupplyChainApp", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Show me potential delivery risks for next week/i,
+        name: /Show me potential delivery risks for this week/i,
       }),
     );
     await screen.findByRole("button", { name: /Write Dana Narid for review/i });

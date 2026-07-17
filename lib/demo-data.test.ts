@@ -29,6 +29,17 @@ describe("operational workflow data", () => {
     expect(JSON.stringify(workflows)).not.toMatch(/June|2026-06|24\.06\.21/);
   });
 
+  it("keeps suggested prompts generic while the evidence stays date-specific", () => {
+    expect(workflows.risks.suggestedPrompts).toContain(
+      "Show me potential delivery risks for this week.",
+    );
+    expect(workflows.risks.suggestedPrompts).toContain(
+      "Create a follow-up plan for delayed freight this week.",
+    );
+    expect(workflows.risks.suggestedPrompts.join(" ")).not.toContain("CW 30");
+    expect(workflows.risks.question).toContain("CW 30");
+  });
+
   it("models role-restricted alternatives and executive decision actions", () => {
     expect(workflows.delay.minimumPersona).toBe("procurement");
     expect(workflows.delay.question).toContain("objective turret");

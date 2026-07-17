@@ -29,6 +29,7 @@ describe("SupplierPortfolioVisualizationView", () => {
     const steripack = screen.getByText("Steripack Hohenlohe");
     expect(steripack.closest("td")).toHaveAttribute("data-savings", "Medium");
     expect(steripack.closest("td")).toHaveAttribute("data-relationship", "Medium");
+    expect(steripack.closest(".supplier-marker")).toHaveTextContent("€520K");
     expect(screen.getByText("Shift volume to MediSeal Jena")).toBeInTheDocument();
     expect(screen.getAllByText("Strategic trade-off").length).toBeGreaterThan(0);
     expect(screen.getByRole("list", { name: /decision heat legend/i })).toHaveTextContent(
@@ -48,10 +49,11 @@ describe("SupplierPortfolioVisualizationView", () => {
     expect(
       screen.getByRole("img", { name: /supplier savings and strategic relationship map/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Annual consolidation savings (USD)")).toBeInTheDocument();
+    expect(screen.getByText("Annual consolidation savings (EUR)")).toBeInTheDocument();
     expect(screen.getByText("Strategic relationship score (0–100)")).toBeInTheDocument();
-    expect(screen.getByText("$4.6M")).toHaveClass("portfolio-bubble-cost");
-    expect(screen.getByText("$800K")).toHaveClass("portfolio-bubble-cost", "is-compact");
+    expect(screen.getByText("€4.6M")).toHaveClass("portfolio-bubble-cost");
+    expect(screen.getByText("€800K")).toHaveClass("portfolio-bubble-cost", "is-compact");
+    expect(document.body).not.toHaveTextContent("$");
     expect(screen.queryByText(/annual cost/i)).not.toBeInTheDocument();
     expect(screen.getByText("MediSeal Jena")).toHaveAttribute("text-anchor", "middle");
     expect(screen.getByText(/reliability, quality, qualification depth/i)).toBeInTheDocument();

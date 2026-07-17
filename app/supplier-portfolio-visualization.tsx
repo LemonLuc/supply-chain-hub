@@ -2,7 +2,7 @@ import type { UIMessage } from "ai";
 
 import {
   buildBubbleChartLayout,
-  formatCompactUsd,
+  formatCompactEur,
   getSavingsAxisMaximum,
   supplierBubbleChartBounds,
 } from "@/lib/supplier-portfolio-chart";
@@ -56,7 +56,7 @@ function SupplierMarker({ supplier }: { supplier: ResolvedSupplierPortfolioItem 
       <dl className="supplier-marker-measures">
         <div>
           <dt>Savings</dt>
-          <dd>{formatCompactUsd(supplier.annualSavingsUsd)}</dd>
+          <dd>{formatCompactEur(supplier.annualSavingsUsd)}</dd>
         </div>
         <div>
           <dt>Relationship</dt>
@@ -164,7 +164,7 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
                 y={bounds.top + plotHeight + 29}
                 textAnchor="middle"
               >
-                {formatCompactUsd(tick)}
+                {formatCompactEur(tick)}
               </text>
             </g>
           ))}
@@ -193,7 +193,7 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
           y={bounds.height - 21}
           textAnchor="middle"
         >
-          Annual consolidation savings (USD)
+          Annual consolidation savings (EUR)
         </text>
         <text
           className="portfolio-axis-label axis-y"
@@ -210,6 +210,7 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
             const bubble = layoutBySupplier.get(supplier.supplier);
             if (!bubble) return null;
             const compactCost = bubble.radius <= 20;
+            const formattedCost = formatCompactEur(supplier.annualCostUsd);
 
             return (
               <g
@@ -217,8 +218,8 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
                 key={supplier.supplier}
               >
                 <title>
-                  {supplier.supplier}: {formatCompactUsd(supplier.annualSavingsUsd)} savings,
-                  {` ${supplier.relationshipScore}/100 relationship, ${supplier.decision}, ${formatCompactUsd(supplier.annualCostUsd)} supplier cost`}
+                  {supplier.supplier}: {formatCompactEur(supplier.annualSavingsUsd)} savings,
+                  {` ${supplier.relationshipScore}/100 relationship, ${supplier.decision}, ${formatCompactEur(supplier.annualCostUsd)} supplier cost`}
                 </title>
                 <text
                   className="portfolio-bubble-name"
@@ -235,7 +236,7 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
                   y={bubble.y + 5}
                   textAnchor="middle"
                 >
-                  {formatCompactUsd(supplier.annualCostUsd)}
+                  {formattedCost}
                 </text>
               </g>
             );

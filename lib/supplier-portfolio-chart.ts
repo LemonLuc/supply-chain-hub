@@ -36,18 +36,18 @@ function compactNumber(value: number, divisor: number): string {
   return Number.isInteger(dividedValue) ? String(dividedValue) : dividedValue.toFixed(1);
 }
 
-export function formatCompactUsd(value: number): string {
-  if (!Number.isFinite(value)) return "$0";
+export function formatCompactEur(value: number): string {
+  if (!Number.isFinite(value)) return "€0";
   const sign = value < 0 ? "-" : "";
   const absoluteValue = Math.abs(value);
 
   if (absoluteValue >= 1_000_000) {
-    return `${sign}$${compactNumber(absoluteValue, 1_000_000)}M`;
+    return `${sign}€${compactNumber(absoluteValue, 1_000_000)}M`;
   }
   if (absoluteValue >= 1_000) {
-    return `${sign}$${compactNumber(absoluteValue, 1_000)}K`;
+    return `${sign}€${compactNumber(absoluteValue, 1_000)}K`;
   }
-  return `${sign}$${Math.round(absoluteValue)}`;
+  return `${sign}€${Math.round(absoluteValue)}`;
 }
 
 export function getSavingsAxisMaximum(suppliers: readonly SupplierPortfolioItem[]): number {

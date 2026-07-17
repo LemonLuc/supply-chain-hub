@@ -168,24 +168,9 @@ const personaRecommendations: Record<PersonaId, Array<{ label: string; source: s
 };
 
 const personaPromptSets: Record<PersonaId, string[]> = {
-  logistics: [
-    "Show me potential delivery risks for next week (CW 30).",
-    "Check whether any carrier milestone changed overnight.",
-    "Which shipments need pickup confirmation before noon?",
-    "Create a CW 30 follow-up plan for delayed freight.",
-  ],
-  procurement: [
-    "What approved alternates can cover the delayed turret assemblies?",
-    "Which production orders can use an approved alternate turret?",
-    "Assign the carrier recovery check for the uncovered builds.",
-    "Which supplier decision needs Lucia Lopez's review?",
-  ],
-  executive: [
-    "Show supplier consolidation options by savings and strategic relationship.",
-    "Which supplier relationships should we consolidate without weakening continuity?",
-    "Where can we capture savings while protecting strategic supply continuity?",
-    "Draft a board-level decision record for supplier consolidation.",
-  ],
+  logistics: workflows.risks.suggestedPrompts,
+  procurement: workflows.delay.suggestedPrompts,
+  executive: workflows.consolidate.suggestedPrompts,
 };
 
 function submittedApprovalStatusText(request: ApprovalRequest) {

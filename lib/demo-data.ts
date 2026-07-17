@@ -132,10 +132,10 @@ export const workflows: Record<WorkflowKey, Workflow> = {
     accessLabel: "Available to all supply chain roles",
     sourceStatus: "6 available tools · live demo data",
     suggestedPrompts: [
-      "Show me potential delivery risks for next week (CW 30).",
+      "Show me potential delivery risks for this week.",
       "Check whether any carrier milestone changed overnight.",
       "Which shipments need pickup confirmation before noon?",
-      "Create a CW 30 follow-up plan for delayed freight.",
+      "Create a follow-up plan for delayed freight this week.",
     ],
     sources: [
       { id: "sap", name: "SAP S/4HANA", category: "ERP MCP", detail: "POs, material master, promised dates", selected: true },

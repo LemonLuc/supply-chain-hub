@@ -86,48 +86,27 @@ record: true
 
 ---
 
-<section class="slide-section solution-slide solution-proposal">
-  <span class="slide-number">05</span>
-  <p class="eyebrow">Solution Proposal</p>
-  <h1>Supply Chain Hub as the enterprise decision interface</h1>
-  <div class="solution-grid">
-    <div><h2>Communication interface</h2><p>An executive-grade conversation surface where teams ask business questions, inspect evidence and <strong>align on next steps</strong>.</p></div>
-    <div><h2>Enterprise operating model</h2><p>Role scope, source ownership, approval paths and auditability turn the app into a <strong>governed way of working</strong>.</p></div>
-    <div><h2>System integration layer</h2><p>Connects ZEISS systems, documents, business tools and workflow actions, constantly <strong>keeping these sources of truth up to date</strong>.</p></div>
-  </div>
-  <div class="consequence-band outcome-list">
-    <span>Business outcome</span>
-    <ul>
-      <li>Reduce manual effort by consolidating scattered supply-chain context into one decision interface.</li>
-      <li>Improve decision precision with source-backed recommendations and visible assumptions.</li>
-      <li>Give leaders a reliable path from signal to recommended action and approval.</li>
-    </ul>
-  </div>
-</section>
-
----
-
 <section class="slide-section architecture">
-  <span class="slide-number">06</span>
+  <span class="slide-number">05</span>
   <p class="eyebrow">Reference architecture</p>
   <h1>Solution overview</h1>
   <div class="arch-canvas">
-    <div class="arch-zone"><h2>Supply Chain Hub</h2><p>Conversation layer for asking, reviewing evidence and aligning next steps.</p></div>
+    <div class="arch-zone"><h2>Supply Chain Hub</h2><p>Conversation layer for asking, reviewing evidence and <strong class="arch-highlight">aligning next steps</strong>.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone ai-zone"><h2>Intelligence layer</h2><p>Turns supply-chain questions into options and next steps.</p></div>
+    <div class="arch-zone ai-zone"><h2>Intelligence layer</h2><p>Applies GPT-5.6 model and reasoning controls to turn <strong class="arch-highlight">questions into options</strong>.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone controls-zone"><h2>Operating controls</h2><p>Keeps roles, sources, masking and review paths clear.</p></div>
+    <div class="arch-zone controls-zone"><h2>Operating controls</h2><p><strong class="arch-highlight">Server-side guardrails</strong> check prompt scope, enforce persona, workflow and selected-source access, filter financials and block unavailable actions.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone"><h2>ZEISS systems</h2><p>SAP, logistics, supplier, warehouse and documents stay sources of truth.</p></div>
-    <div class="arch-rail"><div><b>Ground</b><p>Pull the relevant supply-chain context.</p></div><div><b>Reason</b><p>Compare risk, options and trade-offs.</p></div><div><b>Act</b><p>Send recommendations to owners or approval paths.</p></div></div>
-    <div class="arch-subgrid"><div><h2>OpenAI Responses API</h2><p>Streams grounded answers with source context and model controls.</p></div><div><h2>OpenAI Agents SDK</h2><p>Runs tool-backed workflows and reviewer handoffs.</p></div><div><h2>Why OpenAI / ROI</h2><p>Faster escalation cycles, less expedite exposure and a reusable business case.</p></div></div>
+    <div class="arch-zone"><h2>ZEISS systems</h2><p>SAP, logistics, supplier, warehouse and documents stay <strong class="arch-highlight">sources of truth</strong>.</p></div>
+    <div class="arch-rail"><div><b>Ground</b><p>Retrieve permitted, current supply-chain context.</p></div><div><b>Reason</b><p>Compare risk, options and trade-offs.</p></div><div><b>Act</b><p>Assign work or route accountable approval.</p></div></div>
+    <div class="arch-subgrid"><div><h2>OpenAI Responses API</h2><p>Streams source-backed answers with reasoning and model controls.</p></div><div><h2>OpenAI Agents SDK</h2><p>Runs persona-aware tools, assignments and reviewer handoffs.</p></div><div><h2>Why OpenAI / ROI</h2><p>Faster escalation cycles, less expedite exposure and a reusable business case.</p></div></div>
   </div>
 </section>
 
 ---
 
 <section class="slide-section ops-slide decision-workflow-slide">
-  <span class="slide-number">07</span>
+  <span class="slide-number">06</span>
   <p class="eyebrow">Example</p>
   <h1>Executive workflow</h1>
   <div class="flow-map workflow-map">
@@ -143,9 +122,11 @@ record: true
     <div><h2>Before</h2><p>A customer delivery is at risk, and the team spends the first 20 minutes <strong>checking which source is actually current</strong> instead of deciding what to do.</p></div>
     <div><h2>After</h2><p>Leaders see the exposed orders, root cause, options, cost trade-off and approval owner <strong>in one interface</strong>.</p></div>
   </div>
-  <div class="workflow-takeaway">
-    <div><h2>What changes in the room</h2><p>The meeting starts with a shared view and a recommended next step.</p></div>
-    <div><h2>Why this matters</h2><p>ZEISS keeps source ownership intact while leaders move faster.</p></div>
+  <div class="workflow-security">
+    <h2>Security built into the workflow</h2>
+    <div><b>Model</b><p>Safeguards, evals and monitoring</p></div>
+    <div><b>Platform</b><p>Encryption and enterprise data controls</p></div>
+    <div><b>Application</b><p>Roles, trusted sources, approvals and red-team tests</p></div>
   </div>
 </section>
 
@@ -158,7 +139,7 @@ record: true
 ---
 
 <section class="slide-section poc-slide">
-  <span class="slide-number">09</span>
+  <span class="slide-number">08</span>
   <p class="eyebrow">Proof of concept scorecard</p>
   <h1>Impact validation and success criteria</h1>
   <p class="poc-note">The first POC must prove both business impact and operating trust: faster decisions, better evidence and controlled action paths.</p>
@@ -185,26 +166,10 @@ record: true
 
 ---
 
-<section class="slide-section scale-slide">
-  <span class="slide-number">10</span>
-  <p class="eyebrow">Future potential</p>
-  <h1>Supply Chain Hub as the business blueprint</h1>
-  <div class="expansion-grid">
-    <div><h2>Procurement</h2><ul><li>Supplier negotiations</li><li>Contract Q&A</li><li>Spend-risk trade-offs</li></ul></div>
-    <div><h2>Quality</h2><ul><li>Deviation triage</li><li>Corrective action summaries</li><li>Supplier quality signals</li></ul></div>
-    <div><h2>Manufacturing</h2><ul><li>Line impact analysis</li><li>Work instruction support</li><li>Maintenance handoffs</li></ul></div>
-    <div><h2>Finance</h2><ul><li>Working capital views</li><li>Expedite-cost exposure</li><li>Scenario assumptions</li></ul></div>
-  </div>
-  <p class="callout">The repeatable blueprint is the same: conversational workspace, integration layer, enterprise context and accountable workflow ownership.</p>
-</section>
-
----
-
-<section class="slide-section rollout-slide proof-slide">
-  <span class="slide-number">11</span>
+<section class="slide-section rollout-slide proof-slide time-value-slide">
+  <span class="slide-number">09</span>
   <p class="eyebrow">Looking ahead</p>
-  <h1>Proof of value including guardrails</h1>
-  <p class="timeline-kicker">Four-week proof of concept, followed by a business decision on pilot scale.</p>
+  <h1>Time to value</h1>
   <div class="timeline">
     <div><span>Week 0</span><h2>Align</h2><p>Sponsor, workflow owner, success metrics, data boundaries.</p></div>
     <div><span>Week 1</span><h2>Connect</h2><p>Representative sources, role scopes, approval policy.</p></div>
@@ -212,10 +177,24 @@ record: true
     <div><span>Week 3</span><h2>Validate</h2><p>User feedback, answer quality checks, security review.</p></div>
     <div><span>Week 4</span><h2>Decide</h2><p>Impact readout, guardrail review, pilot recommendation.</p></div>
   </div>
-  <div class="proof-closing">
-    <p class="callout"><strong>What we need to get started:</strong> align on an executive sponsor, one business owner, representative systems and documents, and clear pilot guardrails so the first workflow can move quickly from demo to measured proof.</p>
-    <p class="timeline-kicker collaboration-note">Looking forward to shaping this collaboration between ZEISS and OpenAI!</p>
+  <div class="post-poc-panel">
+    <div class="adoption-path">
+      <h2>After the POC</h2>
+      <div><b>Weeks 5–8 · Pilot</b><p>Harden one workflow and onboard the first team.</p></div>
+      <div><b>Weeks 9–12 · Adopt</b><p>Embed ownership, feedback and support.</p></div>
+      <div><b>Next · Scale the blueprint</b><p>Reuse the pattern across Procurement, Quality, Manufacturing and Finance.</p></div>
+    </div>
+    <div class="adoption-support">
+      <h2>How OpenAI can support adoption</h2>
+      <div><b>Solutions Engineering</b><p>Architecture, POC build and evals.</p></div>
+      <div><b>Enterprise support</b><p>Deployment readiness and escalation path.</p></div>
+      <div><b>Optional delivery services</b><p>Embedded help for production integration.</p></div>
+    </div>
+    <div class="time-value-footer">
+      <span><strong>Lean customer core:</strong> one business owner + one technical lead; sponsor and SMEs join checkpoints.</span>
+    </div>
   </div>
+  <p class="timeline-kicker collaboration-note">Looking forward to shaping the collaboration between ZEISS and OpenAI!</p>
 </section>
 
 ---
@@ -226,14 +205,14 @@ record: true
 
 ---
 
-<section class="slide-section">
-  <span class="slide-number">13</span>
+<section class="slide-section stack-slide">
+  <span class="slide-number">11</span>
   <p class="eyebrow">Annex</p>
-  <h1>Behind the scenes - actual Supply Chain Hub stack</h1>
+  <h1>Behind the scenes</h1>
   <div class="build-grid">
-    <div><h2>App experience</h2><ul><li>Next.js App Router, React and strict TypeScript</li><li><code>app/supply-chain-app.tsx</code> uses AI SDK <code>useChat</code></li><li>Persona, model, thinking and source-selection controls</li></ul></div>
-    <div><h2>OpenAI chat path</h2><ul><li><code>/api/chat</code> validates requests and builds server context</li><li><code>@ai-sdk/openai</code> calls <code>openai.responses(...)</code></li><li>Vercel AI SDK streams output; deterministic demo stream remains fallback</li></ul></div>
-    <div><h2>Agentic action path</h2><ul><li><code>/api/actions</code> checks workflow and persona access</li><li><code>@openai/agents</code> uses Agent, tool, handoff and run</li><li>Reviewer handoffs plus trace flush; fallback results preserve demo reliability</li></ul></div>
-    <div><h2>Repo controls and runtime</h2><ul><li>AGENTS.md: shared logic in <code>lib/</code>; trust in <code>auth</code> / <code>permissions</code></li><li><code>chat-extensions.ts</code> is the MCP / RAG extension point</li><li>OpenNext + Wrangler deploy to Cloudflare Workers; Vitest covers routes and UI</li></ul></div>
+    <div><h2>App experience</h2><ul><li>Next.js App Router, React and strict TypeScript</li><li>GPT-5.6 Sol, Terra and Luna with six reasoning levels</li><li>Persona-aware tools, source settings, answer copy and feedback controls</li></ul></div>
+    <div><h2>Grounded chat and guardrails</h2><ul><li><code>/api/chat</code> runs prompt-scope checks before context, sources or tools</li><li>Server context enforces role scope, selected sources and masked fields</li><li>Responses streaming with deterministic workbook and demo fallbacks</li></ul></div>
+    <div><h2>Agentic actions and integrations</h2><ul><li><code>/api/actions</code> enforces persona, workflow and source eligibility</li><li>Explicit assignee and reviewer metadata drives tasks and approvals</li><li>Role-aware Microsoft 365 grouping, reviewer handoffs and trace flushing</li></ul></div>
+    <div><h2>Decision support and delivery</h2><ul><li>Model-selected savings–relationship bubble or matrix; trusted records stay server-owned</li><li>Server-derived decision colors align recommendations across both views</li><li>Vitest, strict typecheck and OpenNext/Wrangler delivery to Cloudflare Workers</li></ul></div>
   </div>
 </section>

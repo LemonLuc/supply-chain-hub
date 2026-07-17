@@ -92,7 +92,7 @@ describe("buildAppContext", () => {
     expect(context.workflow.key).toBe("consolidate");
     expect(context.workflow.accessAllowed).toBe(true);
     const portfolio = context.decisionSupport?.heatMap ?? [];
-    expect(portfolio).toHaveLength(7);
+    expect(portfolio).toHaveLength(9);
     expect(portfolio[0]).toMatchObject({
       supplier: "MediSeal Jena",
       annualCostUsd: 2_100_000,
@@ -117,6 +117,22 @@ describe("buildAppContext", () => {
       annualSavingsUsd: 910_000,
       relationshipScore: 70,
     });
+    expect(portfolio).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          supplier: "Kappel Pack",
+          annualCostUsd: 900_000,
+          annualSavingsUsd: 150_000,
+          relationshipScore: 54,
+        }),
+        expect.objectContaining({
+          supplier: "BracketPro Ulm",
+          annualCostUsd: 1_100_000,
+          annualSavingsUsd: 220_000,
+          relationshipScore: 57,
+        }),
+      ]),
+    );
     expect(
       portfolio.every(
         (item) =>

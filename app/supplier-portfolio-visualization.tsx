@@ -29,6 +29,10 @@ function decisionSlug(decision: SupplierPortfolioDecision): string {
   return decision.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+function getBubbleValueTextLength(value: string, radius: number): number {
+  return Math.min(value.length * 7, radius * 2 - 10);
+}
+
 function DecisionLegend() {
   return (
     <ul className="portfolio-action-legend" aria-label="Decision heat legend">
@@ -235,6 +239,8 @@ function SupplierBubbleChart({ suppliers }: { suppliers: ResolvedSupplierPortfol
                   x={bubble.x}
                   y={bubble.y + 5}
                   textAnchor="middle"
+                  textLength={getBubbleValueTextLength(formattedCost, bubble.radius)}
+                  lengthAdjust="spacingAndGlyphs"
                 >
                   {formattedCost}
                 </text>

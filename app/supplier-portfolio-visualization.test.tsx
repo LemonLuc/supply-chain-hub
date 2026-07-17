@@ -32,6 +32,13 @@ describe("SupplierPortfolioVisualizationView", () => {
     expect(steripack.closest(".supplier-marker")).toHaveTextContent("€520K");
     expect(screen.getByText("Shift volume to MediSeal Jena")).toBeInTheDocument();
     expect(screen.getAllByText("Strategic trade-off").length).toBeGreaterThan(0);
+    for (const supplierName of ["Kappel Pack", "BracketPro Ulm"]) {
+      const supplier = screen.getByText(supplierName);
+      expect(supplier.closest("td")).toHaveAttribute("data-savings", "Low");
+      expect(supplier.closest("td")).toHaveAttribute("data-relationship", "Medium");
+      expect(supplier.closest(".supplier-marker")).toHaveClass("decision-low-priority");
+    }
+    expect(screen.getAllByText("Low priority")).toHaveLength(3);
     expect(screen.getByRole("list", { name: /decision heat legend/i })).toHaveTextContent(
       "KeepConsolidateStrategic trade-offLow priority",
     );
@@ -44,7 +51,9 @@ describe("SupplierPortfolioVisualizationView", () => {
       "Quantitative comparison",
     );
 
-    render(<SupplierPortfolioVisualizationView visualization={visualization} />);
+    const { container } = render(
+      <SupplierPortfolioVisualizationView visualization={visualization} />,
+    );
 
     expect(
       screen.getByRole("img", { name: /supplier savings and strategic relationship map/i }),
@@ -57,6 +66,16 @@ describe("SupplierPortfolioVisualizationView", () => {
     expect(screen.queryByText(/annual cost/i)).not.toBeInTheDocument();
     expect(screen.getByText("MediSeal Jena")).toHaveAttribute("text-anchor", "middle");
     expect(screen.getByText(/reliability, quality, qualification depth/i)).toBeInTheDocument();
+    for (const bubble of container.querySelectorAll<SVGGElement>(".portfolio-bubble")) {
+      const circle = bubble.querySelector("circle");
+      const value = bubble.querySelector<SVGTextElement>(".portfolio-bubble-cost");
+      const radius = Number(circle?.getAttribute("r"));
+      const textLength = Number(value?.getAttribute("textLength"));
+
+      expect(textLength).toBeGreaterThan(0);
+      expect(textLength).toBeLessThanOrEqual(radius * 2 - 10);
+      expect(value).toHaveAttribute("lengthAdjust", "spacingAndGlyphs");
+    }
     expect(screen.getByRole("list", { name: /decision heat legend/i })).toHaveTextContent(
       "KeepConsolidateStrategic trade-offLow priority",
     );

@@ -57,6 +57,27 @@ describe("supplier portfolio chart geometry", () => {
     }
   });
 
+  it("separates bubbles when suppliers share the same semantic coordinates", () => {
+    const collocatedSuppliers = suppliers.slice(0, 4).map((supplier) => ({
+      ...supplier,
+      annualSavingsUsd: 200_000,
+      relationshipScore: 60,
+    }));
+    const layout = buildBubbleChartLayout(collocatedSuppliers, supplierBubbleChartBounds);
+
+    for (let index = 0; index < layout.length; index += 1) {
+      for (let comparisonIndex = index + 1; comparisonIndex < layout.length; comparisonIndex += 1) {
+        const first = layout[index];
+        const second = layout[comparisonIndex];
+        const distance = Math.hypot(first.x - second.x, first.y - second.y);
+
+        expect(distance, `${first.supplier} overlaps ${second.supplier}`).toBeGreaterThanOrEqual(
+          first.radius + second.radius + 6,
+        );
+      }
+    }
+  });
+
   it("places every company label a consistent distance above its bubble", () => {
     const layout = buildBubbleChartLayout(suppliers, supplierBubbleChartBounds);
 

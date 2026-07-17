@@ -41,7 +41,7 @@ The exact source-trust sentence is: “Verified-source harness shows freshness i
 
 The new security slide uses three equally weighted panels:
 
-1. **OpenAI platform:** business data is not used for training by default, encryption is applied in transit and at rest, qualifying enterprise configurations support European residency controls, and independent assurance is available.
+1. **OpenAI platform:** business data is not used for training by default, encryption is applied in transit and at rest, qualifying enterprise configurations support European residency controls, Frontier Governance and Preparedness frameworks govern severe-risk assessment, and independent assurance is available.
 2. **Application controls:** server-side role permissions, selected-source gating, masking, prompt-scope enforcement, explicit approval paths, and auditable action traces.
 3. **Evaluation and red teaming:** task-specific eval cases, source-faithfulness and authorization checks, off-topic and prompt-injection attacks, regression testing, and human review of high-impact scenarios.
 
@@ -57,8 +57,8 @@ The current five-week card timeline becomes a two-horizon roadmap:
 The slide also clarifies support responsibilities:
 
 - **OpenAI Solutions Engineering:** use-case framing, reference architecture, prototype guidance, eval design, and technical unblock support.
-- **Enterprise deployment and adoption support:** rollout planning, enablement, adoption measurement, and a contracted support path.
-- **Optional Frontier / forward-deployed engineering:** embedded production implementation, governance operationalization, and reusable patterns for eligible strategic deployments.
+- **Enterprise success and support:** rollout planning, enablement, adoption measurement, and a contracted support path.
+- **Optional Frontier / delivery services:** embedded forward-deployed engineering for production implementation, integration, governance operationalization, and reusable patterns for eligible strategic deployments.
 
 The recommended ZEISS core team is 5–7 named contributors: one product/process owner, one or two supply-chain subject-matter experts, one or two platform/data engineers, one security/identity partner, and one change/adoption lead, with executive sponsorship outside the daily team. This is a project-sizing recommendation, not an OpenAI entitlement or guaranteed staffing model.
 

@@ -517,6 +517,30 @@ export const workflows: Record<WorkflowKey, Workflow> = {
           "Meaningful but manageable switching complexity",
         ],
       },
+      {
+        supplier: "Kappel Pack",
+        recommendation: "Maintain the current allocation; consolidation savings are limited",
+        annualCostUsd: 900_000,
+        annualSavingsUsd: 150_000,
+        relationshipScore: 54,
+        relationshipDrivers: [
+          "Stable service on standard packaging formats",
+          "Moderate qualification and switching effort",
+          "Limited incremental savings from consolidation",
+        ],
+      },
+      {
+        supplier: "BracketPro Ulm",
+        recommendation: "Keep under routine review; the consolidation case is limited",
+        annualCostUsd: 1_100_000,
+        annualSavingsUsd: 220_000,
+        relationshipScore: 57,
+        relationshipDrivers: [
+          "Consistent quality on standard bracket programs",
+          "Moderate engineering and transition effort",
+          "Limited incremental savings from consolidation",
+        ],
+      },
     ],
   },
 };

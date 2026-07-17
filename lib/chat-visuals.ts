@@ -65,7 +65,7 @@ function slug(value: string): string {
 }
 
 export function asksForVisualization(question: string): boolean {
-  return /\b(visuali[sz]e|chart|graph|plot|diagram|illustrat(?:e|ion)|image|slide visual)\b/i.test(question);
+  return /\b(visuali[sz]e|chart|graph|plot|diagram|heat\s*map|heatmap|illustrat(?:e|ion)|image|slide visual)\b/i.test(question);
 }
 
 export function parseOperationalBarChart(value: unknown): OperationalBarChart | undefined {
@@ -238,6 +238,8 @@ export function createDemoSlideVisual(context: AppContext): DemoSlideVisual {
 }
 
 export function getDemoChatVisual(question: string, context: AppContext): DemoChatVisual | undefined {
+  if (!asksForVisualization(question)) return undefined;
+
   const suppliers = context.decisionSupport?.heatMap;
   if (suppliers?.length) {
     const preferredView = getDemoPortfolioView(question);
@@ -251,7 +253,6 @@ export function getDemoChatVisual(question: string, context: AppContext): DemoCh
     };
   }
 
-  if (!asksForVisualization(question)) return undefined;
   const chart = resolveOperationalChart(context);
   if (chart) {
     return {

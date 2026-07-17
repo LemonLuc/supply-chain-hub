@@ -171,50 +171,6 @@ function mockChatStreamWithReasoning() {
   );
 }
 
-function mockChatStreamWithControlledDelta() {
-  let releaseSecondDelta: (() => void) | undefined;
-  let releaseThirdDelta: (() => void) | undefined;
-  const secondDeltaGate = new Promise<void>((resolve) => {
-    releaseSecondDelta = resolve;
-  });
-  const thirdDeltaGate = new Promise<void>((resolve) => {
-    releaseThirdDelta = resolve;
-  });
-
-  vi.spyOn(globalThis, "fetch").mockResolvedValue(
-    createUIMessageStreamResponse({
-      stream: createUIMessageStream({
-        execute: async ({ writer }) => {
-          writer.write({ type: "text-start", id: "answer-1" });
-          writer.write({
-            type: "text-delta",
-            id: "answer-1",
-            delta: "The first grounded finding is ready",
-          });
-          await secondDeltaGate;
-          writer.write({
-            type: "text-delta",
-            id: "answer-1",
-            delta: ", followed by the recovery recommendation.",
-          });
-          await thirdDeltaGate;
-          writer.write({
-            type: "text-delta",
-            id: "answer-1",
-            delta: " Evidence review complete.",
-          });
-          writer.write({ type: "text-end", id: "answer-1" });
-        },
-      }),
-    }),
-  );
-
-  return {
-    releaseSecondDelta: () => releaseSecondDelta?.(),
-    releaseThirdDelta: () => releaseThirdDelta?.(),
-  };
-}
-
 function mockChatStreamWithMarkdownTable() {
   return vi.spyOn(globalThis, "fetch").mockResolvedValue(
     createUIMessageStreamResponse({
@@ -245,6 +201,18 @@ function mockChatStreamWithPortfolioTool(view: "matrix" | "bubble") {
 }
 
 describe("SupplyChainApp", () => {
+  it("uses the page scrollbar instead of a nested chat transcript scrollbar", () => {
+    const css = readFileSync("app/globals.css", "utf8");
+    const source = readFileSync("app/supply-chain-app.tsx", "utf8");
+    const messageListRule = css.match(/\.message-list\s*\{([^}]*)\}/)?.[1] ?? "";
+
+    expect(messageListRule).not.toMatch(/max-height\s*:/);
+    expect(messageListRule).not.toMatch(/overflow-y\s*:\s*auto/);
+    expect(source).not.toContain("messageListRef");
+    expect(source).not.toContain("followTranscriptRef");
+    expect(source).not.toContain("forceTranscriptScrollRef");
+  });
+
   it("defines semantic light and dark theme tokens without legacy heat cards", () => {
     const css = readFileSync("app/globals.css", "utf8");
     const themeLayer = css.slice(css.indexOf("/* Unified enterprise theme layer"));
@@ -409,83 +377,6 @@ describe("SupplyChainApp", () => {
     expect(suggestions.compareDocumentPosition(messages) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("scrolls only the chat transcript to the newest prompt", async () => {
-    const scrollIntoView = vi.fn();
-    const scrollTo = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
-      configurable: true,
-      value: scrollIntoView,
-    });
-    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-      configurable: true,
-      value: scrollTo,
-    });
-    mockChatStreamWithReasoning();
-    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
-    await screen.findByText("DHL Freight shipment 00340434161094000012 is the first risk to handle.");
-
-    const transcript = screen.getByLabelText("Chat messages");
-    Object.defineProperties(transcript, {
-      clientHeight: { configurable: true, value: 320 },
-      scrollHeight: { configurable: true, value: 960 },
-      scrollTop: { configurable: true, value: 640, writable: true },
-    });
-    fireEvent.scroll(transcript);
-    scrollTo.mockClear();
-    scrollIntoView.mockClear();
-    fireEvent.click(screen.getByRole("button", { name: /Check whether any carrier milestone changed overnight/i }));
-    await waitFor(() => expect(screen.getAllByText(/Supply Chain Hub/i).length).toBeGreaterThan(1));
-
-    expect(scrollTo).toHaveBeenCalledWith({ top: 960, behavior: "smooth" });
-    expect(scrollIntoView).not.toHaveBeenCalled();
-  });
-
-  it("follows incremental answer updates only while the transcript stays near the bottom", async () => {
-    const scrollTo = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-      configurable: true,
-      value: scrollTo,
-    });
-    const { releaseSecondDelta, releaseThirdDelta } = mockChatStreamWithControlledDelta();
-    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
-    await screen.findByText("The first grounded finding is ready");
-
-    const transcript = screen.getByLabelText("Chat messages");
-    Object.defineProperties(transcript, {
-      clientHeight: { configurable: true, value: 320 },
-      scrollHeight: { configurable: true, value: 1200 },
-      scrollTop: { configurable: true, value: 870, writable: true },
-    });
-    fireEvent.scroll(transcript);
-    scrollTo.mockClear();
-    releaseSecondDelta();
-
-    await screen.findByText(
-      "The first grounded finding is ready, followed by the recovery recommendation.",
-    );
-    await waitFor(() =>
-      expect(scrollTo).toHaveBeenCalledWith({ top: 1200, behavior: "auto" }),
-    );
-
-    Object.defineProperty(transcript, "scrollTop", {
-      configurable: true,
-      value: 100,
-      writable: true,
-    });
-    fireEvent.scroll(transcript);
-    scrollTo.mockClear();
-    releaseThirdDelta();
-
-    await screen.findByText(
-      "The first grounded finding is ready, followed by the recovery recommendation. Evidence review complete.",
-    );
-    expect(scrollTo).not.toHaveBeenCalled();
-  });
-
   it("never shows financial values or quantified business risk to logistics planners", async () => {
     mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
@@ -585,6 +476,33 @@ describe("SupplyChainApp", () => {
     expect(requestBody.workflowKey).toBe("delay");
     expect(requestBody.selectedSourceIds).toEqual(["sap", "quality", "excel", "capacity", "outlook", "teams"]);
     expect(screen.queryByRole("button", { name: /Share risk register with Lukas/i })).not.toBeInTheDocument();
+  });
+
+  it("keeps a contextual visualize-this follow-up on the active workflow", async () => {
+    const fetchMock = mockChatAndActionStream();
+    render(<SupplyChainApp currentUser={mockUsers.procurement} />);
+
+    fireEvent.click(screen.getByRole("button", {
+      name: /What approved alternates can cover the delayed turret assemblies/i,
+    }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "Visualize this." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+    const followUpBody = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
+    expect(followUpBody.workflowKey).toBe("delay");
+    expect(followUpBody.selectedSourceIds).toEqual([
+      "sap",
+      "quality",
+      "excel",
+      "capacity",
+      "outlook",
+      "teams",
+    ]);
   });
 
   it("applies the Microsoft 365 Suite selection to every procurement workflow", async () => {
@@ -839,6 +757,7 @@ describe("SupplyChainApp", () => {
 
     expect(screen.queryByLabelText("Optional feedback")).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Feedback received");
+    expect(helpful).toHaveFocus();
     fireEvent.click(screen.getByRole("button", { name: "Clear conversation" }));
     expect(screen.queryByText("Feedback received")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Copy answer" })).not.toBeInTheDocument();

@@ -154,6 +154,9 @@ export async function POST(request: Request): Promise<Response> {
   const options = normalizeChatOptions(body.model, body.thinking);
   const visualRequested = asksForVisualization(question);
   const operationalChart = visualRequested ? resolveOperationalChart(context) : undefined;
+  const trustedChartAvailable = Boolean(
+    operationalChart || context.decisionSupport?.heatMap?.length,
+  );
   const demoVisual = getDemoChatVisual(question, context);
 
   if (asksForWorkbookReview(question) || !hasLiveApiKey()) {
@@ -162,8 +165,11 @@ export async function POST(request: Request): Promise<Response> {
 
   const externalContext = await loadExternalContext(question, context);
   const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const tools = getChatTools(context, { allowOperationalChart: visualRequested });
-  if (visualRequested) {
+  const tools = getChatTools(context, {
+    allowOperationalChart: visualRequested,
+    allowSupplierPortfolio: visualRequested,
+  });
+  if (visualRequested && !trustedChartAvailable) {
     Object.assign(tools, {
       generateSlideVisual: openai.tools.imageGeneration({
         outputFormat: "webp",

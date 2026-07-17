@@ -4,6 +4,19 @@ import { buildAppContext } from "./context";
 import { getChatTools } from "./chat-extensions";
 
 describe("getChatTools", () => {
+  it("registers the supplier portfolio only for an explicit visualization request", () => {
+    const context = buildAppContext(
+      "consolidate",
+      "executive",
+      ["sap", "contracts", "quality", "resilience", "policy"],
+    );
+
+    expect(getChatTools(context)).toEqual({});
+    expect(getChatTools(context, { allowSupplierPortfolio: true })).toHaveProperty(
+      "renderSupplierPortfolio",
+    );
+  });
+
   it("registers a trusted operational chart only for an explicit compatible request", async () => {
     const context = buildAppContext(
       "delay",

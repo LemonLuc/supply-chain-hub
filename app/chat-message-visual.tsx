@@ -45,6 +45,17 @@ function isBase64(value: unknown): value is string {
   );
 }
 
+function isWebpBase64(value: unknown): value is string {
+  if (!isBase64(value) || value.length > 32_000_000) return false;
+
+  try {
+    const header = atob(value.slice(0, 16));
+    return header.slice(0, 4) === "RIFF" && header.slice(8, 12) === "WEBP";
+  } catch {
+    return false;
+  }
+}
+
 function parseImageVisual(value: unknown): ImageVisual | undefined {
   const demo = parseDemoSlideVisual(value);
   if (demo) {
@@ -58,7 +69,7 @@ function parseImageVisual(value: unknown): ImageVisual | undefined {
     };
   }
 
-  if (!isRecord(value) || !isBase64(value.result)) return undefined;
+  if (!isRecord(value) || !isWebpBase64(value.result)) return undefined;
   return {
     kind: "image",
     result: value.result,

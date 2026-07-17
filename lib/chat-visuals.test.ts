@@ -13,6 +13,8 @@ describe("asksForVisualization", () => {
   it("recognizes explicit chart and slide-image requests", () => {
     expect(asksForVisualization("Visualize this comparison.")).toBe(true);
     expect(asksForVisualization("Plot this as a graph.")).toBe(true);
+    expect(asksForVisualization("Show the supplier heat map.")).toBe(true);
+    expect(asksForVisualization("Open the supplier heatmap.")).toBe(true);
     expect(asksForVisualization("Create an image suitable for a slide.")).toBe(true);
     expect(asksForVisualization("What should I do first?")).toBe(false);
   });
@@ -99,6 +101,7 @@ describe("demo visual routing", () => {
       toolName: "renderSupplierPortfolio",
       output: { view: "bubble" },
     });
+    expect(getDemoChatVisual("Compare supplier cost and resilience.", context)).toBeUndefined();
   });
 
   it("uses a trusted operational chart before a generated preview", () => {

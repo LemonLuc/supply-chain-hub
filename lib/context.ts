@@ -84,7 +84,11 @@ export function buildRoleToolSources(personaValue?: unknown): RoleToolSource[] {
   });
 }
 
-export function resolveWorkflowForPrompt(prompt: string, personaValue?: unknown): WorkflowKey {
+export function resolveWorkflowForPrompt(
+  prompt: string,
+  personaValue?: unknown,
+  fallbackWorkflowValue?: unknown,
+): WorkflowKey {
   const policy = getPersonaPolicy(personaValue);
   const normalizedPrompt = prompt.toLowerCase();
   const exactSuggestedWorkflow = policy.allowedWorkflows.find((workflowKey) =>
@@ -102,8 +106,14 @@ export function resolveWorkflowForPrompt(prompt: string, personaValue?: unknown)
   const match = candidates.find(([workflowKey, keywords]) =>
     policy.allowedWorkflows.includes(workflowKey) && keywords.some((keyword) => normalizedPrompt.includes(keyword)),
   );
+  const fallbackWorkflow =
+    typeof fallbackWorkflowValue === "string" &&
+    workflowKeys.includes(fallbackWorkflowValue as WorkflowKey) &&
+    policy.allowedWorkflows.includes(fallbackWorkflowValue as WorkflowKey)
+      ? fallbackWorkflowValue as WorkflowKey
+      : undefined;
 
-  return match?.[0] ?? policy.allowedWorkflows[0] ?? "risks";
+  return match?.[0] ?? fallbackWorkflow ?? policy.allowedWorkflows[0] ?? "risks";
 }
 
 const sourceActivityTokens: Record<string, string[]> = {

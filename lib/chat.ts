@@ -38,7 +38,7 @@ export function buildSystemPrompt(
   context: AppContext,
   options: { visualRequested?: boolean; operationalChartAvailable?: boolean } = {},
 ): string {
-  const portfolioInstructions = context.decisionSupport?.heatMap?.length
+  const portfolioInstructions = context.decisionSupport?.heatMap?.length && options.visualRequested
     ? `
 - Call renderSupplierPortfolio exactly once for this supplier-portfolio answer.
 - Choose bubble when annual consolidation savings (USD) and the strategic relationship score (0–100) materially improve the comparison; otherwise choose matrix.

@@ -21,7 +21,7 @@ import {
   Sparkles,
   Square,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -229,9 +229,6 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
       timeZone: "Europe/Berlin",
     }).format(new Date()),
   );
-  const messageListRef = useRef<HTMLDivElement | null>(null);
-  const followTranscriptRef = useRef(true);
-  const forceTranscriptScrollRef = useRef(false);
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
   const { messages, sendMessage, status, error, stop, setMessages, clearError } = useChat({ transport });
   const activeUser = mockUsers[persona];
@@ -252,21 +249,6 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     () => buildAppContext(workflowKey, persona, selectedSourceIds, activePrompt),
     [workflowKey, persona, selectedSourceIds, activePrompt],
   );
-  useEffect(() => {
-    if (!messages.length) return;
-
-    const transcript = messageListRef.current;
-    if (!transcript) return;
-    const forced = forceTranscriptScrollRef.current;
-    if (!forced && !followTranscriptRef.current) return;
-
-    transcript.scrollTo?.({
-      top: transcript.scrollHeight,
-      behavior: forced ? "smooth" : "auto",
-    });
-    forceTranscriptScrollRef.current = false;
-  }, [messages, status]);
-
   function sourceIsSelected(toolId: string, fallback: boolean) {
     return sourceSelection[toolId] ?? fallback;
   }
@@ -314,7 +296,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   async function submitPrompt(prompt: string) {
     const nextPrompt = prompt.trim();
     if (!nextPrompt || isBusy) return;
-    const nextWorkflowKey = resolveWorkflowForPrompt(nextPrompt, persona);
+    const nextWorkflowKey = resolveWorkflowForPrompt(nextPrompt, persona, workflowKey);
     const nextSelectedSourceIds = getSelectedSourceIdsForWorkflow(nextWorkflowKey);
 
     clearError();
@@ -324,8 +306,6 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     setHasRun(true);
     setActionNotice("");
     setActionMenuOpen(true);
-    forceTranscriptScrollRef.current = true;
-    followTranscriptRef.current = true;
     await sendMessage(
       { text: nextPrompt },
       { body: { workflowKey: nextWorkflowKey, model, thinking, demoPersona: persona, selectedSourceIds: nextSelectedSourceIds } },
@@ -726,15 +706,9 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
 
           {messages.length > 0 && (
             <div
-              ref={messageListRef}
               className="message-list"
               aria-label="Chat messages"
               aria-live="polite"
-              onScroll={(event) => {
-                const transcript = event.currentTarget;
-                followTranscriptRef.current =
-                  transcript.scrollHeight - transcript.scrollTop - transcript.clientHeight <= 48;
-              }}
             >
               {messages.map((message) => {
                 const visual = message.role === "assistant" ? getMessageVisual(message) : undefined;

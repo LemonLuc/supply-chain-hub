@@ -24,7 +24,7 @@ type OperationalChartToolInput = {
 
 export function getChatTools(
   context: AppContext,
-  options: { allowOperationalChart?: boolean } = {},
+  options: { allowOperationalChart?: boolean; allowSupplierPortfolio?: boolean } = {},
 ): ToolSet {
   const suppliers = context.decisionSupport?.heatMap;
   const operationalChart = options.allowOperationalChart
@@ -33,7 +33,7 @@ export function getChatTools(
 
   const tools: ToolSet = {};
 
-  if (suppliers?.length) {
+  if (options.allowSupplierPortfolio && suppliers?.length) {
     tools.renderSupplierPortfolio = tool({
       description:
         "Select the most decision-useful presentation for the authorized supplier portfolio. The server supplies all trusted supplier records.",

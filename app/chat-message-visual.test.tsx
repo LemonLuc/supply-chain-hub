@@ -53,7 +53,12 @@ describe("ChatMessageVisual", () => {
   });
 
   it("renders completed live image output with alt text and download", () => {
-    const result = Buffer.from("a sufficiently long fake webp image payload", "utf8").toString("base64");
+    const result = Buffer.concat([
+      Buffer.from("RIFF", "ascii"),
+      Buffer.from([36, 0, 0, 0]),
+      Buffer.from("WEBP", "ascii"),
+      Buffer.alloc(32),
+    ]).toString("base64");
     const visual = getMessageVisual(assistantMessage([{
       type: "tool-generateSlideVisual",
       state: "output-available",
@@ -101,6 +106,14 @@ describe("ChatMessageVisual", () => {
       state: "output-available",
       toolCallId: "image-1",
       output: { result: "not base64!" },
+    }]))).toBeUndefined();
+    expect(getMessageVisual(assistantMessage([{
+      type: "tool-generateSlideVisual",
+      state: "output-available",
+      toolCallId: "image-2",
+      output: {
+        result: Buffer.from("base64 text that is not a WebP image payload", "utf8").toString("base64"),
+      },
     }]))).toBeUndefined();
   });
 

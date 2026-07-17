@@ -350,7 +350,7 @@ describe("POST /api/chat", () => {
     expect(systemPrompt).toContain("Two consolidation candidates pass the resilience guardrails");
   });
 
-  it("registers a trusted model-selected portfolio tool for executive requests", async () => {
+  it("registers a trusted model-selected portfolio tool for explicit executive visual requests", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
     const request = new Request("http://localhost/api/chat", {
       method: "POST",
@@ -360,7 +360,7 @@ describe("POST /api/chat", () => {
           {
             id: "message-1",
             role: "user",
-            parts: [{ type: "text", text: "Compare supplier cost and resilience." }],
+            parts: [{ type: "text", text: "Visualize supplier cost and resilience as a heat map." }],
           },
         ],
         workflowKey: "consolidate",
@@ -398,6 +398,35 @@ describe("POST /api/chat", () => {
     });
   });
 
+  it("does not register the portfolio tool for a text-only executive request", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Compare supplier cost and resilience." }],
+          },
+        ],
+        workflowKey: "consolidate",
+        demoPersona: "executive",
+        selectedSourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
+      }),
+    });
+
+    await POST(request);
+
+    const options = streamTextMock.mock.calls[0][0] as {
+      tools: Record<string, unknown>;
+      system: string;
+    };
+    expect(options.tools).toEqual({});
+    expect(options.system).not.toContain("renderSupplierPortfolio");
+  });
+
   it("does not register the portfolio tool outside authorized decision support", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
     const request = new Request("http://localhost/api/chat", {
@@ -423,7 +452,7 @@ describe("POST /api/chat", () => {
     expect(imageGenerationMock).not.toHaveBeenCalled();
   });
 
-  it("registers trusted chart and slide-image tools for an explicit live visualization request", async () => {
+  it("registers only the trusted chart when an explicit live request has quantitative evidence", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
     const request = new Request("http://localhost/api/chat", {
       method: "POST",
@@ -449,6 +478,38 @@ describe("POST /api/chat", () => {
       system: string;
     };
     expect(options.tools).toHaveProperty("renderOperationalChart");
+    expect(options.tools).not.toHaveProperty("generateSlideVisual");
+    expect(imageGenerationMock).not.toHaveBeenCalled();
+    expect(options.system).toContain("Produce exactly one visual");
+    expect(options.system).toContain("Call renderOperationalChart");
+  });
+
+  it("registers the slide-image tool only when no trusted chart is available", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Create an image suitable for a supply-chain slide deck." }],
+          },
+        ],
+        workflowKey: "risks",
+        demoPersona: "logistics",
+        selectedSourceIds: [],
+      }),
+    });
+
+    await POST(request);
+
+    const options = streamTextMock.mock.calls[0][0] as {
+      tools: Record<string, unknown>;
+      system: string;
+    };
+    expect(options.tools).not.toHaveProperty("renderOperationalChart");
     expect(options.tools).toHaveProperty("generateSlideVisual");
     expect(imageGenerationMock).toHaveBeenCalledWith({
       outputFormat: "webp",
@@ -456,10 +517,7 @@ describe("POST /api/chat", () => {
       size: "1536x1024",
     });
     expect(options.system).toContain("Produce exactly one visual");
-    expect(options.system).toContain("Call renderOperationalChart");
-    expect(options.system.indexOf("renderOperationalChart")).toBeLessThan(
-      options.system.indexOf("generateSlideVisual"),
-    );
+    expect(options.system).not.toContain("Call renderOperationalChart");
   });
 
   it("enables OpenAI reasoning summaries for live responses", async () => {

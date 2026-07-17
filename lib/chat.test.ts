@@ -58,13 +58,16 @@ describe("chat grounding", () => {
   });
 
   it("requires a portfolio view tool call only for authorized decision support", () => {
-    const portfolioPrompt = buildSystemPrompt(buildAppContext("consolidate", "executive"));
+    const portfolioContext = buildAppContext("consolidate", "executive");
+    const portfolioPrompt = buildSystemPrompt(portfolioContext, { visualRequested: true });
+    const portfolioTextPrompt = buildSystemPrompt(portfolioContext, { visualRequested: false });
     const logisticsPrompt = buildSystemPrompt(buildAppContext("risks", "logistics"));
 
     expect(portfolioPrompt).toContain("Call renderSupplierPortfolio exactly once");
     expect(portfolioPrompt).toContain("annual consolidation savings");
     expect(portfolioPrompt).toContain("strategic relationship score");
     expect(portfolioPrompt).toContain("Use the derived decision wording exactly");
+    expect(portfolioTextPrompt).not.toContain("renderSupplierPortfolio");
     expect(logisticsPrompt).not.toContain("renderSupplierPortfolio");
   });
 

@@ -121,6 +121,7 @@ export function AnswerActions({
 
   function submitFeedback(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    activeButton()?.focus();
     onSubmitFeedback();
   }
 

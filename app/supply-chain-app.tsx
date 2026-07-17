@@ -158,7 +158,7 @@ const personaRecommendations: Record<PersonaId, Array<{ label: string; source: s
   procurement: [
     { label: "Review MT-440B alternate reservation", source: "Supplier capacity portal" },
     { label: "Check supplier risk register changes", source: "SharePoint workbook" },
-    { label: "Prepare Lucia exception review note", source: "Outlook" },
+    { label: "Prepare Lucia exception review note", source: "Microsoft Outlook" },
   ],
   executive: [
     { label: "Open consolidation opportunity heat map", source: "Resilience signals" },
@@ -169,10 +169,10 @@ const personaRecommendations: Record<PersonaId, Array<{ label: string; source: s
 
 const personaPromptSets: Record<PersonaId, string[]> = {
   logistics: [
-    "Show me potential delivery risks for this week.",
+    "Show me potential delivery risks for next week (CW 30).",
     "Check whether any carrier milestone changed overnight.",
     "Which shipments need pickup confirmation before noon?",
-    "Create a Monday follow-up plan for delayed freight.",
+    "Create a CW 30 follow-up plan for delayed freight.",
   ],
   procurement: [
     "What approved alternates can cover the delayed turret assemblies?",

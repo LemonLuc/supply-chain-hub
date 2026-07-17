@@ -3,15 +3,30 @@ import { describe, expect, it } from "vitest";
 import { workflows } from "./demo-data";
 
 describe("operational workflow data", () => {
-  it("models a Monday delivery radar with carrier evidence and actions", () => {
+  it("models a CW 30 delivery radar with current carrier evidence and actions", () => {
     expect(workflows.risks.question).toContain("N-FK5");
     expect(workflows.risks.sources.map((source) => source.name)).toEqual(
-      expect.arrayContaining(["SAP S/4HANA", "Shipping providers", "Outlook"]),
+      expect.arrayContaining([
+        "SAP S/4HANA",
+        "Shipping providers",
+        "Microsoft Outlook",
+      ]),
     );
+    expect(workflows.risks.sources).toContainEqual(
+      expect.objectContaining({ id: "outlook", name: "Microsoft Outlook" }),
+    );
+    expect(workflows.risks.question).toContain("CW 30");
+    expect(workflows.risks.summary).toContain("23 July");
     expect(workflows.risks.sourceStatus).toBe("6 available tools · live demo data");
     expect(workflows.risks.actions.map((action) => action.label)).toEqual(
-      expect.arrayContaining(["Request DHL recovery routing", "Write Dana Narid for review", "Log DHL exception on PO 4500872319"]),
+      expect.arrayContaining([
+        "Request DHL recovery routing",
+        "Create Microsoft Outlook recovery task",
+        "Write Dana Narid for review",
+        "Log DHL exception on PO 4500872319",
+      ]),
     );
+    expect(JSON.stringify(workflows)).not.toMatch(/June|2026-06|24\.06\.21/);
   });
 
   it("models role-restricted alternatives and executive decision actions", () => {

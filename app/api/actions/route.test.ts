@@ -68,6 +68,7 @@ describe("POST /api/actions", () => {
     expect(response.status).toBe(200);
     expect(body.orchestration).toBe("agents-sdk");
     expect(body.reviewerPersona).toBe("procurement");
+    expect(body.recipientActionLabel).toBe("Review delivery risk summary");
     expect(body.notice).toBe("Approval request sent to Dana Narid.");
     expect(body.draft).toContain("From Lukas Weber to Dana Narid.");
     expect(body.traceId).toMatch(/^trace_/);
@@ -104,6 +105,7 @@ describe("POST /api/actions", () => {
     expect(response.status).toBe(200);
     expect(body.orchestration).toBe("demo-fallback");
     expect(body.reviewerPersona).toBe("procurement");
+    expect(body.recipientActionLabel).toBe("Review delivery risk summary");
     expect(runMock).not.toHaveBeenCalled();
     expect(forceFlushMock).not.toHaveBeenCalled();
   });
@@ -181,6 +183,7 @@ describe("POST /api/actions", () => {
     expect(body).toMatchObject({
       assigneePersona: "logistics",
       assigneeName: "Lukas Weber",
+      recipientActionLabel: "Run recovery check",
       reviewerPersona: null,
       reviewerName: null,
       handoff: null,
@@ -206,6 +209,7 @@ describe("POST /api/actions", () => {
       assigneeName: null,
       reviewerPersona: "executive",
       reviewerName: "Dr. Lucía López",
+      recipientActionLabel: "Review six-build coverage exception",
       handoff: { from: "procurement", to: "executive" },
     });
   });
@@ -226,6 +230,7 @@ describe("POST /api/actions", () => {
     expect(response.status).toBe(200);
     expect(body.orchestration).toBe("agents-sdk");
     expect(body.reviewerPersona).toBeNull();
+    expect(body.recipientActionLabel).toBeNull();
     expect(body.notice).toContain("Draft prepared for Dr. Lucía López");
     expect(body.notice).not.toContain("Dana");
   });

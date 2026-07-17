@@ -8,7 +8,7 @@ describe("buildAppContext", () => {
 
     expect(context.workflow).toEqual({
       key: "risks",
-      question: "Is there any delivery risk this week for N-FK5 optical glass blanks used in the Axioscan 7 objective module?",
+      question: "Is there any delivery risk next week (CW 30) for N-FK5 optical glass blanks used in the Axioscan 7 objective module?",
       accessAllowed: true,
     });
     expect(context.answer.headline).toBe("Delivery exception found");
@@ -38,7 +38,7 @@ describe("buildAppContext", () => {
     expect(context.rows.map((row) => row.subject)).toEqual(["PO 4500872319 · DHL Freight", "PO 4500872481 · FedEx Priority"]);
   });
 
-  it("hides Outlook-gated actions when Outlook is not selected", () => {
+  it("hides Microsoft Outlook-gated actions when Microsoft Outlook is not selected", () => {
     const context = buildAppContext("risks", "logistics", ["sap", "carriers", "warehouse"]);
 
     expect(context.recommendedActions.map((action) => action.label)).not.toContain("Write Dana Narid for review");
@@ -46,12 +46,12 @@ describe("buildAppContext", () => {
     expect(context.recommendedActions.map((action) => action.label)).toContain("Log DHL exception on PO 4500872319");
   });
 
-  it("includes Outlook-gated actions when Outlook is selected", () => {
+  it("includes Microsoft Outlook-gated actions when Microsoft Outlook is selected", () => {
     const context = buildAppContext("risks", "logistics", ["sap", "carriers", "warehouse", "outlook"]);
 
     expect(context.recommendedActions.map((action) => action.label)).toEqual([
       "Request DHL recovery routing",
-      "Create Outlook recovery task",
+      "Create Microsoft Outlook recovery task",
       "Write Dana Narid for review",
       "Log DHL exception on PO 4500872319",
     ]);
@@ -169,7 +169,7 @@ describe("buildAppContext", () => {
     expect(context.answer.headline).toBe("Supplier risk register changes found");
     expect(context.answer.summary).toContain("Supplier Risk & Capacity Register.xlsx");
     expect(context.answer.metrics).toEqual([
-      ["Workbook version", "24.06.21-rc3"],
+      ["Workbook version", "26.07.17-rc3"],
       ["Recent changes", "3"],
       ["Owner", "Dana Narid"],
     ]);

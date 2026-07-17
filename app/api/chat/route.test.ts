@@ -611,7 +611,7 @@ describe("POST /api/chat", () => {
     expect(streamTextMock).not.toHaveBeenCalled();
     expect(stream).toContain("Supplier Risk & Capacity Register.xlsx");
     expect(stream).toContain("Mechatronik Süd capacity increased from 6 to 8 units");
-    expect(stream).toContain("version 24.06.21-rc3");
+    expect(stream).toContain("version 26.07.17-rc3");
   });
 
   it("uses the selected demo persona even when a default demo role is configured", async () => {

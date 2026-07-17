@@ -67,7 +67,7 @@ export function buildRoleToolSources(personaValue?: unknown): RoleToolSource[] {
     name: "Microsoft 365 Suite",
     category: "Microsoft 365 MCP",
     detail:
-      "SharePoint, Word, Outlook, PowerPoint, Teams, Excel, and authorized Microsoft 365 apps",
+      "SharePoint, Word, Microsoft Outlook, PowerPoint, Teams, Excel, and authorized Microsoft 365 apps",
     selected: true,
     workflowKeys: [
       ...new Set(microsoftSources.flatMap((source) => source.workflowKeys)),

@@ -114,7 +114,7 @@ describe("chat grounding", () => {
 
     expect(prompt).toContain("Supplier Risk & Capacity Register.xlsx");
     expect(prompt).toContain("Mechatronik Süd capacity increased from 6 to 8 units");
-    expect(prompt).toContain("version 24.06.21-rc3");
+    expect(prompt).toContain("version 26.07.17-rc3");
     expect(reply).toContain("Supplier Risk & Capacity Register.xlsx");
     expect(reply).toContain("Mechatronik Süd capacity increased from 6 to 8 units");
   });

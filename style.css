@@ -1055,6 +1055,10 @@
   grid-template-rows: 18px 48px auto auto;
 }
 
+.poc-slide .slide-number {
+  bottom: 12px;
+}
+
 .poc-slide .poc-note {
   font-size: 14px !important;
   line-height: 1.25;

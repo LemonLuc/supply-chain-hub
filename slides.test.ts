@@ -96,13 +96,14 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(styles).toContain(".value-levers");
     expect(styles).toContain(".decision-gates");
     expect(styles).toMatch(
-      /\.roi-panel,\s*\.evaluation-panel\s*\{[^}]*min-height: 280px;/s,
+      /\.roi-panel,\s*\.evaluation-panel\s*\{[^}]*min-height: 280px;/,
     );
     expect(styles).toMatch(
-      /\.poc-slide \.validation-layout\s*\{[^}]*width: min\(100%, 920px\);/s,
+      /\.poc-slide \.validation-layout\s*\{[^}]*width: min\(100%, 920px\);/,
     );
+    expect(styles).toMatch(/\.poc-slide \.slide-number\s*\{[^}]*bottom: 12px;/);
     expect(styles).toMatch(
-      /\.decision-gates\s*\{[^}]*border-top: 0;[^}]*padding: 0;/s,
+      /\.decision-gates\s*\{[^}]*border-top: 0;[^}]*padding: 0;/,
     );
     expect(styles).not.toContain(".proof-steps");
     expect(styles).not.toContain(".buyer-gates");

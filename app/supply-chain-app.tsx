@@ -265,7 +265,7 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
       behavior: forced ? "smooth" : "auto",
     });
     forceTranscriptScrollRef.current = false;
-  }, [messages.length, status]);
+  }, [messages, status]);
 
   function sourceIsSelected(toolId: string, fallback: boolean) {
     return sourceSelection[toolId] ?? fallback;

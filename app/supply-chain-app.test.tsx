@@ -171,6 +171,50 @@ function mockChatStreamWithReasoning() {
   );
 }
 
+function mockChatStreamWithControlledDelta() {
+  let releaseSecondDelta: (() => void) | undefined;
+  let releaseThirdDelta: (() => void) | undefined;
+  const secondDeltaGate = new Promise<void>((resolve) => {
+    releaseSecondDelta = resolve;
+  });
+  const thirdDeltaGate = new Promise<void>((resolve) => {
+    releaseThirdDelta = resolve;
+  });
+
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    createUIMessageStreamResponse({
+      stream: createUIMessageStream({
+        execute: async ({ writer }) => {
+          writer.write({ type: "text-start", id: "answer-1" });
+          writer.write({
+            type: "text-delta",
+            id: "answer-1",
+            delta: "The first grounded finding is ready",
+          });
+          await secondDeltaGate;
+          writer.write({
+            type: "text-delta",
+            id: "answer-1",
+            delta: ", followed by the recovery recommendation.",
+          });
+          await thirdDeltaGate;
+          writer.write({
+            type: "text-delta",
+            id: "answer-1",
+            delta: " Evidence review complete.",
+          });
+          writer.write({ type: "text-end", id: "answer-1" });
+        },
+      }),
+    }),
+  );
+
+  return {
+    releaseSecondDelta: () => releaseSecondDelta?.(),
+    releaseThirdDelta: () => releaseThirdDelta?.(),
+  };
+}
+
 function mockChatStreamWithMarkdownTable() {
   return vi.spyOn(globalThis, "fetch").mockResolvedValue(
     createUIMessageStreamResponse({
@@ -396,6 +440,50 @@ describe("SupplyChainApp", () => {
 
     expect(scrollTo).toHaveBeenCalledWith({ top: 960, behavior: "smooth" });
     expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("follows incremental answer updates only while the transcript stays near the bottom", async () => {
+    const scrollTo = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+      configurable: true,
+      value: scrollTo,
+    });
+    const { releaseSecondDelta, releaseThirdDelta } = mockChatStreamWithControlledDelta();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
+    await screen.findByText("The first grounded finding is ready");
+
+    const transcript = screen.getByLabelText("Chat messages");
+    Object.defineProperties(transcript, {
+      clientHeight: { configurable: true, value: 320 },
+      scrollHeight: { configurable: true, value: 1200 },
+      scrollTop: { configurable: true, value: 870, writable: true },
+    });
+    fireEvent.scroll(transcript);
+    scrollTo.mockClear();
+    releaseSecondDelta();
+
+    await screen.findByText(
+      "The first grounded finding is ready, followed by the recovery recommendation.",
+    );
+    await waitFor(() =>
+      expect(scrollTo).toHaveBeenCalledWith({ top: 1200, behavior: "auto" }),
+    );
+
+    Object.defineProperty(transcript, "scrollTop", {
+      configurable: true,
+      value: 100,
+      writable: true,
+    });
+    fireEvent.scroll(transcript);
+    scrollTo.mockClear();
+    releaseThirdDelta();
+
+    await screen.findByText(
+      "The first grounded finding is ready, followed by the recovery recommendation. Evidence review complete.",
+    );
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 
   it("never shows financial values or quantified business risk to logistics planners", async () => {

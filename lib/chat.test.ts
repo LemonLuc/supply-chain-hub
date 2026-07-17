@@ -98,6 +98,18 @@ describe("chat grounding", () => {
     expect(prompt).not.toContain("Call renderOperationalChart");
   });
 
+  it("prevents the model from replacing a client-rendered historical visual", () => {
+    const prompt = buildSystemPrompt(buildAppContext("consolidate", "executive"), {
+      clientRenderedVisualization: true,
+    });
+
+    expect(prompt).toContain(
+      "Do not create another chart, table, diagram, or text-based substitute",
+    );
+    expect(prompt).toContain("Respond with a concise explanation only");
+    expect(prompt).not.toContain("Call renderSupplierPortfolio exactly once");
+  });
+
   it("returns an operational, tool-grounded demo reply", () => {
     const reply = generateMockReply("What should I do first?", buildAppContext("risks"));
 

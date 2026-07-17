@@ -46,12 +46,19 @@ import { buildAppContext, buildRoleToolSources, resolveWorkflowForPrompt } from 
 import { workflows, type WorkflowAction, type WorkflowKey } from "@/lib/demo-data";
 import { getPersonaPolicy, personas, type PersonaId } from "@/lib/permissions";
 import {
+  asksForCostResilienceVisualization,
+  getCostResiliencePortfolioView,
+  resolveCostResilienceVisualization,
+  supplierCostResilienceSnapshot,
+} from "@/lib/supplier-cost-resilience";
+import {
   getDemoPortfolioView,
   resolveSupplierPortfolioVisualization,
 } from "@/lib/supplier-portfolio";
 
 import { AnswerActions, type AnswerFeedback, type FeedbackRating } from "./answer-actions";
 import { ChatMessageVisual, getMessageVisual } from "./chat-message-visual";
+import { SupplierCostResilienceVisualization } from "./supplier-cost-resilience-visualization";
 import {
   getMessagePortfolioVisualization,
   SupplierPortfolioVisualizationView,
@@ -252,7 +259,13 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     [messages],
   );
   const fallbackPortfolioVisualization = useMemo(() => {
-    if (inlinePortfolioVisualization || asksForGeneratedImage(activePrompt)) return undefined;
+    if (
+      inlinePortfolioVisualization ||
+      asksForGeneratedImage(activePrompt) ||
+      asksForCostResilienceVisualization(activePrompt)
+    ) {
+      return undefined;
+    }
 
     const suppliers = appContext.decisionSupport?.heatMap;
     return suppliers
@@ -263,6 +276,15 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
         )
       : undefined;
   }, [activePrompt, appContext.decisionSupport?.heatMap, inlinePortfolioVisualization]);
+  const costResilienceVisualization = useMemo(() => {
+    if (!asksForCostResilienceVisualization(activePrompt)) return undefined;
+
+    return resolveCostResilienceVisualization(
+      supplierCostResilienceSnapshot,
+      getCostResiliencePortfolioView(activePrompt),
+      "Selected from the original supplier cost and resilience snapshot",
+    );
+  }, [activePrompt]);
   function sourceIsSelected(toolId: string, fallback: boolean) {
     return sourceSelection[toolId] ?? fallback;
   }
@@ -903,6 +925,11 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
 
         {canShowResults && (
           <section className="results" aria-label="Supply Chain Hub results">
+            {costResilienceVisualization && (
+              <SupplierCostResilienceVisualization
+                visualization={costResilienceVisualization}
+              />
+            )}
             {fallbackPortfolioVisualization && (
               <SupplierPortfolioVisualizationView visualization={fallbackPortfolioVisualization} />
             )}

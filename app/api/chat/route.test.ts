@@ -352,7 +352,7 @@ describe("POST /api/chat", () => {
     expect(systemPrompt).toContain("Two consolidation candidates pass the resilience guardrails");
   });
 
-  it("registers a trusted model-selected portfolio tool for explicit executive visual requests", async () => {
+  it("registers the newer portfolio tool for explicit savings and relationship requests", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
     const request = new Request("http://localhost/api/chat", {
       method: "POST",
@@ -362,7 +362,7 @@ describe("POST /api/chat", () => {
           {
             id: "message-1",
             role: "user",
-            parts: [{ type: "text", text: "Visualize supplier cost and resilience as a heat map." }],
+            parts: [{ type: "text", text: "Plot annual consolidation savings and strategic relationship score as a bubble chart." }],
           },
         ],
         workflowKey: "consolidate",
@@ -398,6 +398,45 @@ describe("POST /api/chat", () => {
         expect.objectContaining({ supplier: "Steripack Hohenlohe" }),
       ]),
     });
+  });
+
+  it("leaves the historical cost and resilience heat map to the restored client renderer", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [
+              {
+                type: "text",
+                text: "Show the supplier cost and resilience heat map with bubbles.",
+              },
+            ],
+          },
+        ],
+        workflowKey: "consolidate",
+        demoPersona: "executive",
+        selectedSourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
+      }),
+    });
+
+    await POST(request);
+
+    const options = streamTextMock.mock.calls[0][0] as {
+      tools: Record<string, unknown>;
+      system: string;
+    };
+    expect(options.tools).not.toHaveProperty("renderSupplierPortfolio");
+    expect(options.tools).not.toHaveProperty("generateSlideVisual");
+    expect(options.system).not.toContain("Call renderSupplierPortfolio exactly once");
+    expect(options.system).toContain(
+      "Do not create another chart, table, diagram, or text-based substitute",
+    );
+    expect(imageGenerationMock).not.toHaveBeenCalled();
   });
 
   it("does not register the portfolio tool for a text-only executive request", async () => {

@@ -40,12 +40,14 @@ export function buildSystemPrompt(
     visualRequested?: boolean;
     operationalChartAvailable?: boolean;
     generatedImageRequested?: boolean;
+    clientRenderedVisualization?: boolean;
   } = {},
 ): string {
   const portfolioInstructions =
     context.decisionSupport?.heatMap?.length &&
     options.visualRequested &&
-    !options.generatedImageRequested
+    !options.generatedImageRequested &&
+    !options.clientRenderedVisualization
     ? `
 - Call renderSupplierPortfolio exactly once for this supplier-portfolio answer.
 - Choose bubble when annual consolidation savings (USD) and the strategic relationship score (0–100) materially improve the comparison; otherwise choose matrix.
@@ -65,6 +67,12 @@ ${options.generatedImageRequested
 - Do not use generated images for exact operational measurements, financial figures, supplier scores, or order identifiers.
 - Keep exact facts in the written answer and never invent visual data.`
     : "";
+  const clientVisualizationInstructions = options.clientRenderedVisualization
+    ? `
+- The application renders the restored historical supplier cost/resilience visualization from its trusted local snapshot.
+- Do not create another chart, table, diagram, or text-based substitute, and do not reinterpret the historical axes using current portfolio measures.
+- Respond with a concise explanation only that the requested historical view is shown below; do not restate or invent its supplier values.`
+    : "";
 
   return `You are Supply Chain Hub. Answer using the live application snapshot below.
 
@@ -77,7 +85,7 @@ Priorities:
 - Respect workflow access, financial visibility, and approval gates in the snapshot.
 - Any source listed in \`sources\` or \`selectedAuthorizedSources\` is already authorized and available for this request.
 - Do not say you lack access to SAP, SharePoint, Excel, or any selected source. If selected evidence is present, answer from it.
-- If \`documents\` contains workbook data, use that workbook data directly for recent changes, rows, owners, versions, and locations.${portfolioInstructions}${visualInstructions}
+- If \`documents\` contains workbook data, use that workbook data directly for recent changes, rows, owners, versions, and locations.${portfolioInstructions}${visualInstructions}${clientVisualizationInstructions}
 
 Application snapshot:
 ${JSON.stringify(context, null, 2)}`;

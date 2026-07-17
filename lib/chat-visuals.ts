@@ -1,4 +1,5 @@
 import type { AppContext } from "./context";
+import { asksForCostResilienceVisualization } from "./supplier-cost-resilience";
 import {
   getDemoPortfolioView,
   resolveSupplierPortfolioVisualization,
@@ -245,6 +246,8 @@ export function createDemoSlideVisual(context: AppContext): DemoSlideVisual {
 
 export function getDemoChatVisual(question: string, context: AppContext): DemoChatVisual | undefined {
   if (!asksForVisualization(question)) return undefined;
+
+  if (asksForCostResilienceVisualization(question)) return undefined;
 
   if (asksForGeneratedImage(question)) {
     return {

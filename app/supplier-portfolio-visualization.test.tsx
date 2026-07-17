@@ -81,16 +81,7 @@ describe("SupplierPortfolioVisualizationView", () => {
     );
     expect(screen.queryByText("Quantitative comparison")).not.toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
-    expect(
-      [...container.querySelectorAll(".portfolio-chart-zones rect")].map((zone) =>
-        zone.getAttribute("class"),
-      ),
-    ).toEqual([
-      "zone-keep",
-      "zone-strategic-trade-off",
-      "zone-low-priority",
-      "zone-consolidate",
-    ]);
+    expect(container.querySelector(".portfolio-chart-zones")).not.toBeInTheDocument();
   });
 
   it("extracts only completed valid portfolio tool output", () => {

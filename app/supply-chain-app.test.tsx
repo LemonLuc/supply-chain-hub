@@ -239,6 +239,22 @@ describe("SupplyChainApp", () => {
       "--decision-tradeoff-fill",
       "--decision-low-priority",
       "--decision-low-priority-fill",
+      "--action-retain",
+      "--action-retain-surface",
+      "--action-retain-border",
+      "--action-consolidate",
+      "--action-consolidate-surface",
+      "--action-consolidate-border",
+      "--action-protect",
+      "--action-protect-surface",
+      "--action-protect-border",
+      "--action-review",
+      "--action-review-surface",
+      "--action-review-border",
+      "--heat-balanced",
+      "--heat-optimize",
+      "--heat-watch",
+      "--heat-protect",
       "--protected-ink",
       "--protected-surface",
       "--success-surface",
@@ -265,7 +281,7 @@ describe("SupplyChainApp", () => {
     expect(themeLayer).not.toContain(
       ".portfolio-bubble.decision-strategic-trade-off .portfolio-bubble-cost",
     );
-    for (const zone of ["keep", "consolidate", "strategic-trade-off", "low-priority"]) {
+    for (const zone of ["balanced", "optimize", "watch", "protect"]) {
       expect(themeLayer).toMatch(
         new RegExp(`\\.portfolio-chart-zones \\.zone-${zone}\\s*\\{[^}]*fill:`),
       );
@@ -635,23 +651,29 @@ describe("SupplyChainApp", () => {
     expect(screen.queryByRole("table", { name: /supplier savings and strategic relationship matrix/i })).not.toBeInTheDocument();
   });
 
-  it("restores the bubble heat map when an executive response has no inline visual", async () => {
+  it("restores the historical cost and resilience bubble heat map", async () => {
     mockChatStream();
     render(<SupplyChainApp currentUser={mockUsers.executive} />);
 
     fireEvent.change(screen.getByLabelText("Message"), {
-      target: { value: "Show the supplier consolidation heat map." },
+      target: { value: "Show the supplier cost and resilience heat map with bubbles." },
     });
     fireEvent.click(screen.getByRole("button", { name: "Send message" }));
 
     await waitFor(() => {
       const results = screen.getByLabelText("Supply Chain Hub results");
       const heatMap = within(results).getByRole("img", {
-        name: /supplier savings and strategic relationship map/i,
+        name: /supplier cost and resilience bubble chart/i,
       });
       expect(heatMap.closest(".message.assistant")).toBeNull();
       expect(heatMap).toBeInTheDocument();
     });
+    expect(screen.getByText("Cost index")).toBeInTheDocument();
+    expect(screen.getByText("Resilience score")).toBeInTheDocument();
+    expect(screen.getByText("Protect · €3.1M")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("img", { name: /supplier savings and strategic relationship map/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("prefers completed validated model tool output over the demo prompt fallback", async () => {

@@ -117,7 +117,7 @@ describe("supplier portfolio visualization", () => {
   it("selects the demo view from explicit presentation intent", () => {
     expect(getDemoPortfolioView("Plot this as a quantitative bubble chart.")).toBe("bubble");
     expect(getDemoPortfolioView("Compare annual savings and relationship score.")).toBe("bubble");
-    expect(getDemoPortfolioView("Show the supplier heat map.")).toBe("bubble");
+    expect(getDemoPortfolioView("Show the supplier heat map.")).toBe("matrix");
   });
 
   it("accepts valid tool output and rejects malformed or inconsistent output", () => {

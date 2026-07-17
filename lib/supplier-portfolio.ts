@@ -33,7 +33,7 @@ export type SupplierPortfolioVisualization = {
   suppliers: ResolvedSupplierPortfolioItem[];
 };
 
-export const supplierPortfolioDecisionThresholds = {
+const supplierPortfolioDecisionThresholds = {
   annualSavingsUsd: 350_000,
   relationshipScore: 65,
 } as const;
@@ -163,8 +163,6 @@ export function getDemoPortfolioView(prompt: string): SupplierPortfolioView {
     "annual savings",
     "savings potential",
     "relationship score",
-    "heat map",
-    "heatmap",
   ].some((term) => normalizedPrompt.includes(term));
 
   return asksForQuantitativeView ? "bubble" : "matrix";

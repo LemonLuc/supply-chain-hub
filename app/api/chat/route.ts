@@ -27,6 +27,7 @@ import {
   getUIMessageText,
   sanitizeGuardrailHistory,
 } from "@/lib/prompt-scope";
+import { asksForCostResilienceVisualization } from "@/lib/supplier-cost-resilience";
 
 export const runtime = "nodejs";
 
@@ -152,7 +153,9 @@ export async function POST(request: Request): Promise<Response> {
   const options = normalizeChatOptions(body.model, body.thinking);
   const visualRequested = asksForVisualization(question);
   const generatedImageRequested = asksForGeneratedImage(question);
-  const operationalChart = visualRequested && !generatedImageRequested
+  const costResilienceVisualizationRequested = asksForCostResilienceVisualization(question);
+  const serverVisualRequested = visualRequested && !costResilienceVisualizationRequested;
+  const operationalChart = serverVisualRequested && !generatedImageRequested
     ? resolveOperationalChart(context)
     : undefined;
   const trustedChartAvailable = Boolean(
@@ -167,10 +170,13 @@ export async function POST(request: Request): Promise<Response> {
   const externalContext = await loadExternalContext(question, context);
   const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const tools = getChatTools(context, {
-    allowOperationalChart: visualRequested && !generatedImageRequested,
-    allowSupplierPortfolio: visualRequested && !generatedImageRequested,
+    allowOperationalChart: serverVisualRequested && !generatedImageRequested,
+    allowSupplierPortfolio: serverVisualRequested && !generatedImageRequested,
   });
-  if (generatedImageRequested || (visualRequested && !trustedChartAvailable)) {
+  if (
+    !costResilienceVisualizationRequested &&
+    (generatedImageRequested || (serverVisualRequested && !trustedChartAvailable))
+  ) {
     Object.assign(tools, {
       generateSlideVisual: openai.tools.imageGeneration({
         outputFormat: "webp",
@@ -183,9 +189,10 @@ export async function POST(request: Request): Promise<Response> {
     model: openai.responses(options.model),
     system: [
       buildSystemPrompt(context, {
-        visualRequested,
+        visualRequested: serverVisualRequested,
         operationalChartAvailable: Boolean(operationalChart),
         generatedImageRequested,
+        clientRenderedVisualization: costResilienceVisualizationRequested,
       }),
       externalContext.length ? `External context:\n${externalContext.join("\n\n")}` : "",
     ]

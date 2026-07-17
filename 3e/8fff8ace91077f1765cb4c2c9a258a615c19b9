@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-17-generic-prompts-euro-portfolio-design.md
+  s_8f063ba3a5bbd9::t_f935f952443e7f 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "3e8fff8ace91077f1765cb4c2c9a258a615c19b9",
+  "prompts": {},
+  "sessions": {
+    "s_8f063ba3a5bbd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709d-7e67-72e0-bd49-468f2d163cb9",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

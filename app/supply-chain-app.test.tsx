@@ -768,6 +768,7 @@ describe("SupplyChainApp", () => {
     const dialog = screen.getByRole("dialog", { name: "Answer feedback" });
     const field = screen.getByLabelText("Optional feedback");
     expect(dialog.closest(".message")).toBeNull();
+    expect(dialog.parentElement).toHaveClass("app-shell");
     expect(field).toHaveFocus();
     expect(screen.getByRole("button", { name: "Close feedback" })).toBeInTheDocument();
 

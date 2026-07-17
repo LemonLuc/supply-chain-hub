@@ -199,7 +199,7 @@ export function AnswerActions({
             <button type="button" onClick={dismissFeedback}>Cancel feedback</button>
           </div>
         </form>,
-        document.body,
+        document.querySelector(".app-shell") ?? document.body,
       )}
 
       {feedback?.submitted && (

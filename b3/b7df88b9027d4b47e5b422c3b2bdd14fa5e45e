@@ -1,0 +1,33 @@
+app/supply-chain-app.tsx
+  s_8884df62cbd1af::t_63e58a394a2d57 33,198
+lib/action-workflows.test.ts
+  s_8f063ba3a5bbd9::t_7b1305289cc9d4 7,10,28,43,48-90
+lib/action-workflows.ts
+  s_8884df62cbd1af::t_fe6a1b88b5fde2 10,46-49,125
+lib/demo-data.ts
+  s_8f063ba3a5bbd9::t_b309671722ed29 27,35-57,174-175,253,255
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b3b7df88b9027d4b47e5b422c3b2bdd14fa5e45e",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_8f063ba3a5bbd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709d-7e67-72e0-bd49-468f2d163cb9",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

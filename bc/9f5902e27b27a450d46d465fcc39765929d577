@@ -1,0 +1,23 @@
+app/supply-chain-app.test.tsx
+  s_8f063ba3a5bbd9::t_993fdc0d021c4c 326,355,372,389,444,448,521,656,671,687,896,909,928,944,996,1043,1168
+lib/demo-data.test.ts
+  s_8f063ba3a5bbd9::t_bcdc5b00ef512b 32-42
+lib/supplier-portfolio-chart.test.ts
+  s_8f063ba3a5bbd9::t_78b36223aa93c8 6,14-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "bc9f5902e27b27a450d46d465fcc39765929d577",
+  "prompts": {},
+  "sessions": {
+    "s_8f063ba3a5bbd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709d-7e67-72e0-bd49-468f2d163cb9",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

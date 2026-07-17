@@ -219,10 +219,20 @@ describe("SupplyChainApp", () => {
     const messageListRule = css.match(/\.message-list\s*\{([^}]*)\}/)?.[1] ?? "";
     const messageRule = css.match(/\.message\s*\{([^}]*)\}/)?.[1] ?? "";
     const markdownRule = css.match(/\.markdown-content\s*\{([^}]*)\}/)?.[1] ?? "";
+    const tableRule = css.match(/\.markdown-content table\s*\{([^}]*)\}/)?.[1] ?? "";
+    const cellRule = css.match(/\.markdown-content th, \.markdown-content td\s*\{([^}]*)\}/)?.[1] ?? "";
+    const tableMessageRule =
+      css.match(/\.message:has\(\.markdown-content table\)\s*\{([^}]*)\}/)?.[1] ?? "";
 
     expect(messageListRule).toMatch(/grid-template-columns\s*:\s*minmax\(0,\s*1fr\)/);
     expect(messageRule).toMatch(/min-width\s*:\s*0/);
-    expect(markdownRule).toMatch(/overflow-x\s*:\s*auto/);
+    expect(markdownRule).toMatch(/overflow-x\s*:\s*hidden/);
+    expect(tableRule).toMatch(/width\s*:\s*100%/);
+    expect(tableRule).toMatch(/table-layout\s*:\s*auto/);
+    expect(tableRule).not.toMatch(/max-content/);
+    expect(cellRule).toMatch(/overflow-wrap\s*:\s*anywhere/);
+    expect(tableMessageRule).toMatch(/width\s*:\s*100%/);
+    expect(tableMessageRule).toMatch(/max-width\s*:\s*100%/);
   });
 
   it("defines semantic light and dark theme tokens without legacy heat cards", () => {
@@ -649,6 +659,46 @@ describe("SupplyChainApp", () => {
       ).toBeInTheDocument(),
     );
     expect(screen.queryByRole("table", { name: /supplier savings and strategic relationship matrix/i })).not.toBeInTheDocument();
+  });
+
+  it("restores trusted bubbles for a contextual Visualize this request", async () => {
+    const fetchMock = mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.executive} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show supplier consolidation options/i }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "Visualize this." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("img", { name: /supplier savings and strategic relationship map/i }),
+      ).toBeInTheDocument(),
+    );
+    expect(
+      screen.queryByRole("table", { name: /supplier savings and strategic relationship matrix/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not inject a supplier matrix into a text-only response", async () => {
+    const fetchMock = mockChatStream();
+    render(<SupplyChainApp currentUser={mockUsers.executive} />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Which supplier relationships should we consolidate/i }),
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(
+      screen.queryByRole("table", { name: /supplier savings and strategic relationship matrix/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("img", { name: /supplier savings and strategic relationship map/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("restores the historical cost and resilience bubble heat map", async () => {

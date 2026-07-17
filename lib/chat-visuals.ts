@@ -75,6 +75,11 @@ export function asksForGeneratedImage(question: string): boolean {
   return asksForImage && !asksForChart;
 }
 
+export function prefersTrustedSupplierVisualization(question: string): boolean {
+  const asksForExplicitImage = /\b(diagram|illustrat(?:e|ion)|image|slide visual)\b/i.test(question);
+  return asksForVisualization(question) && !asksForExplicitImage;
+}
+
 export function parseOperationalBarChart(value: unknown): OperationalBarChart | undefined {
   if (!isRecord(value) || value.kind !== "operational-bar") return undefined;
   if (
@@ -249,6 +254,19 @@ export function getDemoChatVisual(question: string, context: AppContext): DemoCh
 
   if (asksForCostResilienceVisualization(question)) return undefined;
 
+  const suppliers = context.decisionSupport?.heatMap;
+  if (suppliers?.length && prefersTrustedSupplierVisualization(question)) {
+    const preferredView = getDemoPortfolioView(question);
+    const reason = preferredView === "bubble"
+      ? "The authorized savings, relationship, and cost measures support a quantitative comparison."
+      : "Decision bands support a compact authorized portfolio matrix.";
+    return {
+      toolName: "renderSupplierPortfolio",
+      input: { preferredView, reason },
+      output: resolveSupplierPortfolioVisualization(suppliers, preferredView, reason),
+    };
+  }
+
   if (asksForGeneratedImage(question)) {
     return {
       toolName: "generateSlideVisual",
@@ -257,7 +275,6 @@ export function getDemoChatVisual(question: string, context: AppContext): DemoCh
     };
   }
 
-  const suppliers = context.decisionSupport?.heatMap;
   if (suppliers?.length) {
     const preferredView = getDemoPortfolioView(question);
     const reason = preferredView === "bubble"

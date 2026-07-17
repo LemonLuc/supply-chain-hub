@@ -41,7 +41,10 @@ import {
   type SupportedModel,
   type ThinkingLevel,
 } from "@/lib/chat";
-import { asksForGeneratedImage } from "@/lib/chat-visuals";
+import {
+  asksForVisualization,
+  prefersTrustedSupplierVisualization,
+} from "@/lib/chat-visuals";
 import { buildAppContext, buildRoleToolSources, resolveWorkflowForPrompt } from "@/lib/context";
 import { workflows, type WorkflowAction, type WorkflowKey } from "@/lib/demo-data";
 import { getPersonaPolicy, personas, type PersonaId } from "@/lib/permissions";
@@ -261,7 +264,8 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   const fallbackPortfolioVisualization = useMemo(() => {
     if (
       inlinePortfolioVisualization ||
-      asksForGeneratedImage(activePrompt) ||
+      !asksForVisualization(activePrompt) ||
+      !prefersTrustedSupplierVisualization(activePrompt) ||
       asksForCostResilienceVisualization(activePrompt)
     ) {
       return undefined;

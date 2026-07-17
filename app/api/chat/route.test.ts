@@ -400,6 +400,58 @@ describe("POST /api/chat", () => {
     });
   });
 
+  it("routes a supplier-context Visualize this follow-up through trusted bubbles", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Show supplier consolidation options." }],
+          },
+          {
+            id: "message-2",
+            role: "assistant",
+            parts: [{ type: "text", text: "Two suppliers are consolidation candidates." }],
+          },
+          {
+            id: "message-3",
+            role: "user",
+            parts: [{ type: "text", text: "Visualize this." }],
+          },
+        ],
+        workflowKey: "consolidate",
+        demoPersona: "executive",
+        selectedSourceIds: ["sap", "contracts", "quality", "resilience", "policy"],
+      }),
+    });
+
+    await POST(request);
+
+    const options = streamTextMock.mock.calls[0][0] as {
+      tools: {
+        renderSupplierPortfolio?: {
+          execute?: (input: { preferredView: "matrix" | "bubble"; reason: string }) => unknown;
+        };
+      };
+      system: string;
+    };
+    expect(options.tools).toHaveProperty("renderSupplierPortfolio");
+    expect(options.tools).not.toHaveProperty("generateSlideVisual");
+    expect(options.system).toContain("Call renderSupplierPortfolio exactly once");
+    expect(options.system).not.toContain("Call generateSlideVisual exactly once");
+    expect(imageGenerationMock).not.toHaveBeenCalled();
+
+    const output = await options.tools.renderSupplierPortfolio?.execute?.({
+      preferredView: "matrix",
+      reason: "Generic follow-up should not change the restored view.",
+    });
+    expect(output).toMatchObject({ view: "bubble", requestedView: "bubble" });
+  });
+
   it("leaves the historical cost and resilience heat map to the restored client renderer", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
     const request = new Request("http://localhost/api/chat", {

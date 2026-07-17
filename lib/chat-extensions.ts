@@ -24,7 +24,11 @@ type OperationalChartToolInput = {
 
 export function getChatTools(
   context: AppContext,
-  options: { allowOperationalChart?: boolean; allowSupplierPortfolio?: boolean } = {},
+  options: {
+    allowOperationalChart?: boolean;
+    allowSupplierPortfolio?: boolean;
+    supplierPortfolioView?: SupplierPortfolioView;
+  } = {},
 ): ToolSet {
   const suppliers = context.decisionSupport?.heatMap;
   const operationalChart = options.allowOperationalChart
@@ -44,7 +48,9 @@ export function getChatTools(
         properties: {
           preferredView: {
             type: "string",
-            enum: ["matrix", "bubble"],
+            enum: options.supplierPortfolioView
+              ? [options.supplierPortfolioView]
+              : ["matrix", "bubble"],
             description:
               "Use matrix for a compact decision heat map. Use bubble when annual consolidation savings, strategic relationship score, and annual supplier cost materially improve the answer.",
           },
@@ -58,7 +64,11 @@ export function getChatTools(
         required: ["preferredView", "reason"],
       }),
       execute: async ({ preferredView, reason }) =>
-        resolveSupplierPortfolioVisualization(suppliers, preferredView, reason),
+        resolveSupplierPortfolioVisualization(
+          suppliers,
+          options.supplierPortfolioView ?? preferredView,
+          reason,
+        ),
     });
   }
 

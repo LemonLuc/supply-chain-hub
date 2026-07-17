@@ -101,6 +101,14 @@ describe("demo visual routing", () => {
       toolName: "renderSupplierPortfolio",
       output: { view: "bubble" },
     });
+    expect(getDemoChatVisual("Visualize this.", context)).toMatchObject({
+      toolName: "renderSupplierPortfolio",
+      output: { view: "bubble" },
+    });
+    expect(getDemoChatVisual("Create an image suitable for a slide.", context)).toMatchObject({
+      toolName: "generateSlideVisual",
+      output: { kind: "slide-image" },
+    });
     expect(getDemoChatVisual("Compare supplier cost and resilience.", context)).toBeUndefined();
   });
 

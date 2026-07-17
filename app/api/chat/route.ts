@@ -15,6 +15,7 @@ import {
   asksForGeneratedImage,
   asksForVisualization,
   getDemoChatVisual,
+  prefersTrustedSupplierVisualization,
   resolveOperationalChart,
   type DemoChatVisual,
 } from "@/lib/chat-visuals";
@@ -28,6 +29,7 @@ import {
   sanitizeGuardrailHistory,
 } from "@/lib/prompt-scope";
 import { asksForCostResilienceVisualization } from "@/lib/supplier-cost-resilience";
+import { getDemoPortfolioView } from "@/lib/supplier-portfolio";
 
 export const runtime = "nodejs";
 
@@ -152,9 +154,17 @@ export async function POST(request: Request): Promise<Response> {
   const context = buildAppContext(body.workflowKey, demoPersona, body.selectedSourceIds, question);
   const options = normalizeChatOptions(body.model, body.thinking);
   const visualRequested = asksForVisualization(question);
-  const generatedImageRequested = asksForGeneratedImage(question);
   const costResilienceVisualizationRequested = asksForCostResilienceVisualization(question);
   const serverVisualRequested = visualRequested && !costResilienceVisualizationRequested;
+  const supplierPortfolioRequested = Boolean(
+    serverVisualRequested &&
+    context.decisionSupport?.heatMap?.length &&
+    prefersTrustedSupplierVisualization(question),
+  );
+  const supplierPortfolioView = /^\s*visuali[sz]e\s+this[.!?]*\s*$/i.test(question)
+    ? getDemoPortfolioView(question)
+    : undefined;
+  const generatedImageRequested = asksForGeneratedImage(question) && !supplierPortfolioRequested;
   const operationalChart = serverVisualRequested && !generatedImageRequested
     ? resolveOperationalChart(context)
     : undefined;
@@ -171,7 +181,8 @@ export async function POST(request: Request): Promise<Response> {
   const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const tools = getChatTools(context, {
     allowOperationalChart: serverVisualRequested && !generatedImageRequested,
-    allowSupplierPortfolio: serverVisualRequested && !generatedImageRequested,
+    allowSupplierPortfolio: supplierPortfolioRequested,
+    supplierPortfolioView,
   });
   if (
     !costResilienceVisualizationRequested &&

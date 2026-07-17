@@ -156,6 +156,8 @@ export function resolveSupplierPortfolioVisualization(
 
 export function getDemoPortfolioView(prompt: string): SupplierPortfolioView {
   const normalizedPrompt = prompt.toLowerCase();
+  if (normalizedPrompt.includes("matrix")) return "matrix";
+
   const asksForQuantitativeView = [
     "bubble",
     "plot",
@@ -163,6 +165,10 @@ export function getDemoPortfolioView(prompt: string): SupplierPortfolioView {
     "annual savings",
     "savings potential",
     "relationship score",
+    "visualize",
+    "visualise",
+    "heat map",
+    "heatmap",
   ].some((term) => normalizedPrompt.includes(term));
 
   return asksForQuantitativeView ? "bubble" : "matrix";

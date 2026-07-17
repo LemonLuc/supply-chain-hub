@@ -122,11 +122,12 @@ record: true
     <div><h2>Before</h2><p>A customer delivery is at risk, and the team spends the first 20 minutes <strong>checking which source is actually current</strong> instead of deciding what to do.</p></div>
     <div><h2>After</h2><p>Leaders see the exposed orders, root cause, options, cost trade-off and approval owner <strong>in one interface</strong>.</p></div>
   </div>
-  <div class="workflow-security">
-    <h2>Security built into the workflow</h2>
-    <div><b>Model</b><p>Safeguards, evals and monitoring</p></div>
-    <div><b>Platform</b><p>Encryption and enterprise data controls</p></div>
-    <div><b>Application</b><p>Roles, trusted sources, approvals and red-team tests</p></div>
+  <div class="workflow-security deployment-constraints">
+    <h2>Deployment constraints to validate</h2>
+    <div><b>Data &amp; privacy</b><p>Approved fields only; confirm GDPR, supplier confidentiality, retention and regional processing.</p></div>
+    <div><b>Identity &amp; governance</b><p>SSO, server-side roles, masking and a named reviewer for every high-impact action.</p></div>
+    <div><b>Operations &amp; adoption</b><p>Fail-closed fallback, process owner, training, feedback and security / works-council checkpoints.</p></div>
+    <p class="openai-data-note"><strong>OpenAI data control:</strong> API data is not used for model training unless the customer opts in. Retention and residency depend on eligible project, endpoint and configuration.</p>
   </div>
 </section>
 
@@ -142,24 +143,35 @@ record: true
   <span class="slide-number">08</span>
   <p class="eyebrow">Proof of concept scorecard</p>
   <h1>Impact validation and success criteria</h1>
-  <p class="poc-note">The first POC must prove both business impact and operating trust: faster decisions, better evidence and controlled action paths.</p>
+  <p class="poc-note">Prove value, quality and control with a ZEISS SME-labelled gold set, trace review and explicit release gates.</p>
   <div class="validation-layout">
-    <div class="validation-panel">
+    <div class="validation-panel roi-panel">
       <span>1</span>
-      <h2>Impact validation</h2>
-      <ol>
-        <li><strong>Baseline</strong><p>Measure current risk-review cycle time, escalation volume and manual triage hours.</p></li>
-        <li><strong>Run the workflow</strong><p>Use one live supply-chain risk scenario with real source boundaries and named review.</p></li>
-        <li><strong>Read out value</strong><p>Compare avoided effort, decision speed and quality of evidence against baseline.</p></li>
-      </ol>
+      <h2>Illustrative value hypothesis</h2>
+      <strong class="roi-total">€180K–€310K</strong>
+      <p class="roi-caption">Potential annual gross value · validate against the ZEISS baseline</p>
+      <div class="roi-drivers">
+        <div><b>€15K–€25K</b><p>Analyst capacity</p><small>600–1,000 reviews × 20 min × €75/hour</small></div>
+        <div><b>€101K–€151K</b><p>Avoided expedites</p><small>12–18 cases × €8,400</small></div>
+        <div><b>€65K–€130K</b><p>Downtime exposure</p><small>0.35–0.70 events × €185,000</small></div>
+      </div>
+      <p class="roi-gate"><strong>Scale gate</strong> Net ROI = (validated benefit − annualized solution cost) ÷ annualized solution cost.</p>
     </div>
-    <div class="criteria-panel">
+    <div class="criteria-panel evaluation-panel">
       <span>2</span>
-      <h2>Measurable success criteria</h2>
-      <div><b>25%</b><p>Faster weekly risk-review cycle versus baseline.</p></div>
-      <div><b>90%</b><p>Answers cite trusted ZEISS sources and show assumptions.</p></div>
-      <div><b>80%</b><p>Target users rate outputs useful for real workflows.</p></div>
-      <div><b>100%</b><p>High-impact actions route to accountable review.</p></div>
+      <h2>Evaluation loop and owned gates</h2>
+      <div class="evaluation-loop">
+        <div><b>1</b><p>SME-labelled gold set</p></div>
+        <div><b>2</b><p>Graders</p></div>
+        <div><b>3</b><p>Trace + SME review</p></div>
+        <div><b>4</b><p>Regression set</p></div>
+      </div>
+      <div class="release-gates">
+        <div><b>Process owner</b><p>≥25% faster · ≥80% useful</p></div>
+        <div><b>Supply-chain SME</b><p>≥90% source-faithful · ≤5% critical false negatives</p></div>
+        <div><b>Engineering owner</b><p>≥95% correct tool / trace path</p></div>
+        <div><b>Risk owner</b><p>100% high-impact review</p></div>
+      </div>
     </div>
   </div>
 </section>

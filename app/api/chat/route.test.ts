@@ -1,10 +1,15 @@
 import { APICallError } from "ai";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { convertToModelMessagesMock, generateTextMock, streamTextMock } = vi.hoisted(() => ({
+const { convertToModelMessagesMock, generateTextMock, imageGenerationMock, streamTextMock } = vi.hoisted(() => ({
   convertToModelMessagesMock: vi.fn(async (messages) => messages),
   generateTextMock: vi.fn(async (_options: unknown) => ({
     output: { category: "supply_chain", confidence: 0.99 },
+  })),
+  imageGenerationMock: vi.fn((options: unknown) => ({
+    type: "provider-defined",
+    id: "openai.image_generation",
+    options,
   })),
   streamTextMock: vi.fn((_options: unknown) => ({
     toUIMessageStreamResponse: vi.fn(() => new Response("live stream")),
@@ -14,6 +19,9 @@ const { convertToModelMessagesMock, generateTextMock, streamTextMock } = vi.hois
 vi.mock("@ai-sdk/openai", () => ({
   createOpenAI: () => ({
     responses: (model: string) => ({ model }),
+    tools: {
+      imageGeneration: imageGenerationMock,
+    },
   }),
 }));
 
@@ -43,6 +51,7 @@ afterEach(() => {
   generateTextMock.mockResolvedValue({
     output: { category: "supply_chain", confidence: 0.99 },
   });
+  imageGenerationMock.mockClear();
   streamTextMock.mockClear();
 });
 
@@ -73,6 +82,61 @@ describe("POST /api/chat", () => {
     expect(response.headers.get("x-vercel-ai-ui-message-stream")).toBe("v1");
     expect(stream).toContain("DHL Freight shipment 00340434161094000012");
     expect(stream).toContain("demo mode");
+  });
+
+  it("streams a trusted operational chart for an explicit demo visualization request", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Visualize the delivery risks as a chart." }],
+          },
+        ],
+        workflowKey: "risks",
+        demoPersona: "logistics",
+        selectedSourceIds: ["sap", "carriers"],
+      }),
+    });
+
+    const response = await POST(request);
+    const stream = await response.text();
+
+    expect(stream).toContain('"toolName":"renderOperationalChart"');
+    expect(stream).toContain('"kind":"operational-bar"');
+    expect(stream).toContain('"id":"shipment-quantities"');
+    expect(stream).not.toContain('"toolName":"generateSlideVisual"');
+  });
+
+  it("streams a demo slide image when no trusted quantitative chart is available", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Create an image suitable for a slide deck." }],
+          },
+        ],
+        workflowKey: "risks",
+        demoPersona: "logistics",
+        selectedSourceIds: [],
+      }),
+    });
+
+    const response = await POST(request);
+    const stream = await response.text();
+
+    expect(stream).toContain('"toolName":"generateSlideVisual"');
+    expect(stream).toContain('"kind":"slide-image"');
+    expect(stream).toContain('"demo":true');
   });
 
   it("rejects a request without a user message", async () => {
@@ -356,6 +420,46 @@ describe("POST /api/chat", () => {
 
     const options = streamTextMock.mock.calls[0][0] as { tools: Record<string, unknown> };
     expect(options.tools).toEqual({});
+    expect(imageGenerationMock).not.toHaveBeenCalled();
+  });
+
+  it("registers trusted chart and slide-image tools for an explicit live visualization request", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            id: "message-1",
+            role: "user",
+            parts: [{ type: "text", text: "Visualize this delivery plan as a chart." }],
+          },
+        ],
+        workflowKey: "risks",
+        demoPersona: "logistics",
+        selectedSourceIds: ["sap", "carriers"],
+      }),
+    });
+
+    await POST(request);
+
+    const options = streamTextMock.mock.calls[0][0] as {
+      tools: Record<string, unknown>;
+      system: string;
+    };
+    expect(options.tools).toHaveProperty("renderOperationalChart");
+    expect(options.tools).toHaveProperty("generateSlideVisual");
+    expect(imageGenerationMock).toHaveBeenCalledWith({
+      outputFormat: "webp",
+      quality: "medium",
+      size: "1536x1024",
+    });
+    expect(options.system).toContain("Produce exactly one visual");
+    expect(options.system).toContain("Call renderOperationalChart");
+    expect(options.system.indexOf("renderOperationalChart")).toBeLessThan(
+      options.system.indexOf("generateSlideVisual"),
+    );
   });
 
   it("enables OpenAI reasoning summaries for live responses", async () => {

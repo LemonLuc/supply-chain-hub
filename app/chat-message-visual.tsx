@@ -81,7 +81,8 @@ function getToolName(part: Record<string, unknown>): string | undefined {
 export function getMessageVisual(message: UIMessage): MessageVisual | undefined {
   for (const rawPart of [...message.parts].reverse()) {
     if (!isRecord(rawPart)) continue;
-    const toolName = getToolName(rawPart);
+    const part = rawPart as Record<string, unknown>;
+    const toolName = getToolName(part);
     if (!toolName || ![
       "renderSupplierPortfolio",
       "renderOperationalChart",
@@ -90,21 +91,21 @@ export function getMessageVisual(message: UIMessage): MessageVisual | undefined 
       continue;
     }
 
-    if (rawPart.state === "output-error") return { kind: "error" };
-    if (rawPart.state !== "output-available") continue;
+    if (part.state === "output-error") return { kind: "error" };
+    if (part.state !== "output-available") continue;
 
     if (toolName === "renderSupplierPortfolio") {
-      const visualization = parseSupplierPortfolioVisualization(rawPart.output);
+      const visualization = parseSupplierPortfolioVisualization(part.output);
       if (visualization) return { kind: "portfolio", visualization };
     }
 
     if (toolName === "renderOperationalChart") {
-      const chart = parseOperationalBarChart(rawPart.output);
+      const chart = parseOperationalBarChart(part.output);
       if (chart) return { kind: "operational", chart };
     }
 
     if (toolName === "generateSlideVisual") {
-      const image = parseImageVisual(rawPart.output);
+      const image = parseImageVisual(part.output);
       if (image) return image;
     }
   }

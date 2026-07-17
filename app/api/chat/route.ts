@@ -11,6 +11,12 @@ import {
 
 import { asksForWorkbookReview, buildSystemPrompt, generateMockReply, hasLiveApiKey, normalizeChatOptions } from "@/lib/chat";
 import { getChatTools, loadExternalContext } from "@/lib/chat-extensions";
+import {
+  asksForVisualization,
+  getDemoChatVisual,
+  resolveOperationalChart,
+  type DemoChatVisual,
+} from "@/lib/chat-visuals";
 import { buildAppContext } from "@/lib/context";
 import { getCurrentUser } from "@/lib/auth";
 import { normalizePersona } from "@/lib/permissions";
@@ -83,9 +89,24 @@ function formatChatStreamError(error: unknown): string {
   return error instanceof Error ? cleanErrorText(error.message) : cleanErrorText(error);
 }
 
-function createMockResponse(reply: string): Response {
+function createMockResponse(reply: string, visual?: DemoChatVisual): Response {
   const stream = createUIMessageStream({
     execute: ({ writer }) => {
+      if (visual) {
+        const toolCallId = `${visual.toolName}-${crypto.randomUUID()}`;
+        writer.write({
+          type: "tool-input-available",
+          toolCallId,
+          toolName: visual.toolName,
+          input: visual.input,
+        });
+        writer.write({
+          type: "tool-output-available",
+          toolCallId,
+          output: visual.output,
+        });
+      }
+
       const id = crypto.randomUUID();
       writer.write({ type: "text-start", id });
       writer.write({ type: "text-delta", id, delta: reply });
@@ -131,23 +152,39 @@ export async function POST(request: Request): Promise<Response> {
       : normalizePersona(body.demoPersona ?? serverPersona);
   const context = buildAppContext(body.workflowKey, demoPersona, body.selectedSourceIds, question);
   const options = normalizeChatOptions(body.model, body.thinking);
+  const visualRequested = asksForVisualization(question);
+  const operationalChart = visualRequested ? resolveOperationalChart(context) : undefined;
+  const demoVisual = getDemoChatVisual(question, context);
 
   if (asksForWorkbookReview(question) || !hasLiveApiKey()) {
-    return createMockResponse(generateMockReply(question, context));
+    return createMockResponse(generateMockReply(question, context), demoVisual);
   }
 
   const externalContext = await loadExternalContext(question, context);
   const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const tools = getChatTools(context, { allowOperationalChart: visualRequested });
+  if (visualRequested) {
+    Object.assign(tools, {
+      generateSlideVisual: openai.tools.imageGeneration({
+        outputFormat: "webp",
+        quality: "medium",
+        size: "1536x1024",
+      }),
+    });
+  }
   const result = streamText({
     model: openai.responses(options.model),
     system: [
-      buildSystemPrompt(context),
+      buildSystemPrompt(context, {
+        visualRequested,
+        operationalChartAvailable: Boolean(operationalChart),
+      }),
       externalContext.length ? `External context:\n${externalContext.join("\n\n")}` : "",
     ]
       .filter(Boolean)
       .join("\n\n"),
     messages: await convertToModelMessages(sanitizedMessages),
-    tools: getChatTools(context),
+    tools,
     stopWhen: stepCountIs(2),
     providerOptions: {
       openai: {

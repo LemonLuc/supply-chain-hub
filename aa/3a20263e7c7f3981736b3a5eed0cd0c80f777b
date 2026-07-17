@@ -1,0 +1,31 @@
+app/api/chat/route.test.ts
+  s_4751f4adaa1796::t_5406032ce41573 4,9-13,22-24,54,87-141,423-462
+app/api/chat/route.ts
+  s_8f063ba3a5bbd9::t_c5f8286e4a912a 14-19,92,95-109,155-157,160,165-174,178-181,187
+app/chat-message-visual.tsx
+  s_8f063ba3a5bbd9::t_f2c5a6f9890b3d 84-85,94-95,98,103,108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "aa3a20263e7c7f3981736b3a5eed0cd0c80f777b",
+  "prompts": {},
+  "sessions": {
+    "s_4751f4adaa1796": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709e-8e45-7fa3-8461-23748333992d",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_8f063ba3a5bbd9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709d-7e67-72e0-bd49-468f2d163cb9",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

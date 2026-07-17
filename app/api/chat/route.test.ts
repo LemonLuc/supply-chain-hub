@@ -617,6 +617,7 @@ describe("POST /api/chat", () => {
   it("uses the selected demo persona even when a default demo role is configured", async () => {
     process.env.OPENAI_API_KEY = "sk-live-test-key";
     process.env.DEMO_USER_ROLE = "logistics";
+    process.env.LOCK_DEMO_USER_ROLE = "true";
     const request = new Request("http://localhost/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },

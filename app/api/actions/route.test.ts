@@ -190,6 +190,55 @@ describe("POST /api/actions", () => {
     });
   });
 
+  it("uses the selected demo persona even when the legacy role lock is configured", async () => {
+    process.env.OPENAI_API_KEY = "sk-sample-replace-me";
+    process.env.DEMO_USER_ROLE = "logistics";
+    process.env.LOCK_DEMO_USER_ROLE = "true";
+
+    const response = await POST(
+      actionRequest({
+        workflowKey: "delay",
+        demoPersona: "procurement",
+        selectedSourceIds: ["sap", "quality", "excel", "capacity", "outlook"],
+        actionLabel: "Assign recovery check to logistics",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      requesterPersona: "procurement",
+      assigneePersona: "logistics",
+      assigneeName: "Lukas Weber",
+    });
+  });
+
+  it("returns the authorized mock assignment when live orchestration fails", async () => {
+    process.env.OPENAI_API_KEY = "sk-live-test-key";
+    runMock.mockRejectedValueOnce(new Error("Agents SDK unavailable"));
+
+    const response = await POST(
+      actionRequest({
+        workflowKey: "delay",
+        demoPersona: "procurement",
+        selectedSourceIds: ["sap", "quality", "excel", "capacity", "outlook"],
+        actionLabel: "Assign recovery check to logistics",
+        model: "gpt-5.6-sol",
+        thinking: "high",
+      }),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      orchestration: "demo-fallback",
+      requesterPersona: "procurement",
+      assigneePersona: "logistics",
+      assigneeName: "Lukas Weber",
+      recipientActionLabel: "Run recovery check",
+    });
+  });
+
   it("routes Dana's exception review only to Lucia", async () => {
     process.env.OPENAI_API_KEY = "sk-sample-replace-me";
 

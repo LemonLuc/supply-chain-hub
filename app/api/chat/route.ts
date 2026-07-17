@@ -146,10 +146,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const serverPersona = getCurrentUser().persona;
-  const demoPersona =
-    process.env.LOCK_DEMO_USER_ROLE === "true"
-      ? serverPersona
-      : normalizePersona(body.demoPersona ?? serverPersona);
+  const demoPersona = normalizePersona(body.demoPersona ?? serverPersona);
   const context = buildAppContext(body.workflowKey, demoPersona, body.selectedSourceIds, question);
   const options = normalizeChatOptions(body.model, body.thinking);
   const visualRequested = asksForVisualization(question);

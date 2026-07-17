@@ -29,10 +29,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const serverPersona = getCurrentUser().persona;
-  const persona =
-    process.env.LOCK_DEMO_USER_ROLE === "true"
-      ? serverPersona
-      : normalizePersona(body.demoPersona ?? serverPersona);
+  const persona = normalizePersona(body.demoPersona ?? serverPersona);
   const workflowKey = normalizeWorkflowKey(body.workflowKey);
   const context = buildAppContext(workflowKey, persona, body.selectedSourceIds);
   const action = findActionByLabel(context, body.actionLabel);
@@ -60,14 +57,26 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const options = normalizeChatOptions(body.model, body.thinking);
-  const result = await runActionAgentsWorkflow({
-    context,
-    workflowKey: context.workflow.key,
-    persona,
-    action,
-    model: options.model,
-    thinking: options.thinking,
-  });
+  try {
+    const result = await runActionAgentsWorkflow({
+      context,
+      workflowKey: context.workflow.key,
+      persona,
+      action,
+      model: options.model,
+      thinking: options.thinking,
+    });
 
-  return Response.json(result);
+    return Response.json(result);
+  } catch {
+    return Response.json(
+      buildActionWorkflowResult({
+        context,
+        workflowKey: context.workflow.key,
+        persona,
+        action,
+        orchestration: "demo-fallback",
+      }),
+    );
+  }
 }

@@ -76,6 +76,7 @@ function mockChatAndActionStream(
       return Response.json(
         actionResponse ?? {
           actionLabel: "Write Dana Narid for review",
+          recipientActionLabel: "Review delivery risk summary",
           reviewerPersona: "procurement",
           reviewerName: "Dana Narid",
           draft:
@@ -953,18 +954,33 @@ describe("SupplyChainApp", () => {
       actionLabel: "Write Dana Narid for review",
     });
     expect(screen.getByText("Submitted requests")).toBeInTheDocument();
-    expect(screen.getByText("Pending review by Dana Narid")).toBeInTheDocument();
+    const submittedApprovals = screen.getByLabelText("Human approval workflow");
+    expect(
+      within(submittedApprovals).getByText("Write Dana Narid for review"),
+    ).toBeInTheDocument();
+    expect(
+      within(submittedApprovals).getByText("Pending review by Dana Narid"),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Approve Write Dana Narid for review/i })).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
 
     expect(screen.getByText("Approval queue")).toBeInTheDocument();
+    const incomingApprovals = screen.getByLabelText("Human approval workflow");
+    expect(
+      within(incomingApprovals).getByText("Review delivery risk summary"),
+    ).toBeInTheDocument();
+    expect(within(incomingApprovals).getByText("Review pending")).toBeInTheDocument();
     expect(screen.getByText("From Lukas Weber")).toBeInTheDocument();
     expect(screen.getByText(/DHL Freight shipment 00340434161094000012/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Approve Write Dana Narid for review/i }));
+    fireEvent.click(
+      within(incomingApprovals).getByRole("button", {
+        name: "Approve Review delivery risk summary",
+      }),
+    );
 
-    expect(screen.getByText("Approved by Dana Narid")).toBeInTheDocument();
+    expect(within(incomingApprovals).getByText("Approved")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "logistics" } });
 
@@ -986,11 +1002,18 @@ describe("SupplyChainApp", () => {
     fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
 
     expect(screen.getByText("Approval queue")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Approve Write Dana Narid for review/i })).toBeInTheDocument();
+    const incomingApprovals = screen.getByLabelText("Human approval workflow");
+    expect(
+      within(incomingApprovals).getByRole("button", {
+        name: "Approve Review delivery risk summary",
+      }),
+    ).toBeInTheDocument();
+    expect(within(incomingApprovals).getByText("Review pending")).toBeInTheDocument();
 
     resolveAction(
       Response.json({
         actionLabel: "Write Dana Narid for review",
+        recipientActionLabel: "Review delivery risk summary",
         reviewerPersona: "procurement",
         reviewerName: "Dana Narid",
         draft:

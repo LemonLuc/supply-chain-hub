@@ -52,7 +52,8 @@ type ApprovalStatus = "pending" | "approved" | "denied";
 
 type ApprovalRequest = {
   id: string;
-  actionLabel: string;
+  requesterActionLabel: string;
+  reviewerActionLabel: string;
   workflowKey: WorkflowKey;
   requesterPersona: PersonaId;
   reviewerPersona: PersonaId;
@@ -187,11 +188,17 @@ const personaPromptSets: Record<PersonaId, string[]> = {
   ],
 };
 
-function approvalStatusText(request: ApprovalRequest) {
+function submittedApprovalStatusText(request: ApprovalRequest) {
   const reviewer = mockUsers[request.reviewerPersona].name;
   if (request.status === "approved") return `Approved by ${reviewer}`;
   if (request.status === "denied") return `Denied by ${reviewer}`;
   return `Pending review by ${reviewer}`;
+}
+
+function incomingApprovalStatusText(status: ApprovalStatus) {
+  if (status === "approved") return "Approved";
+  if (status === "denied") return "Denied";
+  return "Review pending";
 }
 
 function personalTaskTitle(action: WorkflowAction) {
@@ -440,7 +447,9 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     const reviewer = mockUsers[reviewerPersona];
     const request: ApprovalRequest = {
       id: `approval-${crypto.randomUUID()}`,
-      actionLabel: action.label,
+      requesterActionLabel: action.label,
+      reviewerActionLabel:
+        result?.recipientActionLabel ?? getRecipientActionLabel(action),
       workflowKey,
       requesterPersona: persona,
       reviewerPersona,
@@ -465,7 +474,8 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
         ...current,
         {
           id: optimisticApprovalId,
-          actionLabel: action.label,
+          requesterActionLabel: action.label,
+          reviewerActionLabel: getRecipientActionLabel(action),
           workflowKey,
           requesterPersona: persona,
           reviewerPersona,
@@ -501,7 +511,14 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
         setApprovalRequests((current) =>
           current.map((request) =>
             request.id === optimisticApprovalId
-              ? { ...request, draft: result.draft, reviewerPersona: result.reviewerPersona ?? reviewerPersona }
+              ? {
+                  ...request,
+                  draft: result.draft,
+                  reviewerActionLabel:
+                    result.recipientActionLabel ?? request.reviewerActionLabel,
+                  reviewerPersona:
+                    result.reviewerPersona ?? reviewerPersona,
+                }
               : request,
           ),
         );
@@ -870,19 +887,19 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                     <article className={`approval-card status-${request.status}`} key={`incoming-${request.id}`}>
                       <div className="approval-card-heading">
                         <div>
-                          <strong>{request.actionLabel}</strong>
+                          <strong>{request.reviewerActionLabel}</strong>
                           <span>From {mockUsers[request.requesterPersona].name}</span>
                         </div>
-                        <span className="status-chip">{approvalStatusText(request)}</span>
+                        <span className="status-chip">{incomingApprovalStatusText(request.status)}</span>
                       </div>
                       <p>{request.draft}</p>
                       {request.status === "pending" && (
                         <div className="approval-controls">
-                          <button type="button" onClick={() => decideApproval(request.id, "approved")} aria-label={`Approve ${request.actionLabel}`}>
+                          <button type="button" onClick={() => decideApproval(request.id, "approved")} aria-label={`Approve ${request.reviewerActionLabel}`}>
                             <Check aria-hidden="true" />
                             Approve
                           </button>
-                          <button type="button" onClick={() => decideApproval(request.id, "denied")} aria-label={`Deny ${request.actionLabel}`}>
+                          <button type="button" onClick={() => decideApproval(request.id, "denied")} aria-label={`Deny ${request.reviewerActionLabel}`}>
                             <Square aria-hidden="true" />
                             Deny
                           </button>
@@ -904,10 +921,10 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
                     <article className={`approval-card status-${request.status}`} key={`submitted-${request.id}`}>
                       <div className="approval-card-heading">
                         <div>
-                          <strong>{request.actionLabel}</strong>
+                          <strong>{request.requesterActionLabel}</strong>
                           <span>Reviewer: {mockUsers[request.reviewerPersona].name}</span>
                         </div>
-                        <span className="status-chip">{approvalStatusText(request)}</span>
+                        <span className="status-chip">{submittedApprovalStatusText(request)}</span>
                       </div>
                       <p>{request.draft}</p>
                     </article>

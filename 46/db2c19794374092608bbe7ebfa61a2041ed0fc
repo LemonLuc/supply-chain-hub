@@ -1,0 +1,25 @@
+app/api/actions/route.test.ts
+  s_eec980cd3f3b50::t_9bff9b327a9817 193-241
+app/api/actions/route.ts
+  s_eec980cd3f3b50::t_c74376432e544f 32,60-68,70-81
+app/api/chat/route.test.ts
+  s_eec980cd3f3b50::t_4ab8c327fbc290 620
+app/api/chat/route.ts
+  s_eec980cd3f3b50::t_36cc65d1c5e018 149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "46db2c19794374092608bbe7ebfa61a2041ed0fc",
+  "prompts": {},
+  "sessions": {
+    "s_eec980cd3f3b50": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7132-c5af-7223-8e22-036cfee732ad",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

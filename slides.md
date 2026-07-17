@@ -55,11 +55,11 @@ record: true
       </ul>
     </div>
     <div class="assumption-list">
-      <h2>Discovery hypotheses to validate</h2>
+      <h2>Working pain hypothesis from technical discovery</h2>
       <ul>
-        <li>Which disruptions consume the most time?</li>
-        <li>Where do handoffs reduce accuracy or predictability?</li>
-        <li>Which recommendations need evidence, review and traceability?</li>
+        <li>Risk reviews can start with roughly 20 minutes spent reconciling SAP, supplier, logistics and workbook updates before a decision can begin.</li>
+        <li>When sources conflict, scarce domain experts become the bottleneck and escalation quality depends on who is available.</li>
+        <li>The result is slower mitigation, avoidable expedite spend, schedule churn and unclear approval ownership.</li>
       </ul>
     </div>
   </div>
@@ -142,33 +142,28 @@ record: true
   <span class="slide-number">08</span>
   <p class="eyebrow">Proof of concept scorecard</p>
   <h1>Impact validation and success criteria</h1>
-  <p class="poc-note">Validate a credible business case and earn a scale decision by testing real supply-chain scenarios with ZEISS business and IT owners.</p>
+  <p class="poc-note">Validate value and control before scaling one workflow.</p>
   <div class="validation-layout">
     <div class="validation-panel roi-panel">
       <span>1</span>
-      <h2>Business value to validate</h2>
-      <strong class="roi-total">€180K–€310K</strong>
-      <p class="roi-caption">Illustrative annual gross value. The POC will confirm actual review volumes, expedite costs and disruption exposure against the ZEISS baseline.</p>
-      <div class="roi-drivers">
-        <div><b>€15K–€25K</b><p>Faster review work</p><small>600–1,000 reviews × 20 minutes saved × €75/hour</small></div>
-        <div><b>€101K–€151K</b><p>Fewer urgent expedites</p><small>12–18 avoided cases × €8,400</small></div>
-        <div><b>€65K–€130K</b><p>Lower disruption exposure</p><small>0.35–0.70 probability-weighted events × €185,000</small></div>
-      </div>
-      <p class="roi-gate"><strong>Scale decision</strong> ZEISS confirms measured benefit and annual solution cost before rollout. Net ROI = (validated benefit − annualized solution cost) ÷ annualized solution cost.</p>
+      <h2>Annual value hypothesis · one workflow</h2>
+      <strong class="roi-total">€0.2M–€0.3M</strong>
+      <ul class="value-levers">
+        <li>Faster risk review</li>
+        <li>Fewer urgent expedites</li>
+        <li>Lower disruption exposure</li>
+      </ul>
+      <p class="roi-gate">ZEISS confirms the baseline, attribution and annual run cost.</p>
     </div>
     <div class="criteria-panel evaluation-panel">
       <span>2</span>
-      <h2>How the POC earns a scale decision</h2>
-      <div class="proof-steps">
-        <div><b>1</b><p><strong>Agree realistic test scenarios.</strong> Business and IT select routine cases, high-impact exceptions and permission boundaries.</p></div>
-        <div><b>2</b><p><strong>Compare each answer and proposed action.</strong> Check the supporting evidence, serious-risk coverage, approved systems and required human approvals.</p></div>
-        <div><b>3</b><p><strong>Review failures together.</strong> Correct the workflow and rerun the same scenarios before release.</p></div>
-      </div>
-      <div class="release-gates buyer-gates">
-        <div><b>Business value · Process owner</b><p>At least 25% faster review work and at least 80% user usefulness.</p></div>
-        <div><b>Decision quality · Supply-chain lead</b><p>At least 90% supported by approved sources and fewer than 5% of serious risks missed.</p></div>
-        <div><b>Technical reliability · IT / AI owner</b><p>At least 95% of runs use the correct approved systems and workflow.</p></div>
-        <div><b>Governance · Risk owner</b><p>Every sensitive or high-impact action receives accountable human review.</p></div>
+      <h2>POC decision gates</h2>
+      <p class="gate-context">Test routine cases, high-impact exceptions and permission boundaries.</p>
+      <div class="decision-gates">
+        <div><b>Process</b><p>≥25% faster review · ≥80% useful</p></div>
+        <div><b>Decision quality</b><p>≥90% source-backed · &lt;5% serious risks missed</p></div>
+        <div><b>Technical reliability</b><p>≥95% correct approved system and workflow</p></div>
+        <div><b>Governance</b><p>100% human review for high-impact actions</p></div>
       </div>
     </div>
   </div>

@@ -451,25 +451,6 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   async function runAction(action: WorkflowAction) {
     if (actionInFlightLabel) return;
 
-    const reviewerPersona = getActionReviewer(action);
-    const optimisticApprovalId = `approval-${crypto.randomUUID()}`;
-
-    if (reviewerPersona) {
-      setApprovalRequests((current) => [
-        ...current,
-        {
-          id: optimisticApprovalId,
-          requesterActionLabel: action.label,
-          reviewerActionLabel: getRecipientActionLabel(action),
-          workflowKey,
-          requesterPersona: persona,
-          reviewerPersona,
-          draft: buildActionDraft(appContext, workflowKey, persona, action, reviewerPersona),
-          status: "pending",
-        },
-      ]);
-    }
-
     setActionInFlightLabel(action.label);
     setActionNotice("");
     setActionNoticeTone("pending");
@@ -492,33 +473,8 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
 
       const result = (await response.json()) as ActionWorkflowResult;
 
-      if (reviewerPersona) {
-        setApprovalRequests((current) =>
-          current.map((request) =>
-            request.id === optimisticApprovalId
-              ? {
-                  ...request,
-                  draft: result.draft,
-                  reviewerActionLabel:
-                    result.recipientActionLabel ?? request.reviewerActionLabel,
-                  reviewerPersona:
-                    result.reviewerPersona ?? reviewerPersona,
-                }
-              : request,
-          ),
-        );
-        setActionMenuOpen(false);
-        setActionNotice(result.notice);
-        setActionNoticeTone("pending");
-      } else {
-        applyActionResult(action, result);
-      }
+      applyActionResult(action, result);
     } catch {
-      if (reviewerPersona) {
-        setApprovalRequests((current) =>
-          current.filter((request) => request.id !== optimisticApprovalId),
-        );
-      }
       setActionMenuOpen(false);
       setActionNotice("Action could not be completed. Please try again.");
       setActionNoticeTone("error");

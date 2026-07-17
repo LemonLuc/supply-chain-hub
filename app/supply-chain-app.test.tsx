@@ -989,7 +989,7 @@ describe("SupplyChainApp", () => {
     expect(screen.getByText("Approved by Dana Narid")).toBeInTheDocument();
   });
 
-  it("keeps approval controls visible while the action workflow is loading", async () => {
+  it("waits for action success before showing submitted approval state", async () => {
     const { resolveAction } = mockChatAndPendingActionStream();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
 
@@ -999,17 +999,9 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: /Write Dana Narid for review/i }));
 
     expect(await screen.findByText(/Running action workflow for Write Dana Narid for review/i)).toBeInTheDocument();
-
-    fireEvent.change(screen.getByLabelText("Demo identity"), { target: { value: "procurement" } });
-
-    expect(screen.getByText("Approval queue")).toBeInTheDocument();
-    const incomingApprovals = screen.getByLabelText("Human approval workflow");
-    expect(
-      within(incomingApprovals).getByRole("button", {
-        name: "Approve Review delivery risk summary",
-      }),
-    ).toBeInTheDocument();
-    expect(within(incomingApprovals).getByText("Review pending")).toBeInTheDocument();
+    expect(screen.queryByText("Submitted for review")).not.toBeInTheDocument();
+    expect(screen.queryByText("Submitted requests")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Human approval workflow")).not.toBeInTheDocument();
 
     resolveAction(
       Response.json({
@@ -1025,6 +1017,8 @@ describe("SupplyChainApp", () => {
       }),
     );
 
+    expect(await screen.findByText("Submitted requests")).toBeInTheDocument();
+    expect(screen.getByLabelText("Human approval workflow")).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByText(/Running action workflow/i)).not.toBeInTheDocument());
   });
 

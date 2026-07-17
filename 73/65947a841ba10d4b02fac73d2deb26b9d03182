@@ -1,0 +1,25 @@
+app/chat-message-visual.test.tsx
+  s_eec980cd3f3b50::t_ca13978a174b51 98-111,117-119,125,133
+app/chat-message-visual.tsx
+  s_eec980cd3f3b50::t_6d92dbd9cc6b81 33,107-112,128,160-168
+app/globals.css
+  s_eec980cd3f3b50::t_444ba0b550ec3c 120-121,168-169
+app/supply-chain-app.test.tsx
+  s_eec980cd3f3b50::t_f991fc39ba6d09 217-227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "7365947a841ba10d4b02fac73d2deb26b9d03182",
+  "prompts": {},
+  "sessions": {
+    "s_eec980cd3f3b50": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7132-c5af-7223-8e22-036cfee732ad",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

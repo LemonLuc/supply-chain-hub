@@ -60,6 +60,10 @@ Core line:
 
 "The same disruption is interpreted differently by every function. OpenAI helps collapse that fragmentation into a shared decision surface."
 
+Slide 03 discovery bridge:
+
+"In our initial technical discovery, the pain was not a lack of dashboards. The working hypothesis is that a risk review can begin with roughly 20 minutes of reconciling SAP, supplier, logistics and workbook updates. When those sources conflict, scarce domain experts become the bottleneck. Mitigation starts later, while expedite spend, schedule churn and approval ambiguity increase. The POC must now validate that baseline with ZEISS rather than treat it as a proven production fact."
+
 ### 6:00-9:00 - Target Architecture
 
 Show this architecture:
@@ -154,6 +158,21 @@ Likely Q&A:
 - Q: "How do we avoid unsafe recommendations?"
 - A: "Use scoped tools, structured outputs, guardrails, citations, approval workflows, and audit logs. The model proposes; governed workflows decide."
 
+#### Slide 08: POC Value And Decision Gates
+
+Frame the headline as a conservative hypothesis for one repeatable workflow, not enterprise-wide ZEISS value:
+
+- Faster review work: 600–1,000 reviews × 20 minutes saved × €75 per hour = approximately €15K–€25K.
+- Fewer urgent expedites: 12–18 avoided cases × €8,400 = approximately €101K–€151K.
+- Lower disruption exposure: 0.35–0.70 probability-weighted events × €185,000 = approximately €65K–€130K.
+- Combined value: approximately €181K–€306K, rounded on the slide to €0.2M–€0.3M.
+
+Core line:
+
+"For an organization of ZEISS’s scale, this is intentionally narrow. It is the value hypothesis for one workflow or operating scope. ZEISS still needs to confirm the baseline, attribution, annual run cost and rollout scope before we extrapolate."
+
+Close on the four gates: process improvement, decision quality, technical reliability and accountable human review for every high-impact action.
+
 ### 27:00-30:00 - Close And Next Step
 
 Close with:
@@ -208,4 +227,3 @@ Avoid:
 - Which decisions require human approval by policy?
 - Which three workflows would create measurable value in six weeks?
 - What risk, compliance, or data residency constraints should shape the pilot?
-

@@ -358,11 +358,16 @@ describe("SupplyChainApp", () => {
     expect(suggestions.compareDocumentPosition(messages) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("scrolls the chat transcript to the newest prompt after subsequent prompt clicks", async () => {
+  it("scrolls only the chat transcript to the newest prompt", async () => {
     const scrollIntoView = vi.fn();
+    const scrollTo = vi.fn();
     Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
       configurable: true,
       value: scrollIntoView,
+    });
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+      configurable: true,
+      value: scrollTo,
     });
     mockChatStreamWithReasoning();
     render(<SupplyChainApp currentUser={mockUsers.logistics} />);
@@ -370,11 +375,20 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks for this week/i }));
     await screen.findByText("DHL Freight shipment 00340434161094000012 is the first risk to handle.");
 
+    const transcript = screen.getByLabelText("Chat messages");
+    Object.defineProperties(transcript, {
+      clientHeight: { configurable: true, value: 320 },
+      scrollHeight: { configurable: true, value: 960 },
+      scrollTop: { configurable: true, value: 640, writable: true },
+    });
+    fireEvent.scroll(transcript);
+    scrollTo.mockClear();
     scrollIntoView.mockClear();
     fireEvent.click(screen.getByRole("button", { name: /Check whether any carrier milestone changed overnight/i }));
     await waitFor(() => expect(screen.getAllByText(/Supply Chain Hub/i).length).toBeGreaterThan(1));
 
-    expect(scrollIntoView).toHaveBeenCalledWith({ block: "end", behavior: "smooth" });
+    expect(scrollTo).toHaveBeenCalledWith({ top: 960, behavior: "smooth" });
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
   it("never shows financial values or quantified business risk to logistics planners", async () => {
@@ -733,6 +747,72 @@ describe("SupplyChainApp", () => {
     fireEvent.click(screen.getByRole("button", { name: "Clear conversation" }));
     expect(screen.queryByText("Feedback received")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Copy answer" })).not.toBeInTheDocument();
+  });
+
+  it("opens feedback in a portal popover and closes it without moving message layout", async () => {
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    const helpful = screen.getByRole("button", { name: "Mark answer as helpful" });
+    fireEvent.click(helpful);
+
+    const dialog = screen.getByRole("dialog", { name: "Answer feedback" });
+    const field = screen.getByLabelText("Optional feedback");
+    expect(dialog.closest(".message")).toBeNull();
+    expect(field).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Close feedback" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Close feedback" }));
+
+    expect(screen.queryByRole("dialog", { name: "Answer feedback" })).not.toBeInTheDocument();
+    expect(helpful).toHaveAttribute("aria-pressed", "false");
+    expect(helpful).toHaveFocus();
+  });
+
+  it("dismisses an unsubmitted feedback popover with Escape or an outside pointer", async () => {
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    const notHelpful = screen.getByRole("button", { name: "Mark answer as not helpful" });
+    fireEvent.click(notHelpful);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "Answer feedback" })).not.toBeInTheDocument();
+
+    fireEvent.click(notHelpful);
+    fireEvent.pointerDown(document.body);
+    expect(screen.queryByRole("dialog", { name: "Answer feedback" })).not.toBeInTheDocument();
+    expect(notHelpful).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("restores submitted feedback when a reopened draft is dismissed", async () => {
+    mockChatStreamWithMarkdownTable();
+    render(<SupplyChainApp currentUser={mockUsers.logistics} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Show me potential delivery risks/i }));
+    await screen.findByRole("heading", { name: "Shipment options" });
+    const helpful = screen.getByRole("button", { name: "Mark answer as helpful" });
+    const notHelpful = screen.getByRole("button", { name: "Mark answer as not helpful" });
+    fireEvent.click(helpful);
+    fireEvent.change(screen.getByLabelText("Optional feedback"), {
+      target: { value: "Keep this saved feedback." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit feedback" }));
+
+    fireEvent.click(notHelpful);
+    fireEvent.change(screen.getByLabelText("Optional feedback"), {
+      target: { value: "Discard this edit." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Close feedback" }));
+
+    expect(helpful).toHaveAttribute("aria-pressed", "true");
+    expect(notHelpful).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("status")).toHaveTextContent("Feedback received");
+    fireEvent.click(helpful);
+    expect(screen.getByLabelText("Optional feedback")).toHaveValue("Keep this saved feedback.");
   });
 
   it("cancels unsubmitted feedback and leaves user messages without answer actions", async () => {

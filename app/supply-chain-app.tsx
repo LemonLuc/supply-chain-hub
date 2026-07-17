@@ -236,7 +236,9 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
       timeZone: "Europe/Berlin",
     }).format(new Date()),
   );
-  const latestMessageRef = useRef<HTMLDivElement | null>(null);
+  const messageListRef = useRef<HTMLDivElement | null>(null);
+  const followTranscriptRef = useRef(true);
+  const forceTranscriptScrollRef = useRef(false);
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
   const { messages, sendMessage, status, error, stop, setMessages, clearError } = useChat({ transport });
   const activeUser = mockUsers[persona];
@@ -274,7 +276,16 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   useEffect(() => {
     if (!messages.length) return;
 
-    latestMessageRef.current?.scrollIntoView?.({ block: "end", behavior: "smooth" });
+    const transcript = messageListRef.current;
+    if (!transcript) return;
+    const forced = forceTranscriptScrollRef.current;
+    if (!forced && !followTranscriptRef.current) return;
+
+    transcript.scrollTo?.({
+      top: transcript.scrollHeight,
+      behavior: forced ? "smooth" : "auto",
+    });
+    forceTranscriptScrollRef.current = false;
   }, [messages.length, status]);
 
   function sourceIsSelected(toolId: string, fallback: boolean) {
@@ -334,6 +345,8 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     setHasRun(true);
     setActionNotice("");
     setActionMenuOpen(true);
+    forceTranscriptScrollRef.current = true;
+    followTranscriptRef.current = true;
     await sendMessage(
       { text: nextPrompt },
       { body: { workflowKey: nextWorkflowKey, model, thinking, demoPersona: persona, selectedSourceIds: nextSelectedSourceIds } },
@@ -355,15 +368,33 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
   }
 
   function selectAnswerFeedback(messageId: string, rating: FeedbackRating) {
-    setAnswerFeedback((current) => ({
-      ...current,
-      [messageId]: {
+    setAnswerFeedback((current) => {
+      const next: Record<string, AnswerFeedback> = {};
+
+      for (const [id, value] of Object.entries(current)) {
+        if (id === messageId) continue;
+        if (!value.formOpen) {
+          next[id] = value;
+        } else if (value.saved) {
+          next[id] = {
+            ...value,
+            ...value.saved,
+            formOpen: false,
+            submitted: true,
+          };
+        }
+      }
+
+      const previous = current[messageId];
+      next[messageId] = {
         rating,
-        comment: current[messageId]?.comment ?? "",
+        comment: previous?.comment ?? previous?.saved?.comment ?? "",
         formOpen: true,
         submitted: false,
-      },
-    }));
+        saved: previous?.saved,
+      };
+      return next;
+    });
   }
 
   function updateAnswerFeedbackComment(messageId: string, comment: string) {
@@ -377,13 +408,33 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
     setAnswerFeedback((current) => {
       const feedback = current[messageId];
       return feedback
-        ? { ...current, [messageId]: { ...feedback, formOpen: false, submitted: true } }
+        ? {
+            ...current,
+            [messageId]: {
+              ...feedback,
+              formOpen: false,
+              submitted: true,
+              saved: { rating: feedback.rating, comment: feedback.comment },
+            },
+          }
         : current;
     });
   }
 
   function cancelAnswerFeedback(messageId: string) {
     setAnswerFeedback((current) => {
+      const feedback = current[messageId];
+      if (feedback?.saved) {
+        return {
+          ...current,
+          [messageId]: {
+            ...feedback,
+            ...feedback.saved,
+            formOpen: false,
+            submitted: true,
+          },
+        };
+      }
       const remaining = { ...current };
       delete remaining[messageId];
       return remaining;
@@ -695,12 +746,21 @@ export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {
           </div>
 
           {messages.length > 0 && (
-            <div className="message-list" aria-label="Chat messages" aria-live="polite">
+            <div
+              ref={messageListRef}
+              className="message-list"
+              aria-label="Chat messages"
+              aria-live="polite"
+              onScroll={(event) => {
+                const transcript = event.currentTarget;
+                followTranscriptRef.current =
+                  transcript.scrollHeight - transcript.scrollTop - transcript.clientHeight <= 48;
+              }}
+            >
               {messages.map((message) => (
                 <div
                   className={`message ${message.role}`}
                   key={message.id}
-                  ref={message.id === messages[messages.length - 1]?.id ? latestMessageRef : undefined}
                 >
                   <div className="message-heading">
                     <span>{message.role === "user" ? "You" : "Supply Chain Hub"}</span>

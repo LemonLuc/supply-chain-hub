@@ -128,12 +128,16 @@ h1, h2, h3, p { margin-top: 0; }
 .answer-actions button { display: inline-grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 5px; padding: 0; color: var(--muted); background: transparent; }
 .answer-actions button:hover, .answer-actions button[aria-pressed="true"] { color: var(--ink); background: var(--panel-blue); }
 .answer-actions button svg { width: 14px; height: 14px; }
-.answer-feedback-form { display: grid; gap: 7px; width: min(100%, 420px); border: 1px solid var(--line); border-radius: 6px; padding: 10px; background: var(--surface-strong); }
+.answer-feedback-form { position: fixed; z-index: 80; display: grid; gap: 7px; width: min(420px,calc(100vw - 24px)); border: 1px solid var(--line-strong); border-radius: 7px; padding: 10px; background: var(--surface-strong); box-shadow: 0 14px 40px rgba(15,23,42,.2); }
+.answer-feedback-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.answer-feedback-heading strong { font-size: .76rem; }
 .answer-feedback-form label { color: var(--muted); font-size: .68rem; font-weight: 650; }
 .answer-feedback-form textarea { min-height: 70px; resize: vertical; border: 1px solid var(--line-strong); border-radius: 5px; padding: 8px; color: var(--ink); background: var(--white); font: inherit; font-size: .78rem; line-height: 1.4; }
-.answer-feedback-form > div { display: flex; gap: 7px; }
+.answer-feedback-footer { display: flex; gap: 7px; }
 .answer-feedback-form button { min-height: 30px; border: 1px solid var(--line); border-radius: 5px; padding: 5px 9px; color: var(--ink); background: var(--panel); font-size: .7rem; font-weight: 650; }
 .answer-feedback-form button[type="submit"] { border-color: var(--indigo); color: var(--brand-foreground); background: var(--indigo); }
+.answer-feedback-form .answer-feedback-close { display: inline-grid; place-items: center; width: 28px; min-height: 28px; padding: 0; background: transparent; }
+.answer-feedback-close svg { width: 14px; height: 14px; }
 .message .answer-feedback-status { margin: 0; padding: 0; color: var(--success-ink); background: transparent; font-size: .68rem; font-weight: 650; }
 .message p { margin-bottom: 0; border-radius: 6px; padding: 11px 13px; white-space: pre-wrap; line-height: 1.5; font-size: .86rem; }
 .message.user p { color: #fff; background: var(--indigo); }

@@ -95,6 +95,15 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(styles).toContain(".roi-panel");
     expect(styles).toContain(".value-levers");
     expect(styles).toContain(".decision-gates");
+    expect(styles).toMatch(
+      /\.roi-panel,\s*\.evaluation-panel\s*\{[^}]*min-height: 280px;/s,
+    );
+    expect(styles).toMatch(
+      /\.poc-slide \.validation-layout\s*\{[^}]*width: min\(100%, 920px\);/s,
+    );
+    expect(styles).toMatch(
+      /\.decision-gates\s*\{[^}]*border-top: 0;[^}]*padding: 0;/s,
+    );
     expect(styles).not.toContain(".proof-steps");
     expect(styles).not.toContain(".buyer-gates");
     expect(styles).not.toContain(".openai-data-note");

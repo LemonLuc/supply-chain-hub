@@ -1170,13 +1170,18 @@
   gap: 18px;
   grid-template-columns: 0.9fr 1.1fr;
   margin-top: -8px;
-  width: min(100%, 940px);
+  width: min(100%, 920px);
 }
 
 .roi-panel,
 .evaluation-panel {
-  min-height: 292px;
+  min-height: 280px;
   padding: 22px 24px;
+}
+
+.roi-panel {
+  display: flex;
+  flex-direction: column;
 }
 
 .roi-panel > span,
@@ -1243,9 +1248,11 @@
 }
 
 .decision-gates {
+  border-top: 0;
   display: grid;
   gap: 12px;
   grid-template-columns: 1fr 1fr;
+  padding: 0;
 }
 
 .decision-gates > div {

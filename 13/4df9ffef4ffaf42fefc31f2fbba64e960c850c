@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-17-inline-chat-visuals-and-feedback-popover-design.md
+  s_4751f4adaa1796::t_6f9432248d1717 1-173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "134df9ffef4ffaf42fefc31f2fbba64e960c850c",
+  "prompts": {},
+  "sessions": {
+    "s_4751f4adaa1796": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f709e-8e45-7fa3-8461-23748333992d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

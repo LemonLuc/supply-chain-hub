@@ -127,7 +127,6 @@ record: true
     <div><b>Data &amp; privacy</b><p>Approved fields only; confirm GDPR, supplier confidentiality, retention and regional processing.</p></div>
     <div><b>Identity &amp; governance</b><p>SSO, server-side roles, masking and a named reviewer for every high-impact action.</p></div>
     <div><b>Operations &amp; adoption</b><p>Fail-closed fallback, process owner, training, feedback and security / works-council checkpoints.</p></div>
-    <p class="openai-data-note"><strong>OpenAI data control:</strong> API data is not used for model training unless the customer opts in. Retention and residency depend on eligible project, endpoint and configuration.</p>
   </div>
 </section>
 
@@ -143,34 +142,33 @@ record: true
   <span class="slide-number">08</span>
   <p class="eyebrow">Proof of concept scorecard</p>
   <h1>Impact validation and success criteria</h1>
-  <p class="poc-note">Prove value, quality and control with a ZEISS SME-labelled gold set, trace review and explicit release gates.</p>
+  <p class="poc-note">Validate a credible business case and earn a scale decision by testing real supply-chain scenarios with ZEISS business and IT owners.</p>
   <div class="validation-layout">
     <div class="validation-panel roi-panel">
       <span>1</span>
-      <h2>Illustrative value hypothesis</h2>
+      <h2>Business value to validate</h2>
       <strong class="roi-total">€180K–€310K</strong>
-      <p class="roi-caption">Potential annual gross value · validate against the ZEISS baseline</p>
+      <p class="roi-caption">Illustrative annual gross value. The POC will confirm actual review volumes, expedite costs and disruption exposure against the ZEISS baseline.</p>
       <div class="roi-drivers">
-        <div><b>€15K–€25K</b><p>Analyst capacity</p><small>600–1,000 reviews × 20 min × €75/hour</small></div>
-        <div><b>€101K–€151K</b><p>Avoided expedites</p><small>12–18 cases × €8,400</small></div>
-        <div><b>€65K–€130K</b><p>Downtime exposure</p><small>0.35–0.70 events × €185,000</small></div>
+        <div><b>€15K–€25K</b><p>Faster review work</p><small>600–1,000 reviews × 20 minutes saved × €75/hour</small></div>
+        <div><b>€101K–€151K</b><p>Fewer urgent expedites</p><small>12–18 avoided cases × €8,400</small></div>
+        <div><b>€65K–€130K</b><p>Lower disruption exposure</p><small>0.35–0.70 probability-weighted events × €185,000</small></div>
       </div>
-      <p class="roi-gate"><strong>Scale gate</strong> Net ROI = (validated benefit − annualized solution cost) ÷ annualized solution cost.</p>
+      <p class="roi-gate"><strong>Scale decision</strong> ZEISS confirms measured benefit and annual solution cost before rollout. Net ROI = (validated benefit − annualized solution cost) ÷ annualized solution cost.</p>
     </div>
     <div class="criteria-panel evaluation-panel">
       <span>2</span>
-      <h2>Evaluation loop and owned gates</h2>
-      <div class="evaluation-loop">
-        <div><b>1</b><p>SME-labelled gold set</p></div>
-        <div><b>2</b><p>Graders</p></div>
-        <div><b>3</b><p>Trace + SME review</p></div>
-        <div><b>4</b><p>Regression set</p></div>
+      <h2>How the POC earns a scale decision</h2>
+      <div class="proof-steps">
+        <div><b>1</b><p><strong>Agree realistic test scenarios.</strong> Business and IT select routine cases, high-impact exceptions and permission boundaries.</p></div>
+        <div><b>2</b><p><strong>Compare each answer and proposed action.</strong> Check the supporting evidence, serious-risk coverage, approved systems and required human approvals.</p></div>
+        <div><b>3</b><p><strong>Review failures together.</strong> Correct the workflow and rerun the same scenarios before release.</p></div>
       </div>
-      <div class="release-gates">
-        <div><b>Process owner</b><p>≥25% faster · ≥80% useful</p></div>
-        <div><b>Supply-chain SME</b><p>≥90% source-faithful · ≤5% critical false negatives</p></div>
-        <div><b>Engineering owner</b><p>≥95% correct tool / trace path</p></div>
-        <div><b>Risk owner</b><p>100% high-impact review</p></div>
+      <div class="release-gates buyer-gates">
+        <div><b>Business value · Process owner</b><p>At least 25% faster review work and at least 80% user usefulness.</p></div>
+        <div><b>Decision quality · Supply-chain lead</b><p>At least 90% supported by approved sources and fewer than 5% of serious risks missed.</p></div>
+        <div><b>Technical reliability · IT / AI owner</b><p>At least 95% of runs use the correct approved systems and workflow.</p></div>
+        <div><b>Governance · Risk owner</b><p>Every sensitive or high-impact action receives accountable human review.</p></div>
       </div>
     </div>
   </div>
@@ -202,11 +200,7 @@ record: true
       <div><b>Enterprise support</b><p>Deployment readiness and escalation path.</p></div>
       <div><b>Optional delivery services</b><p>Embedded help for production integration.</p></div>
     </div>
-    <div class="time-value-footer">
-      <span><strong>Lean customer core:</strong> one business owner + one technical lead; sponsor and SMEs join checkpoints.</span>
-    </div>
   </div>
-  <p class="timeline-kicker collaboration-note">Looking forward to shaping the collaboration between ZEISS and OpenAI!</p>
 </section>
 
 ---

@@ -23,17 +23,15 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(numbers).toEqual(["02", "03", "04", "05", "06", "08", "09", "11"]);
   });
 
-  it("frames customer deployment constraints and OpenAI data controls on slide 06", () => {
+  it("keeps slide 06 deployment constraints concise", () => {
     const slide = numberedSlide("06");
 
     expect(slide).toContain("Deployment constraints to validate");
     expect(slide).toContain("Data &amp; privacy");
     expect(slide).toContain("Identity &amp; governance");
     expect(slide).toContain("Operations &amp; adoption");
-    expect(slide).toContain("API data is not used for model training unless the customer opts in");
-    expect(slide).toContain(
-      "Retention and residency depend on eligible project, endpoint and configuration",
-    );
+    expect(slide).not.toContain("OpenAI data control");
+    expect(slide).not.toContain("API data is not used for model training");
   });
 
   it("shows a euro-only value hypothesis and explicit ROI gate on slide 08", () => {
@@ -49,23 +47,34 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(slide).not.toContain("$");
   });
 
-  it("defines the evaluation loop, metrics, and owners on slide 08", () => {
+  it("explains the slide 08 proof plan in buyer language", () => {
     const slide = numberedSlide("08");
 
-    expect(slide).toContain("SME-labelled gold set");
-    expect(slide).toContain("Graders");
-    expect(slide).toContain("Trace + SME review");
-    expect(slide).toContain("Regression set");
-    expect(slide).toContain("≤5% critical false negatives");
-    expect(slide).toContain("≥95% correct tool / trace path");
-    expect(slide).toContain("100% high-impact review");
+    expect(slide).toContain("Agree realistic test scenarios");
+    expect(slide).toContain("Compare each answer and proposed action");
+    expect(slide).toContain("Review failures together");
+    expect(slide).toContain("Business value · Process owner");
+    expect(slide).toContain("Decision quality · Supply-chain lead");
+    expect(slide).toContain("Technical reliability · IT / AI owner");
+    expect(slide).toContain("Governance · Risk owner");
+    expect(slide).not.toMatch(/SME-labelled gold set|Graders|Trace \+ SME review|Regression set/);
+    expect(slide).not.toMatch(/false negatives|tool \/ trace path/);
   });
 
-  it("includes scoped styling hooks for the new layout", () => {
+  it("removes the closing filler from slide 09", () => {
+    const slide = numberedSlide("09");
+
+    expect(slide).toContain("After the POC");
+    expect(slide).toContain("How OpenAI can support adoption");
+    expect(slide).not.toContain("Looking forward to shaping the collaboration");
+    expect(slide).not.toContain("Lean customer core");
+  });
+
+  it("includes scoped styling hooks for the revised layouts", () => {
     expect(styles).toContain(".deployment-constraints");
-    expect(styles).toContain(".openai-data-note");
     expect(styles).toContain(".roi-panel");
-    expect(styles).toContain(".evaluation-loop");
-    expect(styles).toContain(".release-gates");
+    expect(styles).toContain(".proof-steps");
+    expect(styles).toContain(".buyer-gates");
+    expect(styles).not.toContain(".openai-data-note");
   });
 });

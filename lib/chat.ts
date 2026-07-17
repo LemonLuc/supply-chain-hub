@@ -34,7 +34,10 @@ export function normalizeChatOptions(model: unknown, thinking: unknown): {
   };
 }
 
-export function buildSystemPrompt(context: AppContext): string {
+export function buildSystemPrompt(
+  context: AppContext,
+  options: { visualRequested?: boolean; operationalChartAvailable?: boolean } = {},
+): string {
   const portfolioInstructions = context.decisionSupport?.heatMap?.length
     ? `
 - Call renderSupplierPortfolio exactly once for this supplier-portfolio answer.
@@ -42,6 +45,16 @@ export function buildSystemPrompt(context: AppContext): string {
 - Treat the strategic relationship score as a grounded combination of reliability, quality, qualification depth, supply continuity, and switching complexity—not price.
 - Use the derived decision wording exactly: Keep, Consolidate, Strategic trade-off, or Low priority. Keep the narrative consistent with the heat-map decision.
 - The tool supplies trusted supplier data. Do not repeat or invent supplier values in tool input.`
+    : "";
+  const visualInstructions = options.visualRequested
+    ? `
+- Produce exactly one visual for this explicit visualization request.
+${options.operationalChartAvailable
+  ? "- Call renderOperationalChart because a server-derived quantitative comparison is available."
+  : "- Use a trusted chart tool when one is available."}
+- Only when no trusted chart is suitable, call generateSlideVisual for a conceptual, narrative, or presentation-oriented image.
+- Do not use generated images for exact operational measurements, financial figures, supplier scores, or order identifiers.
+- Keep exact facts in the written answer and never invent visual data.`
     : "";
 
   return `You are Supply Chain Hub. Answer using the live application snapshot below.
@@ -55,7 +68,7 @@ Priorities:
 - Respect workflow access, financial visibility, and approval gates in the snapshot.
 - Any source listed in \`sources\` or \`selectedAuthorizedSources\` is already authorized and available for this request.
 - Do not say you lack access to SAP, SharePoint, Excel, or any selected source. If selected evidence is present, answer from it.
-- If \`documents\` contains workbook data, use that workbook data directly for recent changes, rows, owners, versions, and locations.${portfolioInstructions}
+- If \`documents\` contains workbook data, use that workbook data directly for recent changes, rows, owners, versions, and locations.${portfolioInstructions}${visualInstructions}
 
 Application snapshot:
 ${JSON.stringify(context, null, 2)}`;

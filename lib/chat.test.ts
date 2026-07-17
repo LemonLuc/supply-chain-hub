@@ -68,6 +68,18 @@ describe("chat grounding", () => {
     expect(logisticsPrompt).not.toContain("renderSupplierPortfolio");
   });
 
+  it("routes explicit visual requests to one trusted chart before image generation", () => {
+    const prompt = buildSystemPrompt(
+      buildAppContext("delay", "procurement", ["sap", "quality", "excel", "capacity"]),
+      { visualRequested: true, operationalChartAvailable: true },
+    );
+
+    expect(prompt).toContain("Produce exactly one visual");
+    expect(prompt).toContain("Call renderOperationalChart");
+    expect(prompt).toContain("Do not use generated images for exact operational measurements");
+    expect(prompt.indexOf("renderOperationalChart")).toBeLessThan(prompt.indexOf("generateSlideVisual"));
+  });
+
   it("returns an operational, tool-grounded demo reply", () => {
     const reply = generateMockReply("What should I do first?", buildAppContext("risks"));
 

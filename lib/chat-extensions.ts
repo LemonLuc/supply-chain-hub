@@ -1,6 +1,7 @@
 import { jsonSchema, tool, type ToolSet } from "ai";
 
 import type { AppContext } from "./context";
+import { resolveOperationalChart } from "./chat-visuals";
 import {
   resolveSupplierPortfolioVisualization,
   type SupplierPortfolioView,
@@ -16,12 +17,24 @@ type SupplierPortfolioToolInput = {
   reason: string;
 };
 
-export function getChatTools(context: AppContext): ToolSet {
-  const suppliers = context.decisionSupport?.heatMap;
-  if (!suppliers?.length) return {};
+type OperationalChartToolInput = {
+  visualId: string;
+  reason: string;
+};
 
-  return {
-    renderSupplierPortfolio: tool({
+export function getChatTools(
+  context: AppContext,
+  options: { allowOperationalChart?: boolean } = {},
+): ToolSet {
+  const suppliers = context.decisionSupport?.heatMap;
+  const operationalChart = options.allowOperationalChart
+    ? resolveOperationalChart(context)
+    : undefined;
+
+  const tools: ToolSet = {};
+
+  if (suppliers?.length) {
+    tools.renderSupplierPortfolio = tool({
       description:
         "Select the most decision-useful presentation for the authorized supplier portfolio. The server supplies all trusted supplier records.",
       strict: true,
@@ -46,6 +59,38 @@ export function getChatTools(context: AppContext): ToolSet {
       }),
       execute: async ({ preferredView, reason }) =>
         resolveSupplierPortfolioVisualization(suppliers, preferredView, reason),
-    }),
-  };
+    });
+  }
+
+  if (operationalChart) {
+    tools.renderOperationalChart = tool({
+      description:
+        "Render the available authorized operational comparison. The server supplies every label and numeric value; never provide chart data in the tool input.",
+      strict: true,
+      inputSchema: jsonSchema<OperationalChartToolInput>({
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          visualId: {
+            type: "string",
+            enum: [operationalChart.id],
+            description: `The only chart available for this context: ${operationalChart.id}.`,
+          },
+          reason: {
+            type: "string",
+            minLength: 1,
+            maxLength: 180,
+            description: "A concise explanation of why the trusted comparison supports the answer.",
+          },
+        },
+        required: ["visualId", "reason"],
+      }),
+      execute: async ({ visualId }) => {
+        if (visualId !== operationalChart.id) throw new Error("Unknown authorized chart.");
+        return operationalChart;
+      },
+    });
+  }
+
+  return tools;
 }

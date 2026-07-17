@@ -194,11 +194,7 @@ function approvalStatusText(request: ApprovalRequest) {
 }
 
 function personalTaskTitle(action: WorkflowAction) {
-  if (action.label === "Create Outlook recovery task") {
-    return "Track DHL confirmation, FedEx backup status and Oberkochen receiving cutoff with Supply Chain Hub";
-  }
-
-  return action.label;
+  return action.recipientTaskLabel ?? action.label;
 }
 
 export function SupplyChainApp({ currentUser }: { currentUser: CurrentUser }) {

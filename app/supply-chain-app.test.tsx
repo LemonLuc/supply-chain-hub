@@ -1088,8 +1088,18 @@ describe("SupplyChainApp", () => {
       target: { value: "logistics" },
     });
 
-    expect(screen.getByText("My tasks")).toBeInTheDocument();
-    expect(screen.getByText("Assign recovery check to logistics")).toBeInTheDocument();
+    const taskList = screen.getByLabelText("Personal task list");
+    expect(within(taskList).getByText("Run recovery check")).toBeInTheDocument();
+    expect(
+      within(taskList).queryByText("Assign recovery check to logistics"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      within(taskList).getByRole("button", {
+        name: "Mark Run recovery check done",
+      }),
+    );
+    expect(within(taskList).getByText("Done")).toBeInTheDocument();
   });
 
   it("does not fabricate success for a rejected action", async () => {

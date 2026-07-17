@@ -1,0 +1,55 @@
+lib/supplier-portfolio.test.ts
+  s_8884df62cbd1af::t_ee1ca57d5c40e5 120
+app/api/chat/route.test.ts
+  s_eec980cd3f3b50::t_7fbda28dc9dd1a 355,365,403-441
+app/api/chat/route.ts
+  s_8884df62cbd1af::t_4e5fc9bf6e73ce 30,156-158,173-174,176-179,192,195
+app/globals.css
+  s_eec980cd3f3b50::t_1cfb49412dbdd1 411-426,489-504,1215-1323
+app/supplier-cost-resilience-visualization.test.tsx
+  s_8884df62cbd1af::t_1d29520120bfbe 1-44
+app/supplier-cost-resilience-visualization.tsx
+  s_eec980cd3f3b50::t_ab6670ec5ea1c2 1-270
+app/supplier-portfolio-visualization.test.tsx
+  s_8884df62cbd1af::t_5b8021d911f1b2 84
+app/supply-chain-app.test.tsx
+  s_eec980cd3f3b50::t_98c1fe43be61c3 242-257,284,654,659,666,671-676
+app/supply-chain-app.tsx
+  s_8884df62cbd1af::t_bc71c4d8f32ae8 48-53,61,262-268,279-287,928-932
+lib/chat-visuals.ts
+  s_8884df62cbd1af::t_557f30e0eb30c0 2,250-251
+lib/chat.test.ts
+  s_eec980cd3f3b50::t_24eb23110d0819 101-112
+lib/chat.ts
+  s_8884df62cbd1af::t_b0c4202b31f3bc 43,49-50,70-75,88
+lib/supplier-cost-resilience.test.ts
+  s_8884df62cbd1af::t_fde1c7b71763f3 1-90
+lib/supplier-cost-resilience.ts
+  s_8884df62cbd1af::t_19184f57af47c9 1-196
+lib/supplier-portfolio.ts
+  s_8884df62cbd1af::t_447bfcdb622434 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4eaf302ffed802d6dce150349f8c9af43636ae73",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_eec980cd3f3b50": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7132-c5af-7223-8e22-036cfee732ad",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

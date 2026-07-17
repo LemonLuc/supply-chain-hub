@@ -1,0 +1,21 @@
+executive-presentation.md
+  s_8884df62cbd1af::t_feb23dfb6bbd26 63-66,161-175
+slides.md
+  s_8884df62cbd1af::t_ebd0e7d41a98b3 58,60-62,145,149-156,160-166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "509b68ed37c4cd81eeebc0e8b1131ade199b5d51",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

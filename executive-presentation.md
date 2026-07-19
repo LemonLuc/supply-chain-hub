@@ -182,7 +182,7 @@ Explain how each gate is measured:
 
 #### Slide 11: Actual Supply Chain Hub Solution Stack
 
-"This annex reflects the application that is running, not a future-state architecture. The Responses API streams the grounded chat experience with server-owned context, tools and reasoning controls. The Agents SDK runs role-aware tools and reviewer handoffs for action workflows. A gpt-5.4-nano classifier screens prompt scope before business context is loaded and the guardrail fails closed if that check is unavailable. Image generation is conditional: it is used only when no trusted quantitative chart fits the request. The Next.js application is tested with Vitest and deployed to Cloudflare Workers through OpenNext and Wrangler."
+"This annex reflects the application that is running, not a future-state architecture. The Responses API streams the grounded chat experience with server-owned context, tools and reasoning controls. The Agents SDK runs role-aware tools and reviewer handoffs for action workflows. A gpt-5.4-nano classifier screens prompt scope before business context is loaded and the guardrail fails closed if that check is unavailable. Trusted React/SVG charts render quantitative operational data from approved application context. OpenAI Image Generation is reserved for explicit conceptual, narrative or presentation visuals and is never used for exact measurements, financial figures, supplier scores or order identifiers. The Next.js application is tested with Vitest and deployed to Cloudflare Workers through OpenNext and Wrangler."
 
 ### 27:00-30:00 - Close And Next Step
 

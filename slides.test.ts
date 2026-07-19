@@ -6,6 +6,8 @@ const deck = readFileSync(resolve(process.cwd(), "slides.md"), "utf8");
 const styles = readFileSync(resolve(process.cwd(), "style.css"), "utf8");
 const runbook = readFileSync(resolve(process.cwd(), "executive-presentation.md"), "utf8");
 const packageFile = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
+const globalTopPath = resolve(process.cwd(), "global-top.vue");
+const globalTop = existsSync(globalTopPath) ? readFileSync(globalTopPath, "utf8") : "";
 
 function numberedSlide(number: string) {
   const marker = `<span class="slide-number">${number}</span>`;
@@ -30,12 +32,13 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
 
     expect(slide).toContain("Hypotheses from the technical discovery");
     expect(slide).toContain("Time to decision:");
-    expect(slide).toContain("reconciling conflicting SAP, supplier, logistics and workbook updates");
+    expect(slide).toContain("Teams reconcile SAP, supplier and logistics updates before acting.");
     expect(slide).toContain("Data confidence:");
-    expect(slide).toContain("current, permitted and backed by traceable evidence");
+    expect(slide).toContain("Leaders cannot quickly verify which source is current, permitted and traceable.");
     expect(slide).toContain("Governed action:");
-    expect(slide).toContain("ownership and approval paths are unclear");
-    expect(slide).toContain("customer-delivery risk");
+    expect(slide).toContain("Unclear owners and approvals delay mitigation, increasing delivery risk.");
+    expect(slide).not.toContain("workbook updates");
+    expect(slide).not.toContain("schedule churn");
     expect(slide).not.toContain("Working pain hypothesis from technical discovery");
   });
 
@@ -55,15 +58,19 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(slide).not.toContain("API data is not used for model training");
   });
 
-  it("scopes slide 08 value to one workflow without visible formulas", () => {
+  it("shows a compact first-year value hypothesis without visible formulas", () => {
     const slide = numberedSlide("08");
 
-    expect(slide).toContain("Validate value and control before scaling one workflow");
-    expect(slide).toContain("Annual value hypothesis · one workflow");
-    expect(slide).toContain("€0.2M–€0.3M");
+    expect(slide).toContain("Proof of concept");
+    expect(slide).not.toContain("Validate value and control before scaling");
+    expect(slide).toContain("First-year value hypothesis");
+    expect(slide).toContain("€0.2 - 0.3M");
     expect(slide).toContain("Faster risk review");
     expect(slide).toContain("Fewer urgent expedites");
     expect(slide).toContain("Lower disruption exposure");
+    expect(slide).not.toMatch(/<span>[12]<\/span>/);
+    expect(slide).not.toContain("Annual value hypothesis");
+    expect(slide).not.toContain("one workflow");
     expect(slide).not.toContain("ZEISS confirms the baseline, attribution and annual run cost");
     expect(slide).not.toMatch(/€180K–€310K|€15K–€25K|€101K–€151K|€65K–€130K/);
     expect(slide).not.toContain("Net ROI =");
@@ -74,8 +81,8 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
   it("shows four measurable qualitative and quantitative POC success criteria", () => {
     const slide = numberedSlide("08");
 
-    expect(slide).toContain("POC success criteria");
-    expect(slide).toContain(
+    expect(slide).toContain("Success criteria");
+    expect(slide).not.toContain(
       "Test routine cases, high-impact exceptions and permission boundaries",
     );
     expect(slide).toContain("Process value");
@@ -90,22 +97,37 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(slide).toContain("Governance");
     expect(slide).toContain("100% human review for high-impact actions");
     expect(slide).toContain("Verify every required approval in the audit log.");
-    expect(slide.match(/How measured/g)).toHaveLength(4);
+    expect(slide.match(/Measurement:/g)).toHaveLength(4);
+    expect(slide).not.toContain("How measured");
   });
 
   it("describes the actual application and OpenAI solution stack on slide 11", () => {
     const slide = numberedSlide("11");
 
-    expect(slide).toContain("Actual Supply Chain Hub solution stack");
+    expect(slide).toContain("Supply Chain Hub solution stack");
     expect(slide).toContain("Next.js App Router, React and strict TypeScript");
     expect(slide).toContain("OpenAI Responses API");
     expect(slide).toContain("OpenAI Agents SDK");
     expect(slide).toContain("gpt-5.4-nano");
     expect(slide).toContain("fail closed");
-    expect(slide).toContain("OpenAI image generation");
-    expect(slide).toContain("only when no trusted chart fits");
+    expect(slide).toContain("Trusted React/SVG charts render operational data");
+    expect(slide).toContain("OpenAI Image Generation creates requested conceptual visuals");
     expect(slide).toContain("OpenNext and Wrangler");
+    expect(slide).toContain("Streams tool calls and reasoning summaries");
+    expect(slide).not.toContain("deterministic demo fallbacks");
+    expect(slide).not.toContain("no live API key");
     expect(slide).not.toContain("Microsoft 365 grouping");
+    expect(slide).not.toContain("only when no trusted chart fits");
+  });
+
+  it("keeps Slidev's live pen and clears annotations after leaving a slide", () => {
+    expect(deck).toMatch(/drawings:\s*\n\s+enabled: true/);
+    expect(deck).toMatch(/drawings:[\s\S]*?persist: false/);
+    expect(deck).toMatch(/drawings:[\s\S]*?presenterOnly: false/);
+    expect(deck).toMatch(/drawings:[\s\S]*?syncAll: true/);
+    expect(globalTop).toContain("useDrawings");
+    expect(globalTop).toContain("watch(currentSlideNo");
+    expect(globalTop).toContain("drawingState[previousSlide] = \"\"");
   });
 
   it("disables and removes Slidev recording-only controls", () => {
@@ -136,14 +158,15 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
       /\.nutshell-cards p\s*\{[^}]*font-size: 12\.3px;/,
     );
     expect(styles).toMatch(
-      /\.poc-slide \.validation-layout\s*\{[^}]*grid-template-columns: 0\.82fr 1\.18fr;[^}]*width: min\(100%, 940px\);/,
+      /\.poc-slide \.validation-layout\s*\{[^}]*grid-template-columns: 0\.82fr 1\.18fr;[^}]*margin-top: 30px;[^}]*width: min\(100%, 920px\);/,
     );
     expect(styles).toMatch(/\.value-levers\s*\{[^}]*grid-template-rows: repeat\(3, minmax\(0, 1fr\)\);/);
     expect(styles).toMatch(/\.decision-gates\s*\{[^}]*grid-template-columns: 1fr;[^}]*grid-template-rows: repeat\(4, minmax\(0, 1fr\)\);/);
     expect(styles).toMatch(/\.decision-gates > div\s*\{[^}]*grid-template-columns: 120px 1fr;/);
     expect(styles).toMatch(
-      /\.roi-panel,\s*\.evaluation-panel\s*\{[^}]*box-sizing: border-box;[^}]*height: 338px;[^}]*min-height: 338px;/,
+      /\.roi-panel,\s*\.evaluation-panel\s*\{[^}]*box-sizing: border-box;[^}]*height: 320px;[^}]*min-height: 320px;/,
     );
+    expect(styles).toMatch(/\.roi-panel \.roi-total\s*\{[^}]*font-size: 32px;/);
     expect(styles).toMatch(
       /\.criteria-panel\.evaluation-panel > h2\s*\{[^}]*align-self: stretch;/,
     );
@@ -152,7 +175,13 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
       /\.decision-gates\s*\{[^}]*border-top: 0;[^}]*padding: 0;/,
     );
     expect(styles).toMatch(/\.proof-slide \.timeline div\s*\{[^}]*height: 136px;[^}]*min-height: 136px;/);
-    expect(styles).toMatch(/\.proof-slide \.post-poc-panel\s*\{[^}]*margin-top: -6px;/);
+    expect(styles).toMatch(/\.decision-workflow-slide\s*\{[^}]*gap: 10px;/);
+    expect(styles).toMatch(/\.decision-workflow-slide \.workflow-map\s*\{[^}]*margin-top: 0;/);
+    expect(styles).toMatch(/\.decision-workflow-slide \.before-after\s*\{[^}]*margin-top: 0;/);
+    expect(styles).toMatch(/\.deployment-constraints\s*\{[^}]*margin-top: 0;/);
+    expect(styles).toMatch(/\.deployment-constraints p\s*\{[^}]*font-size: 10px;/);
+    expect(styles).toMatch(/\.proof-slide\s*\{[^}]*gap: 16px;/);
+    expect(styles).toMatch(/\.proof-slide \.post-poc-panel\s*\{[^}]*margin-top: 0;/);
     expect(styles).toMatch(/\.adoption-path h2,\s*\.adoption-support h2\s*\{[^}]*font-size: 13\.5px;/);
     expect(styles).toMatch(/\.adoption-path b,\s*\.adoption-support b\s*\{[^}]*font-size: 11px;/);
     expect(styles).toMatch(/\.adoption-path p,\s*\.adoption-support p\s*\{[^}]*font-size: 10\.2px;/);
@@ -180,7 +209,9 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(runbook).toContain("Responses API streams the grounded chat experience");
     expect(runbook).toContain("Agents SDK runs role-aware tools and reviewer handoffs");
     expect(runbook).toContain("gpt-5.4-nano classifier");
-    expect(runbook).toContain("Image generation is conditional");
-    expect(runbook).toContain("no trusted quantitative chart fits");
+    expect(runbook).toContain("Trusted React/SVG charts render quantitative operational data");
+    expect(runbook).toContain(
+      "OpenAI Image Generation is reserved for explicit conceptual, narrative or presentation visuals",
+    );
   });
 });

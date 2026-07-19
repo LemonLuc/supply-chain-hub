@@ -1173,16 +1173,16 @@
 .poc-slide .validation-layout {
   gap: 16px;
   grid-template-columns: 0.82fr 1.18fr;
-  margin-top: -2px;
-  width: min(100%, 940px);
+  margin-top: 30px;
+  width: min(100%, 920px);
 }
 
 .roi-panel,
 .evaluation-panel {
   box-sizing: border-box;
-  height: 338px;
-  min-height: 338px;
-  padding: 18px 20px;
+  height: 320px;
+  min-height: 320px;
+  padding: 17px 19px;
 }
 
 .roi-panel {
@@ -1205,7 +1205,7 @@
 .roi-panel .roi-total {
   color: var(--blue);
   display: block;
-  font-size: 38px;
+  font-size: 32px;
   font-weight: 720;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -1217,7 +1217,7 @@
   gap: 8px;
   grid-template-rows: repeat(3, minmax(0, 1fr));
   list-style: none;
-  margin: 18px 0 0;
+  margin: 14px 0 0;
   padding: 0;
 }
 
@@ -1370,13 +1370,13 @@
 }
 
 .decision-workflow-slide {
-  gap: 8px;
+  gap: 10px;
   grid-template-rows: 18px 54px auto auto auto;
 }
 
 .decision-workflow-slide .workflow-map {
   align-items: stretch;
-  margin-top: 2px;
+  margin-top: 0;
   width: min(100%, 960px);
 }
 
@@ -1432,7 +1432,7 @@
 }
 
 .decision-workflow-slide .before-after {
-  margin-top: 4px;
+  margin-top: 0;
   width: min(100%, 960px);
 }
 
@@ -1559,9 +1559,17 @@
 
 .deployment-constraints {
   gap: 7px 16px;
-  margin-top: -2px;
+  margin-top: 0;
   min-height: 82px;
   padding: 11px 16px 12px;
+}
+
+.deployment-constraints h2 {
+  font-size: 13.8px;
+}
+
+.deployment-constraints b {
+  font-size: 10.5px;
 }
 
 .deployment-constraints div {
@@ -1569,7 +1577,7 @@
 }
 
 .deployment-constraints p {
-  font-size: 9.4px;
+  font-size: 10px;
   line-height: 1.22;
 }
 
@@ -1742,7 +1750,7 @@
 }
 
 .proof-slide {
-  gap: 12px;
+  gap: 16px;
   grid-template-rows: 18px 58px 136px auto;
 }
 
@@ -1757,7 +1765,7 @@
 }
 
 .proof-slide .post-poc-panel {
-  margin-top: -6px;
+  margin-top: 0;
   width: min(100%, 980px);
 }
 

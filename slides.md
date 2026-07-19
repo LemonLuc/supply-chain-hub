@@ -6,7 +6,10 @@ info: |
 transition: fade-out
 class: se-deck
 drawings:
+  enabled: true
   persist: false
+  presenterOnly: false
+  syncAll: true
 record: false
 ---
 
@@ -57,9 +60,9 @@ record: false
     <div class="assumption-list">
       <h2>Hypotheses from the technical discovery</h2>
       <ul>
-        <li><strong>Time to decision:</strong> Teams lose time reconciling conflicting SAP, supplier, logistics and workbook updates before they can act.</li>
-        <li><strong>Data confidence:</strong> Leaders cannot immediately verify which source is current, permitted and backed by traceable evidence.</li>
-        <li><strong>Governed action:</strong> Mitigation slows when ownership and approval paths are unclear, increasing expedite spend, schedule churn and customer-delivery risk.</li>
+        <li><strong>Time to decision:</strong> Teams reconcile SAP, supplier and logistics updates before acting.</li>
+        <li><strong>Data confidence:</strong> Leaders cannot quickly verify which source is current, permitted and traceable.</li>
+        <li><strong>Governed action:</strong> Unclear owners and approvals delay mitigation, increasing delivery risk.</li>
       </ul>
     </div>
   </div>
@@ -140,14 +143,12 @@ record: false
 
 <section class="slide-section poc-slide">
   <span class="slide-number">08</span>
-  <p class="eyebrow">Proof of concept scorecard</p>
+  <p class="eyebrow">Proof of concept</p>
   <h1>Impact validation and success criteria</h1>
-  <p class="poc-note">Validate value and control before scaling one workflow.</p>
   <div class="validation-layout">
     <div class="validation-panel roi-panel">
-      <span>1</span>
-      <h2>Annual value hypothesis · one workflow</h2>
-      <strong class="roi-total">€0.2M–€0.3M</strong>
+      <h2>First-year value hypothesis</h2>
+      <strong class="roi-total">€0.2 - 0.3M</strong>
       <ul class="value-levers">
         <li><b>Faster risk review</b><small>Time saved per completed case</small></li>
         <li><b>Fewer urgent expedites</b><small>Avoided cases × actual expedite cost</small></li>
@@ -155,14 +156,12 @@ record: false
       </ul>
     </div>
     <div class="criteria-panel evaluation-panel">
-      <span>2</span>
-      <h2>POC success criteria</h2>
-      <p class="gate-context">Test routine cases, high-impact exceptions and permission boundaries.</p>
+      <h2>Success criteria</h2>
       <div class="decision-gates">
-        <div><b>Process value</b><p class="gate-target">≥25% faster review · ≥80% useful</p><small><strong>How measured</strong> Compare timestamped case duration and collect a post-case user rating.</small></div>
-        <div><b>Decision quality</b><p class="gate-target">≥90% source-backed · &lt;5% serious risks missed</p><small><strong>How measured</strong> Review outputs against expert-approved scenarios and source evidence.</small></div>
-        <div><b>Technical reliability</b><p class="gate-target">≥95% correct approved system and workflow</p><small><strong>How measured</strong> Inspect tool-call and trace logs across the scenario set.</small></div>
-        <div><b>Governance</b><p class="gate-target">100% human review for high-impact actions</p><small><strong>How measured</strong> Verify every required approval in the audit log.</small></div>
+        <div><b>Process value</b><p class="gate-target">≥25% faster review · ≥80% useful</p><small><strong>Measurement:</strong> Compare timestamped case duration and collect a post-case user rating.</small></div>
+        <div><b>Decision quality</b><p class="gate-target">≥90% source-backed · &lt;5% serious risks missed</p><small><strong>Measurement:</strong> Review outputs against expert-approved scenarios and source evidence.</small></div>
+        <div><b>Technical reliability</b><p class="gate-target">≥95% correct approved system and workflow</p><small><strong>Measurement:</strong> Inspect tool-call and trace logs across the scenario set.</small></div>
+        <div><b>Governance</b><p class="gate-target">100% human review for high-impact actions</p><small><strong>Measurement:</strong> Verify every required approval in the audit log.</small></div>
       </div>
     </div>
   </div>
@@ -208,11 +207,11 @@ record: false
 <section class="slide-section stack-slide">
   <span class="slide-number">11</span>
   <p class="eyebrow">Annex</p>
-  <h1>Actual Supply Chain Hub solution stack</h1>
+  <h1>Supply Chain Hub solution stack</h1>
   <div class="build-grid">
     <div><h2>Application experience</h2><ul><li>Next.js App Router, React and strict TypeScript</li><li>AI SDK React chat, persona-aware tools and source controls</li><li>GPT-5.6 Sol, Terra and Luna with selectable reasoning effort</li></ul></div>
-    <div><h2>OpenAI Responses API</h2><ul><li>Streams grounded answers through <code>openai.responses(...)</code></li><li>Combines server-owned context, approved tools and reasoning controls</li><li>Uses deterministic demo fallbacks when no live API key is configured</li></ul></div>
+    <div><h2>OpenAI Responses API</h2><ul><li>Streams grounded answers through <code>openai.responses(...)</code></li><li>Combines server-owned context, approved tools and reasoning controls</li><li>Streams tool calls and reasoning summaries through the AI SDK UI protocol</li></ul></div>
     <div><h2>OpenAI Agents SDK</h2><ul><li>Runs role-aware action tools and reviewer handoffs</li><li>Enforces persona, workflow and source eligibility server-side</li><li>Flushes traces after each action workflow for operational visibility</li></ul></div>
-    <div><h2>Guardrails, visuals and delivery</h2><ul><li><code>gpt-5.4-nano</code> classifies prompt scope with structured output and guardrails fail closed</li><li>OpenAI image generation runs only when no trusted chart fits</li><li>Vitest and strict typecheck; OpenNext and Wrangler deploy to Cloudflare Workers</li></ul></div>
+    <div><h2>Guardrails, visuals and delivery</h2><ul><li><code>gpt-5.4-nano</code> classifies prompt scope with structured output and guardrails fail closed</li><li>Trusted React/SVG charts render operational data; OpenAI Image Generation creates requested conceptual visuals</li><li>Vitest and strict typecheck; OpenNext and Wrangler deploy to Cloudflare Workers</li></ul></div>
   </div>
 </section>

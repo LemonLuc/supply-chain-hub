@@ -133,15 +133,23 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(styles).toContain(".value-levers");
     expect(styles).toContain(".decision-gates");
     expect(styles).toMatch(
-      /\.roi-panel,\s*\.evaluation-panel\s*\{[^}]*min-height: 280px;/,
+      /\.nutshell-cards p\s*\{[^}]*font-size: 12\.3px;/,
     );
     expect(styles).toMatch(
-      /\.poc-slide \.validation-layout\s*\{[^}]*width: min\(100%, 920px\);/,
+      /\.poc-slide \.validation-layout\s*\{[^}]*grid-template-columns: 0\.82fr 1\.18fr;[^}]*width: min\(100%, 940px\);/,
     );
+    expect(styles).toMatch(/\.value-levers\s*\{[^}]*grid-template-rows: repeat\(3, minmax\(0, 1fr\)\);/);
+    expect(styles).toMatch(/\.decision-gates\s*\{[^}]*grid-template-columns: 1fr;[^}]*grid-template-rows: repeat\(4, minmax\(0, 1fr\)\);/);
+    expect(styles).toMatch(/\.decision-gates > div\s*\{[^}]*grid-template-columns: 120px 1fr;/);
     expect(styles).toMatch(/\.poc-slide \.slide-number\s*\{[^}]*bottom: 12px;/);
     expect(styles).toMatch(
       /\.decision-gates\s*\{[^}]*border-top: 0;[^}]*padding: 0;/,
     );
+    expect(styles).toMatch(/\.proof-slide \.timeline div\s*\{[^}]*height: 136px;[^}]*min-height: 136px;/);
+    expect(styles).toMatch(/\.proof-slide \.post-poc-panel\s*\{[^}]*margin-top: -6px;/);
+    expect(styles).toMatch(/\.adoption-path h2,\s*\.adoption-support h2\s*\{[^}]*font-size: 13\.5px;/);
+    expect(styles).toMatch(/\.adoption-path b,\s*\.adoption-support b\s*\{[^}]*font-size: 11px;/);
+    expect(styles).toMatch(/\.adoption-path p,\s*\.adoption-support p\s*\{[^}]*font-size: 10\.2px;/);
     expect(styles).not.toContain(".proof-steps");
     expect(styles).not.toContain(".buyer-gates");
     expect(styles).not.toContain(".openai-data-note");
@@ -156,5 +164,17 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(runbook).toContain("€181K–€306K");
     expect(runbook).toContain("one repeatable workflow");
     expect(runbook).toContain("not enterprise-wide ZEISS value");
+    expect(runbook).toContain("Compare timestamped case duration with the agreed baseline");
+    expect(runbook).toContain("expert-reviewed benchmark scenarios");
+    expect(runbook).toContain("Inspect tool-call and trace logs");
+    expect(runbook).toContain("Verify required human approvals in the audit log");
+  });
+
+  it("explains the actual slide 11 stack in the presenter track", () => {
+    expect(runbook).toContain("Responses API streams the grounded chat experience");
+    expect(runbook).toContain("Agents SDK runs role-aware tools and reviewer handoffs");
+    expect(runbook).toContain("gpt-5.4-nano classifier");
+    expect(runbook).toContain("Image generation is conditional");
+    expect(runbook).toContain("no trusted quantitative chart fits");
   });
 });

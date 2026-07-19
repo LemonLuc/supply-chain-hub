@@ -42,6 +42,21 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(slide).not.toContain("Working pain hypothesis from technical discovery");
   });
 
+  it("sizes slide 03 cards to their content and centers the pair", () => {
+    expect(styles).toMatch(
+      /\.customer-slide\s*\{[\s\S]*?grid-template-rows: 18px 74px minmax\(0, 1fr\);[\s\S]*?\}/,
+    );
+    expect(styles).toMatch(
+      /\.customer-slide \.split-60\s*\{[\s\S]*?align-items: stretch;[\s\S]*?align-self: center !important;[\s\S]*?margin-top: 0;[\s\S]*?transform: translateY\(-20px\);[\s\S]*?\}/,
+    );
+    expect(styles).toMatch(
+      /\.customer-slide \.statement-panel,[\s\S]*?\.customer-slide \.assumption-list\s*\{[\s\S]*?height: auto;[\s\S]*?\}/,
+    );
+    expect(styles).not.toMatch(
+      /\.customer-slide \.statement-panel,[\s\S]*?\.customer-slide \.assumption-list\s*\{[\s\S]*?height: 272px;/,
+    );
+  });
+
   it("keeps slide 06 deployment constraints concise", () => {
     const slide = numberedSlide("06");
 
@@ -120,14 +135,23 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(slide).not.toContain("only when no trusted chart fits");
   });
 
-  it("keeps Slidev's live pen and clears annotations after leaving a slide", () => {
+  it("keeps Slidev's live pen, fades idle ink, and clears it between slides", () => {
     expect(deck).toMatch(/drawings:\s*\n\s+enabled: true/);
     expect(deck).toMatch(/drawings:[\s\S]*?persist: false/);
-    expect(deck).toMatch(/drawings:[\s\S]*?presenterOnly: false/);
+    expect(deck).toMatch(/drawings:[\s\S]*?presenterOnly: true/);
     expect(deck).toMatch(/drawings:[\s\S]*?syncAll: true/);
     expect(globalTop).toContain("useDrawings");
+    expect(globalTop).toContain("DISAPPEARING_INK_HOLD_MS");
+    expect(globalTop).toContain("DISAPPEARING_INK_FADE_MS");
+    expect(globalTop).toContain('drauu.on("start"');
+    expect(globalTop).toContain('drauu.on("end"');
+    expect(globalTop).toContain('classList.add("slidev-disappearing-ink")');
+    expect(globalTop).toContain("clear()");
     expect(globalTop).toContain("watch(currentSlideNo");
     expect(globalTop).toContain("drawingState[previousSlide] = \"\"");
+    expect(styles).toMatch(
+      /\.slidev-disappearing-ink\s*\{[\s\S]*?opacity: 0;[\s\S]*?transition: opacity 600ms ease;[\s\S]*?\}/,
+    );
   });
 
   it("disables and removes Slidev recording-only controls", () => {

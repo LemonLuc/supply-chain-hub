@@ -8,7 +8,7 @@ class: se-deck
 drawings:
   enabled: true
   persist: false
-  presenterOnly: false
+  presenterOnly: true
   syncAll: true
 record: false
 ---

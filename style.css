@@ -456,14 +456,17 @@
 }
 
 .customer-slide {
+  grid-template-rows: 18px 74px minmax(0, 1fr);
   position: static;
 }
 
 .customer-slide .split-60 {
-  align-items: start;
+  align-items: stretch;
+  align-self: center !important;
   gap: 56px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 14px;
+  margin-top: 0;
+  transform: translateY(-20px);
   width: min(100%, 940px);
 }
 
@@ -494,10 +497,15 @@
   align-content: start;
   display: grid;
   gap: 10px;
-  height: 272px;
+  height: auto;
   justify-content: flex-start;
   min-height: 0;
   padding: 22px;
+}
+
+.slidev-disappearing-ink {
+  opacity: 0;
+  transition: opacity 600ms ease;
 }
 
 .customer-slide h2 {

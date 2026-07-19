@@ -1179,7 +1179,9 @@
 
 .roi-panel,
 .evaluation-panel {
-  min-height: 318px;
+  box-sizing: border-box;
+  height: 338px;
+  min-height: 338px;
   padding: 18px 20px;
 }
 
@@ -1250,6 +1252,10 @@
 .criteria-panel.evaluation-panel {
   display: flex;
   flex-direction: column;
+}
+
+.criteria-panel.evaluation-panel > h2 {
+  align-self: stretch;
 }
 
 .gate-context {

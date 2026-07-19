@@ -141,6 +141,12 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     expect(styles).toMatch(/\.value-levers\s*\{[^}]*grid-template-rows: repeat\(3, minmax\(0, 1fr\)\);/);
     expect(styles).toMatch(/\.decision-gates\s*\{[^}]*grid-template-columns: 1fr;[^}]*grid-template-rows: repeat\(4, minmax\(0, 1fr\)\);/);
     expect(styles).toMatch(/\.decision-gates > div\s*\{[^}]*grid-template-columns: 120px 1fr;/);
+    expect(styles).toMatch(
+      /\.roi-panel,\s*\.evaluation-panel\s*\{[^}]*box-sizing: border-box;[^}]*height: 338px;[^}]*min-height: 338px;/,
+    );
+    expect(styles).toMatch(
+      /\.criteria-panel\.evaluation-panel > h2\s*\{[^}]*align-self: stretch;/,
+    );
     expect(styles).toMatch(/\.poc-slide \.slide-number\s*\{[^}]*bottom: 12px;/);
     expect(styles).toMatch(
       /\.decision-gates\s*\{[^}]*border-top: 0;[^}]*padding: 0;/,

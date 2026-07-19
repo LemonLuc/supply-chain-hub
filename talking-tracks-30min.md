@@ -345,168 +345,83 @@
 ### Q1. How do you guarantee accuracy and reduce hallucinations?
 
 - No responsible solution can promise zero model errors.
-- We use an accuracy harness around the model.
-- Approved systems provide the facts, and every important claim links to a cited source.
-- Source-freshness indicators show when each record was updated.
-- Missing or conflicting evidence is shown instead of hidden.
-- Deterministic tools handle calculations and policy checks.
-- Structured Outputs enforce the expected schema, but schema compliance alone does not prove factual accuracy.
-- Human review protects high-impact decisions.
-- Expert-labelled evals test unsupported claims, stale sources, and missed risks before every release.
-- Official reference: [Evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices) and [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+- The accuracy harness combines approved sources, freshness indicators, and citations while exposing missing or conflicting evidence.
+- Deterministic checks, expert evals, and human review protect high-impact decisions.
 
 ### Q2. How do we prevent data leakage and enforce role boundaries?
 
-- ZEISS SSO authenticates the employee.
-- Server-side RBAC or ABAC maps that identity to sources, fields, and actions.
-- Sensitive fields are filtered before the model context is built.
-- Tools use least-privilege OAuth or service credentials.
-- A model receives a narrow tool interface, not the underlying employee password.
-- Tool allowlists limit which destinations can receive data.
-- Server rules validate every sensitive action before execution.
-- DLP or redaction checks can block protected content before model or tool calls.
-- Negative permission tests confirm that each role cannot access restricted data.
+- ZEISS SSO and server-side permissions define each user's sources, fields, and actions.
+- Sensitive data is filtered before the model call, and tools use least-privilege credentials instead of employee passwords.
+- Tool allowlists and DLP checks block unexpected sharing; negative permission tests verify the boundaries.
 
 ### Q3. Where does the data flow, and what does OpenAI retain?
 
-- The path starts in a source system and moves through the ZEISS backend.
-- Only the approved context reaches the OpenAI API.
-- The result returns to the ZEISS backend for validation before display or action.
-- The ZEISS backend selects only the fields needed for the request.
-- OpenAI returns the model result or tool request to the application.
-- The application validates it before showing data or calling another system.
-- The audit record should capture the source, fields, and destination.
-- It should also capture the actor and approval.
-- OpenAI API data is not used to train models unless the customer explicitly opts in.
-- Abuse-monitoring logs may be retained for up to 30 days by default.
-- Eligible customers can apply for Zero Data Retention or Modified Abuse Monitoring.
-- Third-party tools keep their own retention and residency policies.
-- ZEISS security should approve the complete data-flow diagram before production.
-- Official reference: [Your data](https://developers.openai.com/api/docs/guides/your-data).
+- Data moves from the source through the ZEISS backend to OpenAI, then returns for validation before display or action.
+- The audit record captures what was sent, where it went, and who approved it.
+- OpenAI API data is not used for training unless the customer opts in.
+- Abuse-monitoring logs may be retained for 30 days; eligible customers can apply for Zero Data Retention or Modified Abuse Monitoring.
 
 ### Q4. How do we defend against prompt injection?
 
-- Treat user input, emails, and documents as untrusted content.
-- Tool results are also untrusted content.
-- Never place untrusted text inside a higher-priority developer instruction.
-- Structured Outputs restrict what can move between workflow steps.
-- Tool allowlists prevent the model from discovering unrestricted actions.
-- Sensitive reads and writes require approval.
-- Validate tool arguments and outputs in application code.
-- Red-team direct prompts, poisoned documents, and cross-tool data-exfiltration attempts.
-- Guardrails reduce risk, but they do not remove it completely.
-- Official reference: [Safety in building agents](https://developers.openai.com/api/docs/guides/agent-builder-safety) and [MCP prompt-injection risks](https://developers.openai.com/api/docs/mcp#prompt-injection-related-risks).
+- Treat user input, documents, and tool results as untrusted content.
+- Structured Outputs, tool allowlists, and application validation reduce the attack surface.
+- Sensitive actions require approval, and red-team tests cover poisoned content or attempted data exfiltration.
 
 ### Q5. How does this move from GenAI to agentic AI?
 
-- Today, the portal helps a person find evidence and prepare the next step.
-- The next stage lets bounded agents call approved tools and complete several steps.
-- The portal can expose the same governed workflows through an API.
-- Another ZEISS agent could request a risk check without bypassing the existing controls.
-- The preferred integration is an API, connector, or MCP server with least privilege.
-- Agents do not need an employee password or unrestricted portal session.
-- Browser automation is a fallback when no API exists and needs stronger approval.
-- The same evidence, permission, and audit harness supports both stages.
-- Official reference: [Using tools](https://developers.openai.com/api/docs/guides/tools) and [MCP and connectors](https://developers.openai.com/api/docs/guides/tools-connectors-mcp).
+- Today, the portal helps a person find evidence and prepare the next step; later, bounded agents can complete approved workflows.
+- The same workflows are accessible through an API, so another ZEISS agent can use them without bypassing existing controls.
+- APIs, connectors, or MCP are preferred; browser automation is a controlled fallback when no API exists.
 
 ### Q6. How much autonomy should the agent have, and who is accountable?
 
 - Autonomy is set per workflow and risk level.
-- Low-risk reads can run automatically after authorization and validation.
-- A model can prepare a task without receiving authority to approve it.
-- Sensitive writes should pause for human approval.
-- The application enforces the policy; the prompt does not enforce it alone.
-- A named business owner remains accountable for the final decision.
-- Record the evidence, policy result, and reviewer.
-- The final outcome completes the record.
-- The Agents SDK supports guardrails and resumable approval flows.
-- Official reference: [Agents SDK guardrails and human review](https://developers.openai.com/api/docs/guides/agents/guardrails-approvals).
+- Low-risk reads can run automatically, while sensitive writes pause for human approval.
+- The application enforces the policy, and a named business owner remains accountable for the recorded outcome.
 
 ### Q7. Who chooses the model, and how do we handle upgrades or deprecations?
 
-- In production, employees should usually choose the task, not the model or reasoning effort.
-- The application should route to an approved model based on eval results, latency, and cost.
-- Centralized configuration can make the code change as small as one line.
-- The real upgrade work is proving that behavior remains safe and useful.
-- Compare answer quality, tool choice, and schema compliance.
-- Also compare latency, token use, and approval behavior.
-- Roll out gradually and keep a tested rollback path.
-- OpenAI documents deprecations and notifies active customers.
-- OpenAI currently gives GA models at least six months' retirement notice, barring faster safety or compliance needs.
-- Specialized variants currently receive at least three months under the same condition.
-- Preview models can have much shorter notice, so critical workflows need a faster migration path.
-- Codex can prepare the code change and tests; the application owner approves the release.
-- Official reference: [API deprecations](https://developers.openai.com/api/docs/deprecations) and [Evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices).
+- Employees choose the task; the application routes to an approved model based on quality, latency, and cost.
+- Centralized configuration simplifies upgrades; every change still needs testing, staged rollout, and rollback.
+- OpenAI currently gives GA models at least six months' retirement notice; preview models can change much faster.
 
 ### Q8. What is the time to value, and who needs to support the proof of concept?
 
 - The four-week proposal is an estimate for one workflow, not a platform guarantee.
-- ZEISS needs one sponsor, one process owner, and two or three expert users.
-- A source-system owner and an identity or security contact complete the core team.
-- Most contributors can work part-time once scope and data access are agreed.
-- OpenAI Solutions Engineering can support architecture, workflow design, and evals.
-- Professional services are optional when integration capacity or production hardening needs extra delivery support.
-- Early access to representative data is usually the biggest schedule dependency.
-- Week four should gate on accuracy, security, and measurable business value.
+- ZEISS needs a sponsor, process owner, and expert users with early access to representative data.
+- OpenAI Solutions Engineering supports the design and evaluation; professional services are optional when extra delivery capacity is needed.
 
 ### Q9. How do we control token usage, performance, and agent loops?
 
-- Keep limits in server code, not in the prompt alone.
-- Set maximum steps, timeouts, and retries for every workflow.
-- Send only relevant context and cap the output size.
-- Route simple tasks to smaller approved models.
-- Use prompt caching where stable content repeats.
-- Track tokens, latency, and failures by project and workflow.
-- Configure rate limits, usage alerts, and workflow cost thresholds.
-- Traces should expose repeated tool calls or stalled loops.
-- Red-team long-running requests and indirect prompt injection.
-- Official reference: [Production best practices](https://developers.openai.com/api/docs/guides/production-best-practices).
+- Server code sets maximum steps, timeouts, and retries for every workflow.
+- Relevant context, smaller approved models, and prompt caching reduce cost and latency.
+- Track usage by workflow and enforce rate limits or cost thresholds.
 
 ### Q10. How do we operate and audit the solution in production?
 
 - Assign an application owner, business owner, and security owner.
-- Version the model, prompt, and tools together.
-- Keep the policy version in the same release record.
-- Traces explain each run; audit records capture the business decision.
-- Run the approved eval set before every release.
-- Monitor accuracy, permission failures, and unusual tool activity.
-- Define an incident path to disable a tool, revoke credentials, or roll back.
-- Review retention rules and role mappings on a fixed schedule.
-- Use feedback to create new eval cases, not only a satisfaction score.
-- Move from pilot to production only when quality and security thresholds stay stable.
+- Version the complete workflow and keep traces for each business decision.
+- Monitor quality, permission failures, and tool activity with a tested incident and rollback path.
 
 ## Appendix B — My OpenAI product feedback to the interviewers
 
-### 1. Provide runnable enterprise control patterns
+### 1. Make the enterprise path easier to navigate
 
-- The model call was not the difficult part of this preparation.
-- The harder part was joining identity, role-based tools, and approvals into one safe path.
-- Tracing and evals then had to fit the same design.
-- I would value maintained starter repositories for the Responses API and Agents SDK.
-- One pattern could map SSO claims to a role-scoped tool registry and approval flow.
-- It should include trace redaction, retention choices, and release gates.
-- This would turn enterprise guidance into working code without presenting one architecture as universal.
+- Building the prototype was fast; shaping it into a complete enterprise solution required more judgment.
+- I would value clearer guidance on how the Responses API, Agents SDK, and company-owned controls fit together.
+- This would help teams move from an experiment to production with greater confidence.
 
-### 2. Add an exportable data-flow and policy view
+### 2. Connect quality, security, and operations
 
-- Traces help developers understand execution, but security reviewers ask a different set of questions.
-- They need to see which source and fields went to OpenAI or an external tool.
-- They also need the actor, destination, and approval.
-- The retention rule completes the security view.
-- I would value an automatically generated data-flow view for each workflow.
-- It could compare actual runs with the declared policy and flag unexpected paths.
-- An exportable report would make security review and incident analysis much easier.
+- While building the tool, accuracy, guardrails, and evals became one connected trust story.
+- Today, teams still need to bring several platform concepts together themselves.
+- A more unified experience would make solutions easier to validate and explain to customers.
 
-### 3. Make evidence quality a reusable platform pattern
+### 3. Simplify model and platform evolution
 
-- I had to define source IDs, freshness, and citations inside the application.
-- Conflict handling needed another custom pattern.
-- Structured Outputs guarantee the shape of a response, not whether the evidence supports it.
-- I would value a standard evidence object for the Responses API and Agents SDK.
-- It could carry source, timestamp, and claim in a consistent format.
-- A confidence field could complete that object.
-- Built-in graders could test citation validity, freshness, and unsupported claims.
-- Showing those results in traces and evals would make accuracy easier to operate across enterprise use cases.
+- Changing a model can be simple; understanding the impact on the full workflow is harder.
+- More integrated support for comparing versions, planning rollouts, and finding regressions would help.
+- This would make continuous improvement easier for enterprise teams.
 
 ## Official OpenAI references
 

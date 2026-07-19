@@ -1,0 +1,37 @@
+executive-presentation.md
+  s_988868212a4a71::t_1b9e7e37411aa5 185
+slides.md
+  s_988868212a4a71::t_4cd0f856783dc8 9,11-12,63-65,146,150-151,159,161-164,210,213,215
+docs/superpowers/plans/2026-07-19-deck-annotation-and-spacing-refinement.md
+  s_8884df62cbd1af::t_53f0639eb069e8 1-16
+global-top.vue
+  s_8884df62cbd1af::t_71543d5c535a75 1-15
+slides.test.ts
+  s_8884df62cbd1af::t_1430e1631ee1bf 9-10,35,37,39-41,61,64-67,71-73,84-85,100-101,107,113-114,116-118,120-130,161,167,169,178-184,212-215
+style.css
+  s_8884df62cbd1af::t_3d3ce52f00746b 1176-1177,1183-1185,1208,1220,1373,1379,1435,1562,1567-1574,1580,1753,1768
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "0da746133795f73dee07a601a74ac93bf29e70b2",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    },
+    "s_988868212a4a71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7a2a-a476-7973-91d4-ec6b7a03cf74",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

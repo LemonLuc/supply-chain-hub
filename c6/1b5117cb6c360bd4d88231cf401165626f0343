@@ -1,0 +1,23 @@
+executive-presentation.md
+  s_8884df62cbd1af::t_e99a112c8668a3 65,176-186,203
+slides.test.ts
+  s_8884df62cbd1af::t_6d3318c28836fa 136,139,141-143,148-152,167-178
+style.css
+  s_8884df62cbd1af::t_1eb222c651830e 312,1054-1055,1063,1065-1066,1174-1177,1182-1183,1193,1200,1206,1214-1216,1218,1223-1224,1227-1228,1230-1231,1238-1244,1246-1247,1251-1252,1257-1259,1265-1268,1274-1281,1285,1288-1289,1291,1296,1298-1312,1586,1595,1609,1616,1739-1740,1748-1750,1754
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "c61b5117cb6c360bd4d88231cf401165626f0343",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

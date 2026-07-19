@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-19-consolidated-presentation-talking-tracks-design.md
+  s_988868212a4a71::t_493911fff79f92 1-161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "48a64872bdbb45306e1d6543a946764d4e21b783",
+  "prompts": {},
+  "sessions": {
+    "s_988868212a4a71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7a2a-a476-7973-91d4-ec6b7a03cf74",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

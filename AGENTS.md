@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a Next.js App Router project written in TypeScript. Routes and UI live in `app/`, with the main interface in `app/supply-chain-app.tsx` and chat endpoint in `app/api/chat/route.ts`. Shared logic, demo data, authorization, and chat helpers live in `lib/`. Static assets are under `public/`, currently `public/avatars/`. Tests are colocated as `*.test.ts` or `*.test.tsx`. Design notes and plans are kept in `docs/superpowers/`; demo collateral is in `demo-script.md` and `executive-presentation.md`.
+This is a Next.js App Router project written in TypeScript. Routes and UI live in `app/`, with the main interface in `app/supply-chain-app.tsx` and chat endpoint in `app/api/chat/route.ts`. Shared logic, demo data, authorization, and chat helpers live in `lib/`. Static assets are under `public/`, currently `public/avatars/`. Tests are colocated as `*.test.ts` or `*.test.tsx`. Design notes and plans are kept in `docs/superpowers/`; demo collateral is in `talking-tracks-30min.md` and `executive-presentation.md`.
 
 ## Build, Test, and Development Commands
 

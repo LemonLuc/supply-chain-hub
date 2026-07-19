@@ -1,0 +1,21 @@
+slides.test.ts
+  s_8884df62cbd1af::t_bcd502b2b68855 144-149
+style.css
+  s_8884df62cbd1af::t_a8375940f86176 1182-1184,1257-1260
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4ef56657a73478f25338030f53dd4862d9e4f4b0",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

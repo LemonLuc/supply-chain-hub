@@ -100,7 +100,7 @@ record: false
     <div class="arch-connector">→</div>
     <div class="arch-zone controls-zone"><h2>Operating controls</h2><p><strong class="arch-highlight">Server-side guardrails</strong> check prompt scope, enforce persona, workflow and selected-source access, filter financials and block unavailable actions.</p></div>
     <div class="arch-connector">→</div>
-    <div class="arch-zone"><h2>ZEISS systems</h2><p>SAP, logistics, supplier, warehouse and documents stay <strong class="arch-highlight">sources of truth</strong>.</p></div>
+    <div class="arch-zone"><h2>ZEISS systems</h2><p>SAP, logistics, supplier, warehouse and documents stay <strong class="arch-highlight">sources of truth</strong> and connect through MCP.</p></div>
     <div class="arch-rail"><div><b>Ground</b><p>Retrieve permitted, current supply-chain context.</p></div><div><b>Reason</b><p>Compare risk, options and trade-offs.</p></div><div><b>Act</b><p>Assign work or route accountable approval.</p></div></div>
     <div class="arch-subgrid"><div><h2>OpenAI Responses API</h2><p>Streams source-backed answers with reasoning and model controls.</p></div><div><h2>OpenAI Agents SDK</h2><p>Runs persona-aware tools, assignments and reviewer handoffs.</p></div><div><h2>Why OpenAI / ROI</h2><p>Faster escalation cycles, less expedite exposure and a reusable business case.</p></div></div>
   </div>

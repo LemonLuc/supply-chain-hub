@@ -57,6 +57,16 @@ describe("approved ROI, deployment, and evaluation deck content", () => {
     );
   });
 
+  it("shows MCP connectivity for the ZEISS systems on slide 05", () => {
+    const slide = numberedSlide("05");
+
+    expect(slide).toContain(
+      'SAP, logistics, supplier, warehouse and documents stay <strong class="arch-highlight">sources of truth</strong> and connect through MCP.',
+    );
+    expect(slide).not.toContain('<strong class="arch-highlight">MCP</strong>');
+    expect(slide).not.toContain('sources of truth</strong>.</p>');
+  });
+
   it("keeps slide 06 deployment constraints concise", () => {
     const slide = numberedSlide("06");
 

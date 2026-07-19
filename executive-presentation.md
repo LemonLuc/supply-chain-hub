@@ -62,7 +62,7 @@ Core line:
 
 Slide 03 discovery bridge:
 
-"In our initial technical discovery, the pain was not a lack of dashboards. The working hypothesis is that a risk review can begin with roughly 20 minutes of reconciling SAP, supplier, logistics and workbook updates. When those sources conflict, scarce domain experts become the bottleneck. Mitigation starts later, while expedite spend, schedule churn and approval ambiguity increase. The POC must now validate that baseline with ZEISS rather than treat it as a proven production fact."
+"The technical discovery surfaced three connected hypotheses. First, time to decision expands while teams reconcile conflicting SAP, supplier, logistics and workbook updates. Second, decision confidence falls when leaders cannot immediately verify which source is current, permitted and supported by traceable evidence. Third, even a sound recommendation creates limited value if ownership and approval paths are unclear. The POC should validate all three with ZEISS rather than treat them as proven production facts."
 
 ### 6:00-9:00 - Target Architecture
 
@@ -173,6 +173,17 @@ Core line:
 
 Close on the four gates: process improvement, decision quality, technical reliability and accountable human review for every high-impact action.
 
+Explain how each gate is measured:
+
+- Process value: Compare timestamped case duration with the agreed baseline and capture a usefulness rating after each completed case.
+- Decision quality: Review outputs against expert-reviewed benchmark scenarios, approved source evidence and the serious risks that should have been identified.
+- Technical reliability: Inspect tool-call and trace logs to confirm each run used the approved system and workflow path.
+- Governance: Verify required human approvals in the audit log for every sensitive or high-impact action.
+
+#### Slide 11: Actual Supply Chain Hub Solution Stack
+
+"This annex reflects the application that is running, not a future-state architecture. The Responses API streams the grounded chat experience with server-owned context, tools and reasoning controls. The Agents SDK runs role-aware tools and reviewer handoffs for action workflows. A gpt-5.4-nano classifier screens prompt scope before business context is loaded and the guardrail fails closed if that check is unavailable. Image generation is conditional: it is used only when no trusted quantitative chart fits the request. The Next.js application is tested with Vitest and deployed to Cloudflare Workers through OpenNext and Wrangler."
+
 ### 27:00-30:00 - Close And Next Step
 
 Close with:
@@ -189,7 +200,7 @@ Before going onsite:
 
 - Push the repo to GitHub.
 - Run the app locally and test all three workflow buttons.
-- Keep a static backup recording in case Wi-Fi or authentication fails.
+- Keep the exported PDF available as a static backup in case the live presentation cannot be reached.
 - Prepare one architecture slide and one value slide.
 - Prepare three customer-specific examples using their likely language: precision parts, optical components, contract manufacturers, quality escapes, regulatory constraints, long lead-time materials.
 

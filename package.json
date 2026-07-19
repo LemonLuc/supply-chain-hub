@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "slides": "node scripts/patch-slidev-recording-audio.mjs && slidev slides.md",
-    "slides:build": "node scripts/patch-slidev-recording-audio.mjs && slidev build slides.md --out dist-slidev",
+    "slides": "slidev slides.md",
+    "slides:build": "slidev build slides.md --out dist-slidev",
     "build": "next build",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "sanitize:cloudflare-env": "node scripts/sanitize-opennext-env.mjs",

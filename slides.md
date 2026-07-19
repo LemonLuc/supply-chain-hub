@@ -7,7 +7,7 @@ transition: fade-out
 class: se-deck
 drawings:
   persist: false
-record: true
+record: false
 ---
 
 <section class="cover-slide">
@@ -55,11 +55,11 @@ record: true
       </ul>
     </div>
     <div class="assumption-list">
-      <h2>Working pain hypothesis from technical discovery</h2>
+      <h2>Hypotheses from the technical discovery</h2>
       <ul>
-        <li>Risk reviews can start with roughly 20 minutes spent reconciling SAP, supplier, logistics and workbook updates before a decision can begin.</li>
-        <li>When sources conflict, scarce domain experts become the bottleneck and escalation quality depends on who is available.</li>
-        <li>The result is slower mitigation, avoidable expedite spend, schedule churn and unclear approval ownership.</li>
+        <li><strong>Time to decision:</strong> Teams lose time reconciling conflicting SAP, supplier, logistics and workbook updates before they can act.</li>
+        <li><strong>Data confidence:</strong> Leaders cannot immediately verify which source is current, permitted and backed by traceable evidence.</li>
+        <li><strong>Governed action:</strong> Mitigation slows when ownership and approval paths are unclear, increasing expedite spend, schedule churn and customer-delivery risk.</li>
       </ul>
     </div>
   </div>
@@ -125,8 +125,8 @@ record: true
   <div class="workflow-security deployment-constraints">
     <h2>Deployment constraints to validate</h2>
     <div><b>Data &amp; privacy</b><p>Approved fields only; confirm GDPR, supplier confidentiality, retention and regional processing.</p></div>
-    <div><b>Identity &amp; governance</b><p>SSO, server-side roles, masking and a named reviewer for every high-impact action.</p></div>
-    <div><b>Operations &amp; adoption</b><p>Fail-closed fallback, process owner, training, feedback and security / works-council checkpoints.</p></div>
+    <div><b>Identity &amp; governance</b><p>SSO, server-side roles and a named reviewer for every high-impact action.</p></div>
+    <div><b>Operations &amp; adoption</b><p>Fail-closed fallback, designated process owner, training, feedback and security checkpoints.</p></div>
   </div>
 </section>
 
@@ -149,21 +149,20 @@ record: true
       <h2>Annual value hypothesis · one workflow</h2>
       <strong class="roi-total">€0.2M–€0.3M</strong>
       <ul class="value-levers">
-        <li>Faster risk review</li>
-        <li>Fewer urgent expedites</li>
-        <li>Lower disruption exposure</li>
+        <li><b>Faster risk review</b><small>Time saved per completed case</small></li>
+        <li><b>Fewer urgent expedites</b><small>Avoided cases × actual expedite cost</small></li>
+        <li><b>Lower disruption exposure</b><small>Avoided incidents × verified impact</small></li>
       </ul>
-      <p class="roi-gate">ZEISS confirms the baseline, attribution and annual run cost.</p>
     </div>
     <div class="criteria-panel evaluation-panel">
       <span>2</span>
-      <h2>POC decision gates</h2>
+      <h2>POC success criteria</h2>
       <p class="gate-context">Test routine cases, high-impact exceptions and permission boundaries.</p>
       <div class="decision-gates">
-        <div><b>Process</b><p>≥25% faster review · ≥80% useful</p></div>
-        <div><b>Decision quality</b><p>≥90% source-backed · &lt;5% serious risks missed</p></div>
-        <div><b>Technical reliability</b><p>≥95% correct approved system and workflow</p></div>
-        <div><b>Governance</b><p>100% human review for high-impact actions</p></div>
+        <div><b>Process value</b><p class="gate-target">≥25% faster review · ≥80% useful</p><small><strong>How measured</strong> Compare timestamped case duration and collect a post-case user rating.</small></div>
+        <div><b>Decision quality</b><p class="gate-target">≥90% source-backed · &lt;5% serious risks missed</p><small><strong>How measured</strong> Review outputs against expert-approved scenarios and source evidence.</small></div>
+        <div><b>Technical reliability</b><p class="gate-target">≥95% correct approved system and workflow</p><small><strong>How measured</strong> Inspect tool-call and trace logs across the scenario set.</small></div>
+        <div><b>Governance</b><p class="gate-target">100% human review for high-impact actions</p><small><strong>How measured</strong> Verify every required approval in the audit log.</small></div>
       </div>
     </div>
   </div>
@@ -209,11 +208,11 @@ record: true
 <section class="slide-section stack-slide">
   <span class="slide-number">11</span>
   <p class="eyebrow">Annex</p>
-  <h1>Behind the scenes</h1>
+  <h1>Actual Supply Chain Hub solution stack</h1>
   <div class="build-grid">
-    <div><h2>App experience</h2><ul><li>Next.js App Router, React and strict TypeScript</li><li>GPT-5.6 Sol, Terra and Luna with six reasoning levels</li><li>Persona-aware tools, source settings, answer copy and feedback controls</li></ul></div>
-    <div><h2>Grounded chat and guardrails</h2><ul><li><code>/api/chat</code> runs prompt-scope checks before context, sources or tools</li><li>Server context enforces role scope, selected sources and masked fields</li><li>Responses streaming with deterministic workbook and demo fallbacks</li></ul></div>
-    <div><h2>Agentic actions and integrations</h2><ul><li><code>/api/actions</code> enforces persona, workflow and source eligibility</li><li>Explicit assignee and reviewer metadata drives tasks and approvals</li><li>Role-aware Microsoft 365 grouping, reviewer handoffs and trace flushing</li></ul></div>
-    <div><h2>Decision support and delivery</h2><ul><li>Model-selected savings–relationship bubble or matrix; trusted records stay server-owned</li><li>Server-derived decision colors align recommendations across both views</li><li>Vitest, strict typecheck and OpenNext/Wrangler delivery to Cloudflare Workers</li></ul></div>
+    <div><h2>Application experience</h2><ul><li>Next.js App Router, React and strict TypeScript</li><li>AI SDK React chat, persona-aware tools and source controls</li><li>GPT-5.6 Sol, Terra and Luna with selectable reasoning effort</li></ul></div>
+    <div><h2>OpenAI Responses API</h2><ul><li>Streams grounded answers through <code>openai.responses(...)</code></li><li>Combines server-owned context, approved tools and reasoning controls</li><li>Uses deterministic demo fallbacks when no live API key is configured</li></ul></div>
+    <div><h2>OpenAI Agents SDK</h2><ul><li>Runs role-aware action tools and reviewer handoffs</li><li>Enforces persona, workflow and source eligibility server-side</li><li>Flushes traces after each action workflow for operational visibility</li></ul></div>
+    <div><h2>Guardrails, visuals and delivery</h2><ul><li><code>gpt-5.4-nano</code> classifies prompt scope with structured output and guardrails fail closed</li><li>OpenAI image generation runs only when no trusted chart fits</li><li>Vitest and strict typecheck; OpenNext and Wrangler deploy to Cloudflare Workers</li></ul></div>
   </div>
 </section>

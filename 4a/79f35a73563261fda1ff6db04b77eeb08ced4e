@@ -1,0 +1,19 @@
+talking-tracks-30min.md
+  s_988868212a4a71::t_db47de5525f475 348-349,353-355,359-362,366-368,372-374,379-380,384-386,391-392,396-398,403-404,408-424
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4a79f35a73563261fda1ff6db04b77eeb08ced4e",
+  "prompts": {},
+  "sessions": {
+    "s_988868212a4a71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7a2a-a476-7973-91d4-ec6b7a03cf74",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}

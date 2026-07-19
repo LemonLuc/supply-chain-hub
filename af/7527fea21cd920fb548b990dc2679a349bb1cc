@@ -1,0 +1,23 @@
+package.json
+  s_8884df62cbd1af::t_d5987063f0e0f4 7-8
+slides.md
+  s_8884df62cbd1af::t_6074407e949fd0 10,58,60-62,128-129,152-154,159,162-165,211,213-216
+slides.test.ts
+  s_8884df62cbd1af::t_cc7e74ae84bd08 1,8,28,31-39,49-53,67,74,77,81,83-84,86-87,89-90,92-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "af7527fea21cd920fb548b990dc2679a349bb1cc",
+  "prompts": {},
+  "sessions": {
+    "s_8884df62cbd1af": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7107-f6be-7b43-b506-1b03b992596e",
+        "model": "unknown"
+      },
+      "human_author": "LucieLu <lucie.schwoerer@googlemail.com>"
+    }
+  }
+}
